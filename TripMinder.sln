@@ -1,0 +1,46 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.12.35707.178 d17.12
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TripMinder.API", "TripMinder.API\TripMinder.API.csproj", "{97C7C262-B944-4CC3-A8EE-742ABA5A4124}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TripMinder.Core", "TripMinder.Core\TripMinder.Core.csproj", "{5E0CD27B-CA7E-414B-8484-20AFDC58F07C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TripMinder.Infrastructure", "TripMinder.Infrastructure\TripMinder.Infrastructure.csproj", "{BC7D7F3A-6C55-4FDA-B1DD-A0AC9C0F9F11}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TripMinder.Service", "TripMinder.Service\TripMinder.Service.csproj", "{D7C84DCB-391E-4FBC-977A-2BE629D10424}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TripMinder.Data", "TripMinder.Data\TripMinder.Data.csproj", "{2413245F-E380-4E19-AE20-4BBC61F08D7A}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{97C7C262-B944-4CC3-A8EE-742ABA5A4124}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{97C7C262-B944-4CC3-A8EE-742ABA5A4124}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{97C7C262-B944-4CC3-A8EE-742ABA5A4124}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{97C7C262-B944-4CC3-A8EE-742ABA5A4124}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5E0CD27B-CA7E-414B-8484-20AFDC58F07C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5E0CD27B-CA7E-414B-8484-20AFDC58F07C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5E0CD27B-CA7E-414B-8484-20AFDC58F07C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5E0CD27B-CA7E-414B-8484-20AFDC58F07C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BC7D7F3A-6C55-4FDA-B1DD-A0AC9C0F9F11}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BC7D7F3A-6C55-4FDA-B1DD-A0AC9C0F9F11}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BC7D7F3A-6C55-4FDA-B1DD-A0AC9C0F9F11}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BC7D7F3A-6C55-4FDA-B1DD-A0AC9C0F9F11}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D7C84DCB-391E-4FBC-977A-2BE629D10424}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D7C84DCB-391E-4FBC-977A-2BE629D10424}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D7C84DCB-391E-4FBC-977A-2BE629D10424}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D7C84DCB-391E-4FBC-977A-2BE629D10424}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2413245F-E380-4E19-AE20-4BBC61F08D7A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2413245F-E380-4E19-AE20-4BBC61F08D7A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2413245F-E380-4E19-AE20-4BBC61F08D7A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2413245F-E380-4E19-AE20-4BBC61F08D7A}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
