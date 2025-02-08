@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "iVqaVkG9yQg=",
+  "dgSpecHash": "FFVdKBKxNaQ=",
   "success": true,
-  "projectFilePath": "E:\\TFS\\TripMinder\\TripMinder.Core\\TripMinder.Core.csproj",
+  "projectFilePath": "E:\\TFS\\Trip\\TripMinder.Core\\TripMinder.Core.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\ahmad\\.nuget\\packages\\azure.core\\1.38.0\\azure.core.1.38.0.nupkg.sha512",
     "C:\\Users\\ahmad\\.nuget\\packages\\azure.identity\\1.11.4\\azure.identity.1.11.4.nupkg.sha512",
