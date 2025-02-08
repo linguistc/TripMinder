@@ -1,3 +1,5 @@
+using Microsoft.EntityFrameworkCore;
+using TripMinder.Infrastructure.Data;
 
 namespace TripMinder.API
 {
@@ -12,6 +14,14 @@ namespace TripMinder.API
             builder.Services.AddControllers();
             // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
             builder.Services.AddOpenApi();
+
+            // Connect to SQL Server
+            builder.Services.AddDbContext<AppDBContext>(option =>
+            {
+                option.UseSqlServer(builder.Configuration.GetConnectionString("DbContext"));
+            });
+
+
 
             var app = builder.Build();
 

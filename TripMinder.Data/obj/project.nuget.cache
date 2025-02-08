@@ -1,8 +1,10 @@
 {
   "version": 2,
-  "dgSpecHash": "FDg4mCmBFQc=",
+  "dgSpecHash": "kGbJcA6nmyQ=",
   "success": true,
   "projectFilePath": "E:\\TFS\\TripMinder\\TripMinder.Data\\TripMinder.Data.csproj",
-  "expectedPackageFiles": [],
+  "expectedPackageFiles": [
+    "C:\\Users\\ahmad\\.nuget\\packages\\mathnet.numerics\\5.0.0\\mathnet.numerics.5.0.0.nupkg.sha512"
+  ],
   "logs": []
 }

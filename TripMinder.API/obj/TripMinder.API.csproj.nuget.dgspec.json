@@ -34,6 +34,9 @@
             "projectReferences": {
               "E:\\TFS\\TripMinder\\TripMinder.Core\\TripMinder.Core.csproj": {
                 "projectPath": "E:\\TFS\\TripMinder\\TripMinder.Core\\TripMinder.Core.csproj"
+              },
+              "E:\\TFS\\TripMinder\\TripMinder.Infrastructure\\TripMinder.Infrastructure.csproj": {
+                "projectPath": "E:\\TFS\\TripMinder\\TripMinder.Infrastructure\\TripMinder.Infrastructure.csproj"
               }
             }
           }
@@ -209,6 +212,12 @@
       "frameworks": {
         "net9.0": {
           "targetAlias": "net9.0",
+          "dependencies": {
+            "MathNet.Numerics": {
+              "target": "Package",
+              "version": "[5.0.0, )"
+            }
+          },
           "imports": [
             "net461",
             "net462",
