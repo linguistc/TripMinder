@@ -1,7 +1,36 @@
 {
   "Version": 1,
   "WorkspaceRootPath": "E:\\TFS\\TripMinder\\",
-  "Documents": [],
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{BC7D7F3A-6C55-4FDA-B1DD-A0AC9C0F9F11}|TripMinder.Infrastructure\\TripMinder.Infrastructure.csproj|e:\\tfs\\tripminder\\tripminder.infrastructure\\tripminder.infrastructure.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|",
+      "RelativeMoniker": "D:0:0:{BC7D7F3A-6C55-4FDA-B1DD-A0AC9C0F9F11}|TripMinder.Infrastructure\\TripMinder.Infrastructure.csproj|solutionrelative:tripminder.infrastructure\\tripminder.infrastructure.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{97C7C262-B944-4CC3-A8EE-742ABA5A4124}|TripMinder.API\\TripMinder.API.csproj|e:\\tfs\\tripminder\\tripminder.api\\tripminder.api.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|",
+      "RelativeMoniker": "D:0:0:{97C7C262-B944-4CC3-A8EE-742ABA5A4124}|TripMinder.API\\TripMinder.API.csproj|solutionrelative:tripminder.api\\tripminder.api.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{D7C84DCB-391E-4FBC-977A-2BE629D10424}|TripMinder.Service\\TripMinder.Service.csproj|e:\\tfs\\tripminder\\tripminder.service\\tripminder.service.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|",
+      "RelativeMoniker": "D:0:0:{D7C84DCB-391E-4FBC-977A-2BE629D10424}|TripMinder.Service\\TripMinder.Service.csproj|solutionrelative:tripminder.service\\tripminder.service.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{D7C84DCB-391E-4FBC-977A-2BE629D10424}|TripMinder.Service\\TripMinder.Service.csproj|e:\\tfs\\tripminder\\tripminder.service\\moduleservicedependencies.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{D7C84DCB-391E-4FBC-977A-2BE629D10424}|TripMinder.Service\\TripMinder.Service.csproj|solutionrelative:tripminder.service\\moduleservicedependencies.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{BC7D7F3A-6C55-4FDA-B1DD-A0AC9C0F9F11}|TripMinder.Infrastructure\\TripMinder.Infrastructure.csproj|e:\\tfs\\tripminder\\tripminder.infrastructure\\moduleinfrastructuredependencies.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{BC7D7F3A-6C55-4FDA-B1DD-A0AC9C0F9F11}|TripMinder.Infrastructure\\TripMinder.Infrastructure.csproj|solutionrelative:tripminder.infrastructure\\moduleinfrastructuredependencies.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{5E0CD27B-CA7E-414B-8484-20AFDC58F07C}|TripMinder.Core\\TripMinder.Core.csproj|e:\\tfs\\tripminder\\tripminder.core\\modulecoredependencies.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{5E0CD27B-CA7E-414B-8484-20AFDC58F07C}|TripMinder.Core\\TripMinder.Core.csproj|solutionrelative:tripminder.core\\modulecoredependencies.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{2413245F-E380-4E19-AE20-4BBC61F08D7A}|TripMinder.Data\\TripMinder.Data.csproj|e:\\tfs\\tripminder\\tripminder.data\\class1.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{2413245F-E380-4E19-AE20-4BBC61F08D7A}|TripMinder.Data\\TripMinder.Data.csproj|solutionrelative:tripminder.data\\class1.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    }
+  ],
   "DocumentGroupContainers": [
     {
       "Orientation": 0,
@@ -9,11 +38,102 @@
       "DocumentGroups": [
         {
           "DockedWidth": 186,
-          "SelectedChildIndex": -1,
+          "SelectedChildIndex": 3,
           "Children": [
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "TripMinder.Service",
+              "DocumentMoniker": "E:\\TFS\\TripMinder\\TripMinder.Service\\TripMinder.Service.csproj",
+              "RelativeDocumentMoniker": "TripMinder.Service\\TripMinder.Service.csproj",
+              "ToolTip": "E:\\TFS\\TripMinder\\TripMinder.Service\\TripMinder.Service.csproj",
+              "RelativeToolTip": "TripMinder.Service\\TripMinder.Service.csproj",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000758|",
+              "WhenOpened": "2025-02-04T21:35:53.658Z",
+              "EditorCaption": ""
+            },
             {
               "$type": "Bookmark",
               "Name": "ST:0:0:{34e76e81-ee4a-11d0-ae2e-00a0c90fffc3}"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "TripMinder.API",
+              "DocumentMoniker": "E:\\TFS\\TripMinder\\TripMinder.API\\TripMinder.API.csproj",
+              "RelativeDocumentMoniker": "TripMinder.API\\TripMinder.API.csproj",
+              "ToolTip": "E:\\TFS\\TripMinder\\TripMinder.API\\TripMinder.API.csproj",
+              "RelativeToolTip": "TripMinder.API\\TripMinder.API.csproj",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAcAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000758|",
+              "WhenOpened": "2025-02-04T21:37:21.453Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "TripMinder.Infrastructure",
+              "DocumentMoniker": "E:\\TFS\\TripMinder\\TripMinder.Infrastructure\\TripMinder.Infrastructure.csproj",
+              "RelativeDocumentMoniker": "TripMinder.Infrastructure\\TripMinder.Infrastructure.csproj",
+              "ToolTip": "E:\\TFS\\TripMinder\\TripMinder.Infrastructure\\TripMinder.Infrastructure.csproj",
+              "RelativeToolTip": "TripMinder.Infrastructure\\TripMinder.Infrastructure.csproj",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAoAAAA6AAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000758|",
+              "WhenOpened": "2025-02-04T21:35:53.897Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 6,
+              "Title": "Class1.cs",
+              "DocumentMoniker": "E:\\TFS\\TripMinder\\TripMinder.Data\\Class1.cs",
+              "RelativeDocumentMoniker": "TripMinder.Data\\Class1.cs",
+              "ToolTip": "E:\\TFS\\TripMinder\\TripMinder.Data\\Class1.cs",
+              "RelativeToolTip": "TripMinder.Data\\Class1.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-02-04T21:34:08.761Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "ModuleServiceDependencies.cs",
+              "DocumentMoniker": "E:\\TFS\\TripMinder\\TripMinder.Service\\ModuleServiceDependencies.cs",
+              "RelativeDocumentMoniker": "TripMinder.Service\\ModuleServiceDependencies.cs",
+              "ToolTip": "E:\\TFS\\TripMinder\\TripMinder.Service\\ModuleServiceDependencies.cs",
+              "RelativeToolTip": "TripMinder.Service\\ModuleServiceDependencies.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAEAAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-02-04T21:33:51.381Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "ModuleInfrastructureDependencies.cs",
+              "DocumentMoniker": "E:\\TFS\\TripMinder\\TripMinder.Infrastructure\\ModuleInfrastructureDependencies.cs",
+              "RelativeDocumentMoniker": "TripMinder.Infrastructure\\ModuleInfrastructureDependencies.cs",
+              "ToolTip": "E:\\TFS\\TripMinder\\TripMinder.Infrastructure\\ModuleInfrastructureDependencies.cs",
+              "RelativeToolTip": "TripMinder.Infrastructure\\ModuleInfrastructureDependencies.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-02-04T21:33:31.603Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 5,
+              "Title": "ModuleCoreDependencies.cs",
+              "DocumentMoniker": "E:\\TFS\\TripMinder\\TripMinder.Core\\ModuleCoreDependencies.cs",
+              "RelativeDocumentMoniker": "TripMinder.Core\\ModuleCoreDependencies.cs",
+              "ToolTip": "E:\\TFS\\TripMinder\\TripMinder.Core\\ModuleCoreDependencies.cs",
+              "RelativeToolTip": "TripMinder.Core\\ModuleCoreDependencies.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAQAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-02-04T21:31:51.383Z",
+              "EditorCaption": ""
             }
           ]
         }
