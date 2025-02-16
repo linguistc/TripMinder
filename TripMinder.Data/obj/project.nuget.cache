@@ -1,8 +1,12 @@
 {
   "version": 2,
+<<<<<<< HEAD
   "dgSpecHash": "W4Q+ZSePncA=",
+=======
+  "dgSpecHash": "6ZLw4IUHXjs=",
+>>>>>>> 32838b184476bba15f29b82c936e7b9557b60823
   "success": true,
-  "projectFilePath": "E:\\TFS\\TripMinder\\TripMinder.Data\\TripMinder.Data.csproj",
+  "projectFilePath": "E:\\TFS\\Trip\\TripMinder.Data\\TripMinder.Data.csproj",
   "expectedPackageFiles": [],
   "logs": []
 }

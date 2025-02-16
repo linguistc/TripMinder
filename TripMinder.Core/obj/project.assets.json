@@ -2806,11 +2806,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "E:\\TFS\\TripMinder\\TripMinder.Core\\TripMinder.Core.csproj",
+      "projectUniqueName": "E:\\TFS\\Trip\\TripMinder.Core\\TripMinder.Core.csproj",
       "projectName": "TripMinder.Core",
-      "projectPath": "E:\\TFS\\TripMinder\\TripMinder.Core\\TripMinder.Core.csproj",
+      "projectPath": "E:\\TFS\\Trip\\TripMinder.Core\\TripMinder.Core.csproj",
       "packagesPath": "C:\\Users\\ahmad\\.nuget\\packages\\",
-      "outputPath": "E:\\TFS\\TripMinder\\TripMinder.Core\\obj\\",
+      "outputPath": "E:\\TFS\\Trip\\TripMinder.Core\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
@@ -2831,11 +2831,11 @@
         "net9.0": {
           "targetAlias": "net9.0",
           "projectReferences": {
-            "E:\\TFS\\TripMinder\\TripMinder.Data\\TripMinder.Data.csproj": {
-              "projectPath": "E:\\TFS\\TripMinder\\TripMinder.Data\\TripMinder.Data.csproj"
+            "E:\\TFS\\Trip\\TripMinder.Data\\TripMinder.Data.csproj": {
+              "projectPath": "E:\\TFS\\Trip\\TripMinder.Data\\TripMinder.Data.csproj"
             },
-            "E:\\TFS\\TripMinder\\TripMinder.Service\\TripMinder.Service.csproj": {
-              "projectPath": "E:\\TFS\\TripMinder\\TripMinder.Service\\TripMinder.Service.csproj"
+            "E:\\TFS\\Trip\\TripMinder.Service\\TripMinder.Service.csproj": {
+              "projectPath": "E:\\TFS\\Trip\\TripMinder.Service\\TripMinder.Service.csproj"
             }
           }
         }
