@@ -17,6 +17,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\TripMinder.Core\TripMinder.Core.csproj" />
+    <ProjectReference Include="..\TripMinder.Infrastructure\TripMinder.Infrastructure.csproj" />
   </ItemGroup>
 
 </Project>
