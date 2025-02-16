@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("TripMinder.API")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+3a2699be345d46ab31da58a8855d9651a98a33db")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+6760bec7626fe6e644dbcdc5b3fad7a79c8d4431")]
 [assembly: System.Reflection.AssemblyProductAttribute("TripMinder.API")]
 [assembly: System.Reflection.AssemblyTitleAttribute("TripMinder.API")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
