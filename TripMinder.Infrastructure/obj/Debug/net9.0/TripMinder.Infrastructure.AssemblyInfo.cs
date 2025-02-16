@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("TripMinder.Infrastructure")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+068c72cd7c953d50c5ce8bac3825822158eccc0d")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+3a2699be345d46ab31da58a8855d9651a98a33db")]
 [assembly: System.Reflection.AssemblyProductAttribute("TripMinder.Infrastructure")]
 [assembly: System.Reflection.AssemblyTitleAttribute("TripMinder.Infrastructure")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
