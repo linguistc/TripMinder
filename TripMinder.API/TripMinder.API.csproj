@@ -18,6 +18,11 @@
   <ItemGroup>
     <ProjectReference Include="..\TripMinder.Core\TripMinder.Core.csproj" />
     <ProjectReference Include="..\TripMinder.Infrastructure\TripMinder.Infrastructure.csproj" />
+    <ProjectReference Include="..\TripMinder.Service\TripMinder.Service.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Controllers\" />
   </ItemGroup>
 
 </Project>

@@ -1,5 +1,8 @@
 using Microsoft.EntityFrameworkCore;
 using TripMinder.Infrastructure.Data;
+using TripMinder.Infrastructure;
+using TripMinder.Service;
+using TripMinder.Core;
 
 namespace TripMinder.API
 {
@@ -21,7 +24,11 @@ namespace TripMinder.API
                 option.UseSqlServer(builder.Configuration.GetConnectionString("DbContext"));
             });
 
-
+            #region Dependency Injection
+            builder.Services.AddInfrastructureDependencies()
+                            .AddServiceDependecies()
+                            .AddCoreDependecies();
+            #endregion
 
             var app = builder.Build();
 
