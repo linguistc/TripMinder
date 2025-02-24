@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace TripMinder.Core.Features.Restaurants.Queries.Responses
+﻿namespace TripMinder.Core.Features.Restaurants.Queries.Responses
 {
     public class GetAllRestaurantsResponse
     {

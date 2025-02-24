@@ -1,7 +1,15 @@
-public class EntertainmentProfile : Profile
+using AutoMapper;
+
+namespace TripMinder.Core.Mapping.Entertainments
 {
-    public EntertainmentProfile()
+
+    public partial class EntertainmentProfile : Profile
     {
-        CreateMap<Entertainment, EntertainmentDto>();
+        public EntertainmentProfile()
+        {
+            this.GetSingleEntertainmentMapping();
+            this.GetAllEntertainmentsMapping();
+        }
     }
+
 }

@@ -1,33 +1,56 @@
-public class EntertainmentQueryHandler : 
-    IRequestHandler<GetAllEntertainmentsQuery, GetAllEntertainmentsResponse>,
-    IRequestHandler<GetEntertainmentByIdQuery, GetSingleEntertainmentResponse>
+using AutoMapper;
+using MediatR;
+using TripMinder.Core.Bases;
+using TripMinder.Core.Features.Entertainments.Queries.Models;
+using TripMinder.Core.Features.Entertainments.Queries.Responses;
+using TripMinder.Service.Contracts;
+
+namespace TripMinder.Core.Features.Entertainments.Queries.Handlers
 {
-    private readonly IMapper _mapper;
-    private readonly IEntertainmentRepository _entertainmentRepository;
 
-    public EntertainmentQueryHandler(IMapper mapper, IEntertainmentRepository entertainmentRepository)
-    {
-        _mapper = mapper;
-        _entertainmentRepository = entertainmentRepository;
-    }
 
-    public async Task<GetAllEntertainmentsResponse> Handle(GetAllEntertainmentsQuery request, CancellationToken cancellationToken)
+    public class EntertainmentQueryHandler : RespondHandler
+                                        , IRequestHandler<GetAllEntertainmentsQuery, Respond<List<GetAllEntertainmentsResponse>>>
+                                        , IRequestHandler<GetEntertainmentByIdQuery, Respond<GetSingleEntertainmentResponse>>
     {
-        var entertainments = await _entertainmentRepository.GetAllAsync();
-        return new GetAllEntertainmentsResponse
+        #region Fields
+        private readonly IMapper mapper;
+        private readonly IEntertainmentService service;
+        #endregion
+
+        #region Constructors
+
+        public EntertainmentQueryHandler(IMapper mapper, IEntertainmentService service)
         {
-            Entertainments = _mapper.Map<List<EntertainmentDto>>(entertainments),
-            Success = true
-        };
-    }
+            this.mapper = mapper;
+            this.service = service;
+        }
 
-    public async Task<GetSingleEntertainmentResponse> Handle(GetEntertainmentByIdQuery request, CancellationToken cancellationToken)
-    {
-        var entertainment = await _entertainmentRepository.GetByIdAsync(request.Id);
-        return new GetSingleEntertainmentResponse
+        #endregion
+
+        #region Methods
+
+        public async Task<Respond<List<GetAllEntertainmentsResponse>>> Handle(GetAllEntertainmentsQuery request, CancellationToken cancellationToken)
         {
-            Entertainment = _mapper.Map<EntertainmentDto>(entertainment),
-            Success = true
-        };
+            var entertainments = await service.GetAllEntertainmentsAsync();
+
+            var entertainmentMapper = this.mapper.Map<List<GetAllEntertainmentsResponse>>(entertainments);
+
+            return Success(entertainmentMapper);
+        }
+
+        public async Task<Respond<GetSingleEntertainmentResponse>> Handle(GetEntertainmentByIdQuery request, CancellationToken cancellationToken)
+        {
+            var entertainment = await service.GetEntertainmentByIdAsync(request.Id);
+
+            if (entertainment == null)
+                return NotFound<GetSingleEntertainmentResponse>("Object Not Found");
+
+            var result = this.mapper.Map<GetSingleEntertainmentResponse>(entertainment);
+
+            return Success(result);
+        }
+
+        #endregion
     }
 }

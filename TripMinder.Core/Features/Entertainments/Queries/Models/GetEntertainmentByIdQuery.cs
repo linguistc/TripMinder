@@ -1,9 +1,17 @@
-public class GetEntertainmentByIdQuery : IRequest<GetSingleEntertainmentResponse>
-{
-    public int Id { get; set; }
+using MediatR;
+using TripMinder.Core.Bases;
+using TripMinder.Core.Features.Entertainments.Queries.Responses;
 
-    public GetEntertainmentByIdQuery(int id)
+namespace TripMinder.Core.Features.Entertainments.Queries.Models
+{
+
+    public class GetEntertainmentByIdQuery : IRequest<Respond<GetSingleEntertainmentResponse>>
     {
-        this.Id = id;
+        public int Id { get; set; }
+
+        public GetEntertainmentByIdQuery(int id)
+        {
+            this.Id = id;
+        }
     }
 }
