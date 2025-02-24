@@ -7,21 +7,21 @@ using System.Threading.Tasks;
 
 namespace TripMinder.Core.Bases
 {
-    public class Response<T>
+    public class Respond<T>
     {
-        public Response() { }
-        public Response(T data, string message = null)
+        public Respond() { }
+        public Respond(T data, string message = null)
         {
             Succeeded = true;
             Message = message;
             Data = data;
         }
-        public Response(string message)
+        public Respond(string message)
         {
             Succeeded = false;
             Message = message;
         }
-        public Response(string message, bool succeeded)
+        public Respond(string message, bool succeeded)
         {
             Succeeded = succeeded;
             Message = message;

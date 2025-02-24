@@ -1,6 +1,6 @@
 ﻿namespace TripMinder.Core.Features.Accomodataions.Queries.Responses
 {
-    public class GetAllAccomodationsResponse
+    public class GetAccomodationsListResponse
     {
         public int Id { get; set; }
         public string Name { get; set; }

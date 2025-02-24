@@ -16,6 +16,7 @@
     <Folder Include="Features\Entertainments\Queries\Responses\" />
     <Folder Include="Features\Restaurants\Commands\" />
     <Folder Include="Features\TourismAreas\Queries\Responses\" />
+    <Folder Include="Mapping\Accomodations\CommandMapping\" />
   </ItemGroup>
 
   <ItemGroup>

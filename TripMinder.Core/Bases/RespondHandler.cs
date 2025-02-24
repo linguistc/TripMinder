@@ -1,23 +1,23 @@
 ﻿namespace TripMinder.Core.Bases
 {
-    public class ResponseHandler
+    public class RespondHandler
     {
-        public ResponseHandler()
+        public RespondHandler()
         {
 
         }
-        public Response<T> Deleted<T>()
+        public Respond<T> Deleted<T>()
         {
-            return new Response<T>()
+            return new Respond<T>()
             {
                 StatusCode = System.Net.HttpStatusCode.OK,
                 Succeeded = true,
                 Message = "Deleted Successfully"
             };
         }
-        public Response<T> Success<T>(T entity, object Meta = null)
+        public Respond<T> Success<T>(T entity, object Meta = null)
         {
-            return new Response<T>()
+            return new Respond<T>()
             {
                 Data = entity,
                 StatusCode = System.Net.HttpStatusCode.OK,
@@ -26,18 +26,18 @@
                 Meta = Meta
             };
         }
-        public Response<T> Unauthorized<T>()
+        public Respond<T> Unauthorized<T>()
         {
-            return new Response<T>()
+            return new Respond<T>()
             {
                 StatusCode = System.Net.HttpStatusCode.Unauthorized,
                 Succeeded = true,
                 Message = "UnAuthorized"
             };
         }
-        public Response<T> BadRequest<T>(string Message = null)
+        public Respond<T> BadRequest<T>(string Message = null)
         {
-            return new Response<T>()
+            return new Respond<T>()
             {
                 StatusCode = System.Net.HttpStatusCode.BadRequest,
                 Succeeded = false,
@@ -45,9 +45,9 @@
             };
         }
 
-        public Response<T> NotFound<T>(string message = null)
+        public Respond<T> NotFound<T>(string message = null)
         {
-            return new Response<T>()
+            return new Respond<T>()
             {
                 StatusCode = System.Net.HttpStatusCode.NotFound,
                 Succeeded = false,
@@ -55,9 +55,9 @@
             };
         }
 
-        public Response<T> Created<T>(T entity, object Meta = null)
+        public Respond<T> Created<T>(T entity, object Meta = null)
         {
-            return new Response<T>()
+            return new Respond<T>()
             {
                 Data = entity,
                 StatusCode = System.Net.HttpStatusCode.Created,

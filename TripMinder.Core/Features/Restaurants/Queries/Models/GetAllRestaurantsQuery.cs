@@ -5,7 +5,7 @@ using TripMinder.Core.Features.Restaurants.Queries.Responses;
 
 namespace TripMinder.Core.Features.Restaurants.Queries.Models
 {
-    public class GetAllRestaurantsQuery : IRequest<Response<List<GetAllRestaurantsResponse>>>
+    public class GetAllRestaurantsQuery : IRequest<Respond<List<GetAllRestaurantsResponse>>>
     {
 
     }
