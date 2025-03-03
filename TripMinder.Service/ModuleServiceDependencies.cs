@@ -1,6 +1,6 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
-using System.Runtime.CompilerServices;
 using TripMinder.Service.Contracts;
+using TripMinder.Service.Implementations;
 
 namespace TripMinder.Service
 {
@@ -8,10 +8,10 @@ namespace TripMinder.Service
     {
         public static IServiceCollection AddServiceDependecies(this IServiceCollection services)
         {
-            services.AddTransient<IAccomodationService, IAccomodationService>();
-            services.AddTransient<IRestaurantService, IRestaurantService>();
-            services.AddTransient<IEntertainmentService, IEntertainmentService>();
-            services.AddTransient<ITourismAreaService, ITourismAreaService>();
+            services.AddTransient<IAccomodationService, AccomodationService>();
+            services.AddTransient<IRestaurantService, RestaurantService>();
+            services.AddTransient<IEntertainmentService, EntertainmentService>();
+            services.AddTransient<ITourismAreaService, TourismAreaService>();
 
             return services;
         }

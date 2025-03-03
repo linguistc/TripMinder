@@ -1,6 +1,6 @@
 ﻿namespace TripMinder.Core.Features.Restaurants.Queries.Responses
 {
-    public class GetSingleRestaurantResponse
+    public class GetRestaurantByIdResponse
     {
         public int Id { get; set; }
         public string Name { get; set; }

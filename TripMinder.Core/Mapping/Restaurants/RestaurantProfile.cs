@@ -13,6 +13,8 @@ namespace TripMinder.Core.Mapping.Restaurants
         {
             this.GetSingleRestaurantMapping();
             this.GetRestaurantsListMapping();
+            this.CreateRestaurantMapping();
+            this.UpdateRestaurantCommandMapping();
         }
     }
 }

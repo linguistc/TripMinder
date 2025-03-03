@@ -13,7 +13,7 @@ using TripMinder.Service.Contracts;
 namespace TripMinder.Core.Features.Accomodataions.Queries.Hanlders
 {
     public class AccomodationQueryHandler : RespondHandler
-                                         , IRequestHandler<GetSingleAccomodationQuery, Respond<GetSingleAccomodationResponse>>
+                                         , IRequestHandler<GetAccomodationByIdQuery, Respond<GetSingleAccomodationResponse>>
                                          , IRequestHandler<GetAccomodationsListQuery, Respond<List<GetAccomodationsListResponse>>>
     {
         #region Fields
@@ -32,7 +32,7 @@ namespace TripMinder.Core.Features.Accomodataions.Queries.Hanlders
 
 
         #region Functions
-        public async Task<Respond<GetSingleAccomodationResponse>> Handle(GetSingleAccomodationQuery request, CancellationToken cancellationToken)
+        public async Task<Respond<GetSingleAccomodationResponse>> Handle(GetAccomodationByIdQuery request, CancellationToken cancellationToken)
         {
             var accomodation = await this.service.GetAccomodationByIdAsync(request.Id);
 

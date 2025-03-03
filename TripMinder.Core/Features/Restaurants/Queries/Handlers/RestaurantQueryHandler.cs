@@ -1,52 +1,60 @@
 ﻿using MediatR;
 using AutoMapper;
+using Microsoft.Extensions.Localization;
 using TripMinder.Core.Bases;
 using TripMinder.Core.Features.Restaurants.Queries.Models;
 using TripMinder.Core.Features.Restaurants.Queries.Responses;
+using TripMinder.Core.Resources;
 using TripMinder.Service.Contracts;
 
 namespace TripMinder.Core.Features.Restaurants.Queries.Handlers
 {
     public class RestaurantQueryHandler : RespondHandler
-                                        , IRequestHandler<GetAllRestaurantsQuery, Respond<List<GetAllRestaurantsResponse>>>
-                                        , IRequestHandler<GetRestaurantByIdQuery, Respond<GetSingleRestaurantResponse>>
+                                        , IRequestHandler<GetRestaurantsListQuery, Respond<List<GetAllRestaurantsResponse>>>
+                                        , IRequestHandler<GetRestaurantByIdQuery, Respond<GetRestaurantByIdResponse>>
     {
 
         #region Fields
         private readonly IRestaurantService restaurantService;
         private readonly IMapper mapper;
+        private readonly IStringLocalizer<SharedResources> stringLocalizer;
 
         #endregion
 
 
         #region Constructors
-        public RestaurantQueryHandler(IRestaurantService service, IMapper mapper)
+        public RestaurantQueryHandler(IRestaurantService service, IMapper mapper, IStringLocalizer<SharedResources> stringLocalizer)
         {
             this.mapper = mapper;
             this.restaurantService = service;
+            this.stringLocalizer = stringLocalizer;
         }
 
         #endregion
 
 
         #region Functions
-        public async Task<Respond<List<GetAllRestaurantsResponse>>> Handle(GetAllRestaurantsQuery request, CancellationToken cancellationToken)
+        public async Task<Respond<List<GetAllRestaurantsResponse>>> Handle(GetRestaurantsListQuery request, CancellationToken cancellationToken)
         {
             var restaurantList = await this.restaurantService.GetAllRestaurantsAsync();
 
             var restaurantMapper = this.mapper.Map<List<GetAllRestaurantsResponse>>(restaurantList);
 
-            return Success(restaurantMapper);
+            var result = Success(restaurantMapper);
+            
+            result.Meta = new {Count = restaurantMapper.Count};
+
+            return result;
         }
 
-        public async Task<Respond<GetSingleRestaurantResponse>> Handle(GetRestaurantByIdQuery request, CancellationToken cancellationToken)
+        public async Task<Respond<GetRestaurantByIdResponse>> Handle(GetRestaurantByIdQuery request, CancellationToken cancellationToken)
         {
-            var restaurant = await this.restaurantService.GetRestaurantByIdAsync(request.Id);
+            var restaurant = await this.restaurantService.GetRestaurantByIdAsync(request.Id); // with include
 
             if (restaurant == null)
-                return NotFound<GetSingleRestaurantResponse>("Object Not Found");
+                return NotFound<GetRestaurantByIdResponse>(this.stringLocalizer[SharedResourcesKeys.NotFound]);
 
-            var result = this.mapper.Map<GetSingleRestaurantResponse>(restaurant);
+            var result = this.mapper.Map<GetRestaurantByIdResponse>(restaurant);
         
             return Success(result);
         }

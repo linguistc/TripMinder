@@ -4,7 +4,7 @@ using TripMinder.Core.Features.Restaurants.Queries.Responses;
 
 namespace TripMinder.Core.Features.Restaurants.Queries.Models
 {
-    public class GetRestaurantByIdQuery : IRequest<Respond<GetSingleRestaurantResponse>>
+    public class GetRestaurantByIdQuery : IRequest<Respond<GetRestaurantByIdResponse>>
     {
         public int Id { get; set; }
 

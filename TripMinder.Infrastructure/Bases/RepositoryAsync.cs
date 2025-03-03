@@ -50,7 +50,7 @@ namespace TripMinder.Infrastructure.Bases
             await dbContext.SaveChangesAsync();
 
         }
-        public virtual async Task<T> AddAsync(T entity)
+        public virtual async Task<T> CreateAsync(T entity)
         {
             await dbContext.Set<T>().AddAsync(entity);
             await dbContext.SaveChangesAsync();

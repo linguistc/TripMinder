@@ -12,7 +12,7 @@ namespace TripMinder.Core.Mapping.Restaurants
     {
         void GetSingleRestaurantMapping()
         {
-            CreateMap<Restaurant, GetSingleRestaurantResponse>()
+            CreateMap<Restaurant, GetRestaurantByIdResponse>()
                 .ForMember(dest => dest.Description,
                             options => options.MapFrom(src => src.Description.Text))
                 .ForMember(dest => dest.Class,

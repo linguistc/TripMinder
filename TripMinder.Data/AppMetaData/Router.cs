@@ -16,13 +16,13 @@
             public const string GetById = Prefix + SingleRouter;
 
             public const string Create = Prefix + "create/";
-            public const string Edit = Prefix + "edit/";
+            public const string Update = Prefix + "edit/";
             public const string Delete = Prefix + SingleRouter;
 
             public const string Paginate = Prefix + "paginate/";
         }
 
-        public static class AccomodataionRouting
+        public static class AccomodationRouting
         {
             public const string Prefix = Rule + "accommodation/";
             public const string List = Prefix + "list/";

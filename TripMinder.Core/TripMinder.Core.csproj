@@ -14,14 +14,16 @@
   <ItemGroup>
     <Folder Include="Features\Accomodataions\Commands\" />
     <Folder Include="Features\Entertainments\Queries\Responses\" />
-    <Folder Include="Features\Restaurants\Commands\" />
     <Folder Include="Features\TourismAreas\Queries\Responses\" />
     <Folder Include="Mapping\Accomodations\CommandMapping\" />
   </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="AutoMapper" Version="14.0.0" />
+    <PackageReference Include="FluentValidation" Version="11.11.0" />
+    <PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="11.11.0" />
     <PackageReference Include="MediatR" Version="12.4.1" />
+    <PackageReference Include="Microsoft.Extensions.Localization.Abstractions" Version="9.0.2" />
   </ItemGroup>
 
 </Project>
