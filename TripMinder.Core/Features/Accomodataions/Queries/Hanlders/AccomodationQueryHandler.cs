@@ -1,52 +1,59 @@
 ﻿using AutoMapper;
 using MediatR;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using Microsoft.Extensions.Localization;
 using TripMinder.Core.Bases;
 using TripMinder.Core.Features.Accomodataions.Queries.Models;
 using TripMinder.Core.Features.Accomodataions.Queries.Responses;
 using TripMinder.Service.Contracts;
+using TripMinder.Core.Resources;
 
 namespace TripMinder.Core.Features.Accomodataions.Queries.Hanlders
 {
     public class AccomodationQueryHandler : RespondHandler
-                                         , IRequestHandler<GetAccomodationByIdQuery, Respond<GetSingleAccomodationResponse>>
+                                         , IRequestHandler<GetAccomodationByIdQuery, Respond<GetAccomodationByIdResponse>>
                                          , IRequestHandler<GetAccomodationsListQuery, Respond<List<GetAccomodationsListResponse>>>
     {
         #region Fields
         private readonly IAccomodationService service;
         private readonly IMapper mapper;
+        private readonly IStringLocalizer<SharedResources> stringLocalizer;
         #endregion
 
 
         #region Constructors
-        public AccomodationQueryHandler(IAccomodationService service, IMapper mapper)
+        public AccomodationQueryHandler(IAccomodationService service, IMapper mapper, IStringLocalizer<SharedResources> stringLocalizer)
         {
             this.service = service;
             this.mapper = mapper;
+            this.stringLocalizer = this.stringLocalizer;
         }
         #endregion
 
 
         #region Functions
-        public async Task<Respond<GetSingleAccomodationResponse>> Handle(GetAccomodationByIdQuery request, CancellationToken cancellationToken)
+        public async Task<Respond<GetAccomodationByIdResponse>> Handle(GetAccomodationByIdQuery request, CancellationToken cancellationToken)
         {
-            var accomodation = await this.service.GetAccomodationByIdAsync(request.Id);
+            var accomodation = await this.service.GetAccomodationByIdWithIncludeAsync(request.Id);
 
             if (accomodation == null)
-                return NotFound<GetSingleAccomodationResponse>();
+                return NotFound<GetAccomodationByIdResponse>(this.stringLocalizer[SharedResourcesKeys.NotFound]);
 
-            var result = this.mapper.Map<GetSingleAccomodationResponse>(accomodation);
+            var result = this.mapper.Map<GetAccomodationByIdResponse>(accomodation);
 
             return Success(result);
         }
 
-        Task<Respond<List<GetAccomodationsListResponse>>> IRequestHandler<GetAccomodationsListQuery, Respond<List<GetAccomodationsListResponse>>>.Handle(GetAccomodationsListQuery request, CancellationToken cancellationToken)
+        async Task<Respond<List<GetAccomodationsListResponse>>> IRequestHandler<GetAccomodationsListQuery, Respond<List<GetAccomodationsListResponse>>>.Handle(GetAccomodationsListQuery request, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            var accomodationList = await this.service.GetAllAccomodationsAsync();
+
+            var accomodationMapper = this.mapper.Map<List<GetAccomodationsListResponse>>(accomodationList);
+
+            var result = Success(accomodationMapper);
+            
+            result.Meta = new {Count = accomodationMapper.Count};
+
+            return result;
         }
 
         #endregion

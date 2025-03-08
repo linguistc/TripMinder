@@ -26,7 +26,7 @@ namespace TripMinder.Service.Implementations
             return await this.repository.GetAllEntertainmentsAsync();
         }
 
-        public async Task<Entertainment> GetEntertainmentByIdAsync(int id)
+        public async Task<Entertainment> GetEntertainmentByIdWithIncludeAsync(int id)
         {
             var entertainment = this.repository.GetTableNoTracking()
                                             .Include(e => e.Description)
@@ -38,6 +38,62 @@ namespace TripMinder.Service.Implementations
                                             .FirstOrDefault();
 
             return entertainment;
+        }
+
+        public async Task<Entertainment> GetEntertainmentByIdAsync(int id)
+        {
+            var entertainment = await this.repository.GetByIdAsync(id);
+
+            return entertainment;
+        }
+
+        public async Task<string> CreateAsync(Entertainment newEntertainment)
+        {
+            await this.repository.CreateAsync(newEntertainment);
+            return "Created";
+        }
+
+        public async Task<bool> IsNameArExist(string nameAr)
+        {
+            throw new NotImplementedException();
+        }
+
+        public async Task<bool> IsNameEnExist(string nameEn)
+        {
+            throw new NotImplementedException();
+        }
+
+        public async Task<bool> IsNameArExistExcludeSelf(string nameAr, int id)
+        {
+            throw new NotImplementedException();
+        }
+
+        public async Task<bool> IsNameEnExistExcludeSelf(string nameEn, int id)
+        {
+            throw new NotImplementedException();
+        }
+
+        public async Task<string> UpdateAsync(Entertainment entertainment)
+        {
+            await this.repository.UpdateAsync(entertainment);
+            return "Updated";
+        }
+
+        public async Task<string> DeleteAsync(Entertainment entertainment)
+        {
+            var trans = this.repository.BeginTransaction();
+
+            try
+            {
+                await this.repository.DeleteAsync(entertainment);
+                await trans.CommitAsync();
+                return "Deleted";
+            }
+            catch
+            {
+                await trans.RollbackAsync();
+                return "Failed";
+            }
         }
 
         #endregion

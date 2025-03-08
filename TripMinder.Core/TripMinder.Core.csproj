@@ -12,10 +12,11 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Features\Accomodataions\Commands\" />
+    <Folder Include="Features\Accomodataions\Commands\Validations\" />
+    <Folder Include="Features\Entertainments\Commands\Validations\" />
     <Folder Include="Features\Entertainments\Queries\Responses\" />
+    <Folder Include="Features\TourismAreas\Commands\Validations\" />
     <Folder Include="Features\TourismAreas\Queries\Responses\" />
-    <Folder Include="Mapping\Accomodations\CommandMapping\" />
   </ItemGroup>
 
   <ItemGroup>

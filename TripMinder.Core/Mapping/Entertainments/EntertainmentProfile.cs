@@ -9,6 +9,8 @@ namespace TripMinder.Core.Mapping.Entertainments
         {
             this.GetSingleEntertainmentMapping();
             this.GetAllEntertainmentsMapping();
+            this.CreateEntertainmentCommandMapping();
+            this.UpdateEntertainmentCommandMapping();
         }
     }
 

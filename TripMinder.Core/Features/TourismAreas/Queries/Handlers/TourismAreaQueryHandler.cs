@@ -41,7 +41,7 @@ namespace TripMinder.Core.Features.TourismAreas.Queries.Handlers
 
         public async Task<Respond<GetSingleTourismAreaResponse>> Handle(GetTourismAreaByIdQuery request, CancellationToken cancellationToken)
         {
-            var tourismArea = await service.GetTourismAreaByIdAsync(request.Id);
+            var tourismArea = await service.GetTourismAreaByIdWithIncludeAsync(request.Id);
 
             if (tourismArea == null)
                 return NotFound<GetSingleTourismAreaResponse>("Object Not Found");

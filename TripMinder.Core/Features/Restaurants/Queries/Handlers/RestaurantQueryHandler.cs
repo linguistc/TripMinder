@@ -49,7 +49,7 @@ namespace TripMinder.Core.Features.Restaurants.Queries.Handlers
 
         public async Task<Respond<GetRestaurantByIdResponse>> Handle(GetRestaurantByIdQuery request, CancellationToken cancellationToken)
         {
-            var restaurant = await this.restaurantService.GetRestaurantByIdAsync(request.Id); // with include
+            var restaurant = await this.restaurantService.GetRestaurantByIdWithIncludeAsync(request.Id);
 
             if (restaurant == null)
                 return NotFound<GetRestaurantByIdResponse>(this.stringLocalizer[SharedResourcesKeys.NotFound]);

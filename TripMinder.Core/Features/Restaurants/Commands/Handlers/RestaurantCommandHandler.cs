@@ -34,9 +34,9 @@ namespace TripMinder.Core.Features.Restaurants.Commands.Handlers
 
         public async Task<Respond<string>> Handle(CreateRestaurantCommand request, CancellationToken cancellationToken)
         {
-            var restaurantMapper = mapper.Map<Restaurant>(request);
+            var restaurantMapper = this.mapper.Map<Restaurant>(request);
 
-            var result = await restaurantService.CreateAsync(restaurantMapper);
+            var result = await this.restaurantService.CreateAsync(restaurantMapper);
 
             if (result == "Created") return Created("");
             else return BadRequest<string>();
@@ -47,10 +47,10 @@ namespace TripMinder.Core.Features.Restaurants.Commands.Handlers
 
         public async Task<Respond<string>> Handle(UpdateRestaurantCommand request, CancellationToken cancellationToken)
         {
-            var restaurant = await this.restaurantService.GetRestaurantByIdAsync(request.Id); // withInclude
+            var restaurant = await this.restaurantService.GetRestaurantByIdAsync(request.Id);
             if (restaurant == null) return NotFound<string>();
 
-            var restaurantMapper = mapper.Map(request, restaurant);
+            var restaurantMapper = this.mapper.Map(request, restaurant);
             var result = await this.restaurantService.UpdateAsync(restaurantMapper);
             
             if(result == "Updated") return Success($"{this.stringlocalizer[SharedResourcesKeys.Updated]} {restaurantMapper.Id}");
@@ -60,7 +60,7 @@ namespace TripMinder.Core.Features.Restaurants.Commands.Handlers
 
         public async Task<Respond<string>> Handle(DeleteRestaurantCommand request, CancellationToken cancellationToken)
         {
-            var restaurant = await this.restaurantService.GetRestaurantByIdAsync(request.Id); // withInclude
+            var restaurant = await this.restaurantService.GetRestaurantByIdAsync(request.Id);
             if (restaurant == null) return NotFound<string>();
             
             var result = await this.restaurantService.DeleteAsync(restaurant);

@@ -1,5 +1,6 @@
 ﻿using MediatR;
 using TripMinder.Core.Bases;
+using TripMinder.Core.DTOHelpers;
 
 namespace TripMinder.Core.Features.Restaurants.Commands.Models
 {
@@ -15,5 +16,13 @@ namespace TripMinder.Core.Features.Restaurants.Commands.Models
         public double PricePerPerson { get; set; }
         public int CategoryId { get; set; }
         public bool HasKidsArea { get; set; }
+        
+        public List<SocialProfileDto> BusinessSocialProfiles { get; set; }
+
+        public LocationDto Location { get; set; }
+        public List<string> Images { get; set; } // => How to create or edit the source?
+
+        //public List<string> FoodCategories { get; set; } => handled in another Entity
+
     }
 }

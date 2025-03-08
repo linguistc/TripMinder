@@ -4,7 +4,7 @@ using TripMinder.Core.Features.Accomodataions.Queries.Responses;
 
 namespace TripMinder.Core.Features.Accomodataions.Queries.Models
 {
-    public class GetAccomodationByIdQuery : IRequest<Respond<GetSingleAccomodationResponse>>
+    public class GetAccomodationByIdQuery : IRequest<Respond<GetAccomodationByIdResponse>>
     {
         public int Id { get; set; }
 

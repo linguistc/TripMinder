@@ -116,6 +116,21 @@ namespace TripMinder.Infrastructure.Bases
             dbContext.Set<T>().UpdateRange(entities);
             await dbContext.SaveChangesAsync();
         }
+        
+        public async Task<IDbContextTransaction> BeginTransactionAsync()
+        {
+            return await dbContext.Database.BeginTransactionAsync();
+        }
+
+        public async Task CommitAsync()
+        {
+            await dbContext.Database.CommitTransactionAsync();
+        }
+
+        public async Task RollBackAsync()
+        {
+            await dbContext.Database.RollbackTransactionAsync();
+        }
         #endregion
     }
 }

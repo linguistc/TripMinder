@@ -13,6 +13,8 @@ namespace TripMinder.Core.Mapping.Accomodations
         {
             this.GetSingleAccomodationMapping();
             this.GetAccomdationsListMapping();
+            this.CreateAccomodationCommandMapping();
+            this.UpdateAccomodationCommandMapping();
         }
     }
 }

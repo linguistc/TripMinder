@@ -41,7 +41,7 @@ namespace TripMinder.Core.Features.Entertainments.Queries.Handlers
 
         public async Task<Respond<GetSingleEntertainmentResponse>> Handle(GetEntertainmentByIdQuery request, CancellationToken cancellationToken)
         {
-            var entertainment = await service.GetEntertainmentByIdAsync(request.Id);
+            var entertainment = await service.GetEntertainmentByIdWithIncludeAsync(request.Id);
 
             if (entertainment == null)
                 return NotFound<GetSingleEntertainmentResponse>("Object Not Found");

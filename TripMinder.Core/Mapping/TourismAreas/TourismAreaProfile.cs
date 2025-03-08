@@ -1,13 +1,19 @@
 using AutoMapper;
 using TripMinder.Data.Entities;
 
-public partial class TourismAreaProfile : Profile
+namespace TripMinder.Core.Mapping.TourismAreas
 {
 
-    public TourismAreaProfile() 
-    {
-        this.GetSingleTourismAreaMapping();
-        this.GetAllTourismAreaMapping();
 
+    public partial class TourismAreaProfile : Profile
+    {
+
+        public TourismAreaProfile()
+        {
+            this.GetSingleTourismAreaMapping();
+            this.GetAllTourismAreaMapping();
+            this.CreateTourismAreaCommandMapping();
+            this.UpdateTourismAreaCommandMapping();
+        }
     }
 }
