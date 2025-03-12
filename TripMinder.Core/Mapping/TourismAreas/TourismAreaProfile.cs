@@ -10,8 +10,8 @@ namespace TripMinder.Core.Mapping.TourismAreas
 
         public TourismAreaProfile()
         {
-            this.GetSingleTourismAreaMapping();
-            this.GetAllTourismAreaMapping();
+            this.GetTourismAreaByIdMapping();
+            this.GetTourismAreasListMapping();
             this.CreateTourismAreaCommandMapping();
             this.UpdateTourismAreaCommandMapping();
         }

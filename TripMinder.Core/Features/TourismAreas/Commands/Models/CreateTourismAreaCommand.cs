@@ -6,22 +6,23 @@ namespace TripMinder.Core.Features.TourismAreas.Commands.Models;
 
 public class CreateTourismAreaCommand : IRequest<Respond<string>>
 {
-    public int Id { get; set; }
-    public string NameAr { get; set; }
-    public string NameEn { get; set; }
-    public int DescriptionId { get; set; }
+    public string Name { get; set; }
+        
     public int ClassId { get; set; }
 
+    public string Description { get; set; }
+    public int TourismTypeId { get; set; }
+
     public int ZoneId { get; set; }
-    public double PricePerPerson { get; set; }
-    public int CategoryId { get; set; }
-    public bool HasKidsArea { get; set; }
+    public double AveragePricePerAdult { get; set; }
+
+    public string Address { get; set; } 
+    public string? MapLink { get; set; }
         
-    public List<SocialProfileDto> BusinessSocialProfiles { get; set; }
-
-    public LocationDto Location { get; set; }
-    public List<string> Images { get; set; } // => How to create or edit the source?
-
-    //public List<string> FoodCategories { get; set; } => handled in another Entity
-
+    public string? ContactLink { get; set; } 
+        
+    public string? ImageSource { get; set; }
+    public int PlaceTypeId { get; set; }
+    public bool HasKidsArea { get; set; }
+    
 }

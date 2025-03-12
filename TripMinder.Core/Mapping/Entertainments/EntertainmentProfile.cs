@@ -7,8 +7,8 @@ namespace TripMinder.Core.Mapping.Entertainments
     {
         public EntertainmentProfile()
         {
-            this.GetSingleEntertainmentMapping();
-            this.GetAllEntertainmentsMapping();
+            this.GetEntertainmentByIdMapping();
+            this.GetEntertainmentsListMapping();
             this.CreateEntertainmentCommandMapping();
             this.UpdateEntertainmentCommandMapping();
         }

@@ -10,7 +10,7 @@ using TripMinder.Service.Contracts;
 namespace TripMinder.Core.Features.Restaurants.Queries.Handlers
 {
     public class RestaurantQueryHandler : RespondHandler
-                                        , IRequestHandler<GetRestaurantsListQuery, Respond<List<GetAllRestaurantsResponse>>>
+                                        , IRequestHandler<GetRestaurantsListQuery, Respond<List<GetRestaurantsListResponse>>>
                                         , IRequestHandler<GetRestaurantByIdQuery, Respond<GetRestaurantByIdResponse>>
     {
 
@@ -34,11 +34,11 @@ namespace TripMinder.Core.Features.Restaurants.Queries.Handlers
 
 
         #region Functions
-        public async Task<Respond<List<GetAllRestaurantsResponse>>> Handle(GetRestaurantsListQuery request, CancellationToken cancellationToken)
+        public async Task<Respond<List<GetRestaurantsListResponse>>> Handle(GetRestaurantsListQuery request, CancellationToken cancellationToken)
         {
             var restaurantList = await this.restaurantService.GetAllRestaurantsAsync();
 
-            var restaurantMapper = this.mapper.Map<List<GetAllRestaurantsResponse>>(restaurantList);
+            var restaurantMapper = this.mapper.Map<List<GetRestaurantsListResponse>>(restaurantList);
 
             var result = Success(restaurantMapper);
             

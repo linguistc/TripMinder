@@ -5,7 +5,7 @@ using TripMinder.Core.Features.Entertainments.Queries.Responses;
 namespace TripMinder.Core.Features.Entertainments.Queries.Models
 {
 
-    public class GetEntertainmentByIdQuery : IRequest<Respond<GetSingleEntertainmentResponse>>
+    public class GetEntertainmentByIdQuery : IRequest<Respond<GetEntertainmentByIdResponse>>
     {
         public int Id { get; set; }
 

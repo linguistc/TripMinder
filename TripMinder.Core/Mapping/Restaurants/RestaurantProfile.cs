@@ -11,7 +11,7 @@ namespace TripMinder.Core.Mapping.Restaurants
     {
         public RestaurantProfile() 
         {
-            this.GetSingleRestaurantMapping();
+            this.GetRestaurantByIdMapping();
             this.GetRestaurantsListMapping();
             this.CreateRestaurantMapping();
             this.UpdateRestaurantCommandMapping();

@@ -10,8 +10,8 @@ namespace TripMinder.Core.Features.TourismAreas.Queries.Handlers
 
 
     public class TourismAreasQueryHandler : RespondHandler
-                                        , IRequestHandler<GetAllTourismAreasQuery, Respond<List<GetAllTourismAreasResponse>>>
-                                        , IRequestHandler<GetTourismAreaByIdQuery, Respond<GetSingleTourismAreaResponse>>
+                                        , IRequestHandler<GetAllTourismAreasQuery, Respond<List<GetTourismAreasListResponse>>>
+                                        , IRequestHandler<GetTourismAreaByIdQuery, Respond<GetTourismAreaByIdResponse>>
     {
         #region Fields
         private readonly IMapper mapper;
@@ -30,23 +30,23 @@ namespace TripMinder.Core.Features.TourismAreas.Queries.Handlers
 
         #region Methods
 
-        public async Task<Respond<List<GetAllTourismAreasResponse>>> Handle(GetAllTourismAreasQuery request, CancellationToken cancellationToken)
+        public async Task<Respond<List<GetTourismAreasListResponse>>> Handle(GetAllTourismAreasQuery request, CancellationToken cancellationToken)
         {
             var tourismAreas = await service.GetAllTourismAreasAsync();
 
-            var tourismAreaMapper = this.mapper.Map<List<GetAllTourismAreasResponse>>(tourismAreas);
+            var tourismAreaMapper = this.mapper.Map<List<GetTourismAreasListResponse>>(tourismAreas);
 
             return Success(tourismAreaMapper);
         }
 
-        public async Task<Respond<GetSingleTourismAreaResponse>> Handle(GetTourismAreaByIdQuery request, CancellationToken cancellationToken)
+        public async Task<Respond<GetTourismAreaByIdResponse>> Handle(GetTourismAreaByIdQuery request, CancellationToken cancellationToken)
         {
             var tourismArea = await service.GetTourismAreaByIdWithIncludeAsync(request.Id);
 
             if (tourismArea == null)
-                return NotFound<GetSingleTourismAreaResponse>("Object Not Found");
+                return NotFound<GetTourismAreaByIdResponse>("Object Not Found");
 
-            var result = this.mapper.Map<GetSingleTourismAreaResponse>(tourismArea);
+            var result = this.mapper.Map<GetTourismAreaByIdResponse>(tourismArea);
 
             return Success(result);
         }

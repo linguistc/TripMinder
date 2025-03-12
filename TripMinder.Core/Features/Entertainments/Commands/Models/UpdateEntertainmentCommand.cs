@@ -7,19 +7,24 @@ namespace TripMinder.Core.Features.Entertainments.Commands.Models;
 public class UpdateEntertainmentCommand : IRequest<Respond<string>>
 {
     public int Id { get; set; }
-    public string NameAr { get; set; }
-    public string NameEn { get; set; }
-    public int DescriptionId { get; set; }
-    public int ClassId { get; set; }
-
-    public int ZoneId { get; set; }
-    public double PricePerPerson { get; set; }
-    public int CategoryId { get; set; }
-    public bool HasKidsArea { get; set; }
+    public string Name { get; set; }
         
-    public List<SocialProfileDto> BusinessSocialProfiles { get; set; }
+    public int ClassTypeId { get; set; }
 
-    public LocationDto Location { get; set; }
-    public List<string> Images { get; set; } // => How to create or edit the source?
+    public string Description { get; set; }
+    
+    public int EntertainmentTypeId { get; set; }
+        
+    public int ZoneId { get; set; }
+    public double AveragePricePerAdult { get; set; }
+
+    public string Address { get; set; } 
+    public string? MapLink { get; set; }
+        
+    public string? ContactLink { get; set; } 
+        
+    public string? ImageSource { get; set; }
+    public int PlaceTypeId { get; set; }
+    public bool HasKidsArea { get; set; }
     
 }

@@ -32,11 +32,10 @@ namespace TripMinder.Service.Implementations
         public async Task<Restaurant> GetRestaurantByIdWithIncludeAsync(int id)
         {
             var restaurant = this.repository.GetTableNoTracking()
-                .Include(r => r.Description)
-                .Include(r => r.PlaceCategory)
+                .Include(r => r.FoodCategory)
+                .Include(r => r.PlaceType)
                 .Include(r => r.Class)
                 .Include(r => r.Zone)
-                .Include(r => r.Location)
                 .FirstOrDefault(r => r.Id == id);
 
             return restaurant;

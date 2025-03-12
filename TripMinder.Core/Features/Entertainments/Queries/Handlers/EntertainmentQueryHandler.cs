@@ -10,8 +10,8 @@ namespace TripMinder.Core.Features.Entertainments.Queries.Handlers
 
 
     public class EntertainmentQueryHandler : RespondHandler
-                                        , IRequestHandler<GetAllEntertainmentsQuery, Respond<List<GetAllEntertainmentsResponse>>>
-                                        , IRequestHandler<GetEntertainmentByIdQuery, Respond<GetSingleEntertainmentResponse>>
+                                        , IRequestHandler<GetAllEntertainmentsQuery, Respond<List<GetEntertainmentsListResponse>>>
+                                        , IRequestHandler<GetEntertainmentByIdQuery, Respond<GetEntertainmentByIdResponse>>
     {
         #region Fields
         private readonly IMapper mapper;
@@ -30,23 +30,23 @@ namespace TripMinder.Core.Features.Entertainments.Queries.Handlers
 
         #region Methods
 
-        public async Task<Respond<List<GetAllEntertainmentsResponse>>> Handle(GetAllEntertainmentsQuery request, CancellationToken cancellationToken)
+        public async Task<Respond<List<GetEntertainmentsListResponse>>> Handle(GetAllEntertainmentsQuery request, CancellationToken cancellationToken)
         {
             var entertainments = await service.GetAllEntertainmentsAsync();
 
-            var entertainmentMapper = this.mapper.Map<List<GetAllEntertainmentsResponse>>(entertainments);
+            var entertainmentMapper = this.mapper.Map<List<GetEntertainmentsListResponse>>(entertainments);
 
             return Success(entertainmentMapper);
         }
 
-        public async Task<Respond<GetSingleEntertainmentResponse>> Handle(GetEntertainmentByIdQuery request, CancellationToken cancellationToken)
+        public async Task<Respond<GetEntertainmentByIdResponse>> Handle(GetEntertainmentByIdQuery request, CancellationToken cancellationToken)
         {
             var entertainment = await service.GetEntertainmentByIdWithIncludeAsync(request.Id);
 
             if (entertainment == null)
-                return NotFound<GetSingleEntertainmentResponse>("Object Not Found");
+                return NotFound<GetEntertainmentByIdResponse>("Object Not Found");
 
-            var result = this.mapper.Map<GetSingleEntertainmentResponse>(entertainment);
+            var result = this.mapper.Map<GetEntertainmentByIdResponse>(entertainment);
 
             return Success(result);
         }

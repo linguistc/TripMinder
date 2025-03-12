@@ -30,10 +30,9 @@ namespace TripMinder.Service.Implementations
         {
             var accomodation = this.repository.GetTableNoTracking()
                                         .Include(a => a.Description)
-                                        .Include(a => a.PlaceCategory)
+                                        .Include(a => a.PlaceType)
                                         .Include(a => a.Class)
                                         .Include(a => a.Zone)
-                                        .Include(a => a.Location)
                                         .FirstOrDefault(a => a.Id == id);
 
             return accomodation;

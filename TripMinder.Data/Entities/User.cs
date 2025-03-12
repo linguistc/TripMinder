@@ -33,11 +33,6 @@ namespace TripMinder.Data.Entities
         [Phone]
         public string PhoneNumber { get; set; }
 
-        public Location Location { get; set; }
-
-        [ForeignKey("Location")]
-        public int LocationId { get; set; }
-
         public ICollection<UserSocialProfile> SocialMediaProfiles { get; set; }
         public ICollection<UserImage> Images { get; set; }
         public ICollection<UserHistory> History { get; set; }

@@ -29,13 +29,11 @@ namespace TripMinder.Service.Implementations
         public async Task<TourismArea> GetTourismAreaByIdWithIncludeAsync(int id)
         {
             var tourism = this.repository.GetTableNoTracking()
-                                    .Include(t => t.Description)
-                                    .Include(t => t.PlaceCategory)
+                                    .Include(t => t.TourismType)
+                                    .Include(t => t.PlaceType)
                                     .Include(t => t.Class)
                                     .Include(t => t.Zone)
-                                    .Include(t => t.Location)
-                                    .Where(t => t.Id.Equals(id))
-                                    .FirstOrDefault();
+                                    .FirstOrDefault(t => t.Id == id);
 
             return tourism;
         }

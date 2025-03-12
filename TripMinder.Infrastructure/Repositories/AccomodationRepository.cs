@@ -26,11 +26,10 @@ namespace TripMinder.Infrastructure.Repositories
         public async Task<List<Accomodation>> GetAllAccomodationsAsync()
         {
 
-            var result = await this.accomodations.Include(r => r.Description)
+            var result = await this.accomodations.Include(r => r.AccomodationType)
                                          .Include(r => r.Zone)
                                          .Include(r => r.Class)
-                                         .Include(r => r.Location)
-                                         .Include(r => r.PlaceCategory)
+                                         .Include(r => r.PlaceType)
                                          .ToListAsync();
 
             return result;

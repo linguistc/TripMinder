@@ -1,19 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using TripMinder.Core.Features.Restaurants.Queries.Responses;
+﻿using TripMinder.Core.Features.Restaurants.Queries.Responses;
 using TripMinder.Data.Entities;
 
 namespace TripMinder.Core.Mapping.Restaurants
 {
     public partial class RestaurantProfile
     {
-        void GetRestaurantsListMapping()
+        void GetRestaurantByIdMapping()
         {
-
-            CreateMap<Restaurant, GetRestaurantsListResponse>()
+            
+            CreateMap<Restaurant, GetRestaurantByIdResponse>()
                 .ForMember(dest => dest.Id,
                     options => options.MapFrom(src => src.Id))
                 .ForMember(dest => dest.Name, 

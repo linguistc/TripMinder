@@ -2,14 +2,13 @@
 
 namespace TripMinder.Data.Entities
 {
+    
 
-
-    public class AccomodationDescription // الوصف التجاري
+    public class PlaceType // مطعم إقامة ترفيه سياحة
     {
         [Key]
         public int Id { get; set; }
-        public string Text { get; set; }
-    }   
-    
+        public string Type { get; set; }
+    }
 
 }

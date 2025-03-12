@@ -1,25 +1,20 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using TripMinder.Core.Features.Restaurants.Queries.Responses;
+﻿using TripMinder.Core.Features.Accomodataions.Queries.Responses;
 using TripMinder.Data.Entities;
 
-namespace TripMinder.Core.Mapping.Restaurants
-{
-    public partial class RestaurantProfile
-    {
-        void GetRestaurantsListMapping()
-        {
 
-            CreateMap<Restaurant, GetRestaurantsListResponse>()
+namespace TripMinder.Core.Mapping.Accomodations
+{
+    public partial class AccomodationProfile
+    {
+        void GetAccomodationByIdMapping()
+        {
+            CreateMap<Accomodation, GetAccomodationByIdResponse>()
                 .ForMember(dest => dest.Id,
                     options => options.MapFrom(src => src.Id))
                 .ForMember(dest => dest.Name, 
                     options => options.MapFrom(src => src.Name))
-                .ForMember(dest => dest.FoodCategory, 
-                    options => options.MapFrom(src => src.FoodCategory.Type))
+                .ForMember(dest => dest.AccomodationType, 
+                    options => options.MapFrom(src => src.AccomodationType.Type))
                 .ForMember(dest => dest.ClassType, 
                     options => options.MapFrom(src => src.Class.Type))
                 .ForMember(dest => dest.Zone, 
@@ -39,9 +34,14 @@ namespace TripMinder.Core.Mapping.Restaurants
                 .ForMember(dest => dest.ContactLink, 
                     options => options.MapFrom(src => src.ContactLink))
                 .ForMember(dest => dest.ImageSource, 
-                    options => options.MapFrom(src => src.ImageSource));
+                    options => options.MapFrom(src => src.ImageSource))
+                .ForMember(dest => dest.NumOfBeds,
+                    options => options.MapFrom(src => src.NumOfBeds))
+                .ForMember(dest => dest.NumOfPersons,
+                    options => options.MapFrom(src => src.NumOfMembers))
+                .ForMember(dest => dest.BedStatus,
+                    options => options.MapFrom(src => src.BedStatus));
             
         }
-
     }
 }

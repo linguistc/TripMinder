@@ -3,8 +3,10 @@
 namespace TripMinder.Data.Entities
 {
     
-
-    public class PlaceCategory // مطعم إقامة ترفيه سياحة
+    /// <summary>
+    /// Museums, Histories, Beaches ..etc
+    /// </summary>
+    public class TourismType // الوصف التجاري
     {
         [Key]
         public int Id { get; set; }

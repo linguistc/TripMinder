@@ -11,7 +11,7 @@ namespace TripMinder.Core.Mapping.Accomodations
     {
         public AccomodationProfile() 
         {
-            this.GetSingleAccomodationMapping();
+            this.GetAccomodationByIdMapping();
             this.GetAccomdationsListMapping();
             this.CreateAccomodationCommandMapping();
             this.UpdateAccomodationCommandMapping();

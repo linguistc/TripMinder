@@ -8,26 +8,30 @@ public partial class EntertainmentProfile
     public void CreateEntertainmentCommandMapping()
     {
         CreateMap<CreateEntertainmentCommand, Entertainment>()
-            .ForMember(dest => dest.Description,
-                options => options.MapFrom(src => src.DescriptionId))
-            .ForMember(dest => dest.Class,
-                options => options.MapFrom(src => src.ClassId))
-            .ForMember(dest => dest.Zone,
+            .ForMember(dest => dest.Name,
+                options => options.MapFrom(src => src.Name))
+            .ForMember(dest => dest.ClassId,
+                options => options.MapFrom(src => src.ClassTypeId))
+            .ForMember(dest => dest.ZoneId,
                 options => options.MapFrom(src => src.ZoneId ))
-            .ForMember(dest => dest.PlaceCategory, 
-                options => options.MapFrom(src => src.CategoryId))
-            .ForMember(dest => dest.Location,
-                options => options.MapFrom(src => src.Location))
-            .ForMember(dest => dest.Images,
-                options => options.MapFrom(src => src.Images))
-            .ForMember(dest => dest.BusinessSocialProfiles,
-                options => options.MapFrom(src => src.BusinessSocialProfiles))
+            .ForMember(dest => dest.PlaceTypeId, 
+                options => options.MapFrom(src => src.PlaceTypeId))
+            .ForMember(dest => dest.Address,
+                options => options.MapFrom(src => src.Address))
+            .ForMember(dest => dest.ImageSource,
+                options => options.MapFrom(src => src.ImageSource))
             .ForMember(dest => dest.HasKidsArea,
-                options => options.MapFrom(src => src.HasKidsArea));
-        
+                options => options.MapFrom(src => src.HasKidsArea))
+            .ForMember(dest => dest.AveragePricePerAdult,
+                options => options.MapFrom(src => src.AveragePricePerAdult))
+            .ForMember(dest => dest.ContactLink,
+                options => options.MapFrom(src => src.ContactLink))
+            .ForMember(dest => dest.MapLink,
+                options => options.MapFrom(src => src.MapLink))
+            .ForMember(dest => dest.Description,
+                opions => opions.MapFrom(src => src.Description))
+            .ForMember(dest => dest.EntertainmentTypeId,
+                options => options.MapFrom(src => src.EntertainmentTypeId));
+
     }
-}
-public class CreateEntertainmentCommandMapping
-{
-    
 }

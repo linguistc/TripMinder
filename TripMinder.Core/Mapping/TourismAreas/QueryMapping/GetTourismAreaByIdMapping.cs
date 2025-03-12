@@ -1,25 +1,20 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using TripMinder.Core.Features.Restaurants.Queries.Responses;
+using TripMinder.Core.Features.TourismAreas.Queries.Responses;
 using TripMinder.Data.Entities;
 
-namespace TripMinder.Core.Mapping.Restaurants
+namespace TripMinder.Core.Mapping.TourismAreas
 {
-    public partial class RestaurantProfile
-    {
-        void GetRestaurantsListMapping()
-        {
 
-            CreateMap<Restaurant, GetRestaurantsListResponse>()
+    public partial class TourismAreaProfile
+    {
+        void GetTourismAreaByIdMapping()
+        {
+            CreateMap<TourismArea, GetTourismAreaByIdResponse>()
                 .ForMember(dest => dest.Id,
                     options => options.MapFrom(src => src.Id))
                 .ForMember(dest => dest.Name, 
                     options => options.MapFrom(src => src.Name))
-                .ForMember(dest => dest.FoodCategory, 
-                    options => options.MapFrom(src => src.FoodCategory.Type))
+                .ForMember(dest => dest.TourismType, 
+                    options => options.MapFrom(src => src.TourismType.Type))
                 .ForMember(dest => dest.ClassType, 
                     options => options.MapFrom(src => src.Class.Type))
                 .ForMember(dest => dest.Zone, 
@@ -42,6 +37,6 @@ namespace TripMinder.Core.Mapping.Restaurants
                     options => options.MapFrom(src => src.ImageSource));
             
         }
-
     }
+
 }

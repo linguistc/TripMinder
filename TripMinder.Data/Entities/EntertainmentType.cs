@@ -2,14 +2,14 @@
 
 namespace TripMinder.Data.Entities
 {
-    // Main Navigation Properties
     
-    public class AccomodationClass // A,B,C and D
+    /// <summary>
+    /// Cenima, Theatre, Concerts ..etc
+    /// </summary>
+    public class EntertainmentType // الوصف التجاري
     {
         [Key]
         public int Id { get; set; }
         public string Type { get; set; }
     }
-
-
 }

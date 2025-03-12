@@ -29,22 +29,10 @@ namespace TripMinder.Core.Features.Restaurants.Commands.Validations
         #region Functions
         public void ApplyValidationsRules()
         {
-            RuleFor(x => x.NameAr)
-                 .NotEmpty().WithMessage(stringLocalizer[SharedResourcesKeys.NotEmpty])
-                 .NotNull().WithMessage(stringLocalizer[SharedResourcesKeys.Required])
-                 .MaximumLength(100).WithMessage(stringLocalizer[SharedResourcesKeys.MaxLengthis100]);
         }
 
         public void ApplyCustomValidationsRules()
         {
-            RuleFor(x => x.NameAr)
-                .MustAsync(async (Key, CancellationToken) => !await restaurantService.IsNameArExist(Key))
-                .WithMessage(stringLocalizer[SharedResourcesKeys.IsExist]);
-            RuleFor(x => x.NameEn)
-                .MustAsync(async (Key, CancellationToken) => !await restaurantService.IsNameEnExist(Key))
-            .WithMessage(stringLocalizer[SharedResourcesKeys.IsExist]);
-
-
         }
         #endregion
     }

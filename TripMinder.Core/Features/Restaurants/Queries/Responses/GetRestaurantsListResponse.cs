@@ -1,6 +1,8 @@
-﻿namespace TripMinder.Core.Features.Restaurants.Queries.Responses
+﻿using TripMinder.Core.DTOHelpers;
+
+namespace TripMinder.Core.Features.Restaurants.Queries.Responses
 {
-    public class GetRestaurantByIdResponse
+    public class GetRestaurantsListResponse
     {
         public int Id { get; set; }
         public string Name { get; set; }
