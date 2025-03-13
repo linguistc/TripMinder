@@ -18,7 +18,17 @@ namespace TripMinder.Infrastructure
             services.AddTransient<IRestaurantRepository, RestaurantRepository>();
             services.AddTransient<IEntertainmentRepository, EntertainmentRepository>();
             services.AddTransient<ITourismAreaRepository, TourismAreaRepository>();
-
+            
+            services.AddTransient<IAccomodationClassRepository, AccomodationClassRepository>();
+            services.AddTransient<IAccomodationTypeRepository, AccomodationTypeRepository>();
+            services.AddTransient<IEntertainmentClassRepository, EntertainmentClassRepository>();
+            services.AddTransient<IEntertainmentTypeRepository, EntertainmentTypeRepository>();
+            services.AddTransient<IFoodCategoryRepository, FoodCategoryRepository>();
+            services.AddTransient<IPlaceTypeRepository, PlaceTypeRepository>();
+            services.AddTransient<IRestaurantClassRepository, RestaurantClassRepository>();
+            services.AddTransient<ITourismAreaClassRepository, TourismAreaClassRepository>();
+            services.AddTransient<ITourismTypeRepository, TourismTypeRepository>();
+            services.AddTransient<IZoneRepository, ZoneRepository>();
 
             return services;
         }

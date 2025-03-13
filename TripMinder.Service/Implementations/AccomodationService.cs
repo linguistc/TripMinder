@@ -21,9 +21,9 @@ namespace TripMinder.Service.Implementations
         #endregion
 
         #region Functions
-        public Task<List<Accomodation>> GetAllAccomodationsAsync()
+        public Task<List<Accomodation>> GetAccomodationsListAsync()
         {
-            return this.repository.GetAllAccomodationsAsync();
+            return this.repository.GetAccomodationsListAsync();
         }
 
         public async Task<Accomodation> GetAccomodationByIdWithIncludeAsync(int id)

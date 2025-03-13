@@ -23,7 +23,7 @@ namespace TripMinder.Infrastructure.Repositories
         #endregion
 
         #region Functions
-        public async Task<List<Accomodation>> GetAllAccomodationsAsync()
+        public async Task<List<Accomodation>> GetAccomodationsListAsync()
         {
 
             var result = await this.accomodations.Include(r => r.AccomodationType)

@@ -45,7 +45,7 @@ namespace TripMinder.Core.Features.Accomodataions.Queries.Hanlders
 
         async Task<Respond<List<GetAccomodationsListResponse>>> IRequestHandler<GetAccomodationsListQuery, Respond<List<GetAccomodationsListResponse>>>.Handle(GetAccomodationsListQuery request, CancellationToken cancellationToken)
         {
-            var accomodationList = await this.service.GetAllAccomodationsAsync();
+            var accomodationList = await this.service.GetAccomodationsListAsync();
 
             var accomodationMapper = this.mapper.Map<List<GetAccomodationsListResponse>>(accomodationList);
 
