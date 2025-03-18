@@ -2,6 +2,7 @@
 using System.Runtime.CompilerServices;
 using TripMinder.Infrastructure.Bases;
 using TripMinder.Infrastructure.Contracts;
+using TripMinder.Infrastructure.Data;
 using TripMinder.Infrastructure.Repositories;
 
 namespace TripMinder.Infrastructure
@@ -30,6 +31,9 @@ namespace TripMinder.Infrastructure
             services.AddTransient<ITourismTypeRepository, TourismTypeRepository>();
             services.AddTransient<IZoneRepository, ZoneRepository>();
 
+            // Add DataSeeder to DI
+            services.AddScoped<DataSeeder>();
+            
             return services;
         }
     }

@@ -10,7 +10,7 @@ namespace TripMinder.API
 {
     public class Program
     {
-        public static void Main(string[] args)
+        public static async Task Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
 
@@ -63,6 +63,14 @@ namespace TripMinder.API
                 app.UseSwagger();
                 app.UseSwaggerUI();
             }
+            
+            // Seed the database
+            using (var scope = app.Services.CreateScope())
+            {
+                var services = scope.ServiceProvider;
+                var seeder = services.GetRequiredService<DataSeeder>();
+                await seeder.SeedAsync();
+            }
 
             app.UseHttpsRedirection();
 
@@ -71,7 +79,7 @@ namespace TripMinder.API
 
             app.MapControllers();
 
-            app.Run();
+            app.RunAsync();
         }
     }
 }

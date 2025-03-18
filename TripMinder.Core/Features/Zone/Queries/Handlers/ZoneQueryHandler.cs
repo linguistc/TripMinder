@@ -13,7 +13,6 @@ public class ZoneQueryHandler : RespondHandler
     , IRequestHandler<GetZoneByIdQuery, Respond<GetZoneByIdResponse>>
     , IRequestHandler<GetZonesListQuery, Respond<List<GetZonesListResponse>>>
 {
-
     #region Fields
     private readonly IZoneService zoneService;
     private readonly IMapper mapper;
@@ -21,19 +20,18 @@ public class ZoneQueryHandler : RespondHandler
     #endregion
 
     #region Constructors
-
-    public ZoneQueryHandler(IZoneService zoneService, IMapper mapper)
+    public ZoneQueryHandler(
+        IZoneService zoneService,
+        IMapper mapper,
+        IStringLocalizer<SharedResources> stringLocalizer) : base(stringLocalizer)
     {
         this.zoneService = zoneService;
         this.mapper = mapper;
         this.stringLocalizer = stringLocalizer;
     }
-
     #endregion
-    
-    
+
     #region Methods
-    
     public async Task<Respond<GetZoneByIdResponse>> Handle(GetZoneByIdQuery request, CancellationToken cancellationToken)
     {
         var zone = await this.zoneService.GetZoneByIdAsync(request.Id);
@@ -52,11 +50,9 @@ public class ZoneQueryHandler : RespondHandler
         var zoneMapper = this.mapper.Map<List<GetZonesListResponse>>(zonesList);
 
         var result = Success(zoneMapper);
-
         result.Meta = new { Count = zoneMapper.Count };
 
         return result;
     }
-    
     #endregion
 }

@@ -17,7 +17,7 @@
             public const string GetById = Prefix + SingleRouter;
 
             public const string Create = Prefix + "create/";
-            public const string Update = Prefix + "edit/";
+            public const string Update = Prefix + "Update/";
             public const string Delete = Prefix + SingleRouter;
 
             public const string Paginate = Prefix + "paginate/";
@@ -29,7 +29,7 @@
             public const string List = Prefix + "list/";
             public const string GetById = Prefix + SingleRouter;
             public const string Create = Prefix + "create/";
-            public const string Edit = Prefix + "edit/";
+            public const string Update = Prefix + "Update/";
             public const string Delete = Prefix + SingleRouter;
             public const string Paginate = Prefix + "paginate/";
         }
@@ -40,7 +40,7 @@
             public const string List = Prefix + "list/";
             public const string GetById = Prefix + SingleRouter;
             public const string Create = Prefix + "create/";
-            public const string Edit = Prefix + "edit/";
+            public const string Update = Prefix + "Update/";
             public const string Delete = Prefix + SingleRouter;
             public const string Paginate = Prefix + "paginate/";
         }
@@ -51,7 +51,7 @@
             public const string List = Prefix + "list/";
             public const string GetById = Prefix + SingleRouter;
             public const string Create = Prefix + "create/";
-            public const string Edit = Prefix + "edit/";
+            public const string Update = Prefix + "Update/";
             public const string Delete = Prefix + SingleRouter;
             public const string Paginate = Prefix + "paginate/";
         }
@@ -64,7 +64,7 @@
             public const string List = Prefix + "list/";
             public const string GetById = Prefix + SingleRouter;
             public const string Create = Prefix + "create/";
-            public const string Edit = Prefix + "edit/";
+            public const string Update = Prefix + "Update/";
             public const string Delete = Prefix + SingleRouter;
             public const string Paginate = Prefix + "paginate/";
         }
@@ -75,7 +75,7 @@
             public const string List = Prefix + "list/";
             public const string GetById = Prefix + SingleRouter;
             public const string Create = Prefix + "create/";
-            public const string Edit = Prefix + "edit/";
+            public const string Update = Prefix + "Update/";
             public const string Delete = Prefix + SingleRouter;
             public const string Paginate = Prefix + "paginate/";
         }
@@ -86,7 +86,7 @@
             public const string List = Prefix + "list/";
             public const string GetById = Prefix + SingleRouter;
             public const string Create = Prefix + "create/";
-            public const string Edit = Prefix + "edit/";
+            public const string Update = Prefix + "Update/";
             public const string Delete = Prefix + SingleRouter;
             public const string Paginate = Prefix + "paginate/";
         }
@@ -97,7 +97,7 @@
             public const string List = Prefix + "list/";
             public const string GetById = Prefix + SingleRouter;
             public const string Create = Prefix + "create/";
-            public const string Edit = Prefix + "edit/";
+            public const string Update = Prefix + "Update/";
             public const string Delete = Prefix + SingleRouter;
             public const string Paginate = Prefix + "paginate/";
         }
@@ -108,7 +108,7 @@
             public const string List = Prefix + "list/";
             public const string GetById = Prefix + SingleRouter;
             public const string Create = Prefix + "create/";
-            public const string Edit = Prefix + "edit/";
+            public const string Update = Prefix + "Update/";
             public const string Delete = Prefix + SingleRouter;
             public const string Paginate = Prefix + "paginate/";
         }
@@ -119,7 +119,7 @@
             public const string List = Prefix + "list/";
             public const string GetById = Prefix + SingleRouter;
             public const string Create = Prefix + "create/";
-            public const string Edit = Prefix + "edit/";
+            public const string Update = Prefix + "Update/";
             public const string Delete = Prefix + SingleRouter;
             public const string Paginate = Prefix + "paginate/";
         }
@@ -130,7 +130,7 @@
             public const string List = Prefix + "list/";
             public const string GetById = Prefix + SingleRouter;
             public const string Create = Prefix + "create/";
-            public const string Edit = Prefix + "edit/";
+            public const string Update = Prefix + "Update/";
             public const string Delete = Prefix + SingleRouter;
             public const string Paginate = Prefix + "paginate/";
         }
@@ -141,7 +141,7 @@
             public const string List = Prefix + "list/";
             public const string GetById = Prefix + SingleRouter;
             public const string Create = Prefix + "create/";
-            public const string Edit = Prefix + "edit/";
+            public const string Update = Prefix + "Update/";
             public const string Delete = Prefix + SingleRouter;
             public const string Paginate = Prefix + "paginate/";
         }
@@ -152,7 +152,7 @@
                 public const string List = Prefix + "list/";
                 public const string GetById = Prefix + SingleRouter;
                 public const string Create = Prefix + "create/";
-                public const string Edit = Prefix + "edit/";
+                public const string Update = Prefix + "Update/";
                 public const string Delete = Prefix + SingleRouter;
                 public const string Paginate = Prefix + "paginate/";
             }
@@ -163,7 +163,7 @@
                 public const string List = Prefix + "list/";
                 public const string GetById = Prefix + SingleRouter;
                 public const string Create = Prefix + "create/";
-                public const string Edit = Prefix + "edit/";
+                public const string Update = Prefix + "Update/";
                 public const string Delete = Prefix + SingleRouter;
                 public const string Paginate = Prefix + "paginate/";
             }
