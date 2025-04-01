@@ -22,7 +22,7 @@ public class TourismAreaCommandHandler : RespondHandler
 
     #region Constructors
 
-    public TourismAreaCommandHandler(IMapper mapper, ITourismAreaService tourismAreaService, IStringLocalizer<SharedResources> stringLocalizer)
+    public TourismAreaCommandHandler(IMapper mapper, ITourismAreaService tourismAreaService, IStringLocalizer<SharedResources> stringLocalizer) : base(stringLocalizer)
     {
         this.mapper = mapper;
         this.tourismAreaService = tourismAreaService;

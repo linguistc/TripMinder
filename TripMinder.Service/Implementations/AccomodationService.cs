@@ -29,7 +29,6 @@ namespace TripMinder.Service.Implementations
         public async Task<Accomodation> GetAccomodationByIdWithIncludeAsync(int id)
         {
             var accomodation = this.repository.GetTableNoTracking()
-                                        .Include(a => a.Description)
                                         .Include(a => a.PlaceType)
                                         .Include(a => a.Class)
                                         .Include(a => a.Zone)

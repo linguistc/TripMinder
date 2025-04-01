@@ -23,7 +23,7 @@ namespace TripMinder.Core.Features.Restaurants.Queries.Handlers
 
 
         #region Constructors
-        public RestaurantQueryHandler(IRestaurantService service, IMapper mapper, IStringLocalizer<SharedResources> stringLocalizer)
+        public RestaurantQueryHandler(IRestaurantService service, IMapper mapper, IStringLocalizer<SharedResources> stringLocalizer) : base(stringLocalizer)
         {
             this.mapper = mapper;
             this.restaurantService = service;

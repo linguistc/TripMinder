@@ -21,7 +21,7 @@ namespace TripMinder.Core.Features.Accomodataions.Queries.Hanlders
 
 
         #region Constructors
-        public AccomodationQueryHandler(IAccomodationService service, IMapper mapper, IStringLocalizer<SharedResources> stringLocalizer)
+        public AccomodationQueryHandler(IAccomodationService service, IMapper mapper, IStringLocalizer<SharedResources> stringLocalizer) : base(stringLocalizer)
         {
             this.service = service;
             this.mapper = mapper;

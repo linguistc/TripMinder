@@ -64,13 +64,13 @@ namespace TripMinder.API
                 app.UseSwaggerUI();
             }
             
-            // Seed the database
-            using (var scope = app.Services.CreateScope())
-            {
-                var services = scope.ServiceProvider;
-                var seeder = services.GetRequiredService<DataSeeder>();
-                await seeder.SeedAsync();
-            }
+            // // Seed the database
+            // using (var scope = app.Services.CreateScope())
+            // {
+            //     var services = scope.ServiceProvider;
+            //     var seeder = services.GetRequiredService<DataSeeder>();
+            //     await seeder.SeedAsync();
+            // }
 
             app.UseHttpsRedirection();
 
@@ -79,7 +79,7 @@ namespace TripMinder.API
 
             app.MapControllers();
 
-            app.RunAsync();
+            app.Run();
         }
     }
 }

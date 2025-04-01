@@ -1,8 +1,10 @@
 using AutoMapper;
 using MediatR;
+using Microsoft.Extensions.Localization;
 using TripMinder.Core.Bases;
 using TripMinder.Core.Features.TourismAreas.Queries.Models;
 using TripMinder.Core.Features.TourismAreas.Queries.Responses;
+using TripMinder.Core.Resources;
 using TripMinder.Service.Contracts;
 
 namespace TripMinder.Core.Features.TourismAreas.Queries.Handlers
@@ -16,16 +18,17 @@ namespace TripMinder.Core.Features.TourismAreas.Queries.Handlers
         #region Fields
         private readonly IMapper mapper;
         private readonly ITourismAreaService service;
+        private readonly IStringLocalizer<SharedResources> stringLocalizer;
         #endregion
 
         #region Constructors
 
-        public TourismAreasQueryHandler(IMapper mapper, ITourismAreaService service)
+        public TourismAreasQueryHandler(IMapper mapper, ITourismAreaService service, IStringLocalizer<SharedResources> stringLocalizer) : base(stringLocalizer)
         {
             this.mapper = mapper;
             this.service = service;
+            this.stringLocalizer = stringLocalizer;
         }
-
         #endregion
 
         #region Methods
@@ -36,7 +39,10 @@ namespace TripMinder.Core.Features.TourismAreas.Queries.Handlers
 
             var tourismAreaMapper = this.mapper.Map<List<GetTourismAreasListResponse>>(tourismAreas);
 
-            return Success(tourismAreaMapper);
+            var result = Success(tourismAreaMapper);
+
+            result.Meta = new { Count = tourismAreaMapper.Count };
+            return result;
         }
 
         public async Task<Respond<GetTourismAreaByIdResponse>> Handle(GetTourismAreaByIdQuery request, CancellationToken cancellationToken)
@@ -44,7 +50,7 @@ namespace TripMinder.Core.Features.TourismAreas.Queries.Handlers
             var tourismArea = await service.GetTourismAreaByIdWithIncludeAsync(request.Id);
 
             if (tourismArea == null)
-                return NotFound<GetTourismAreaByIdResponse>("Object Not Found");
+                return NotFound<GetTourismAreaByIdResponse>(this.stringLocalizer[SharedResourcesKeys.NotFound]);
 
             var result = this.mapper.Map<GetTourismAreaByIdResponse>(tourismArea);
 

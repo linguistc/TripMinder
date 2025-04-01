@@ -23,7 +23,7 @@ public class AccomodationCommandHandler : RespondHandler
 
     #region Constructors
 
-    public AccomodationCommandHandler(IMapper mapper, IAccomodationService accomodationservice, IStringLocalizer<SharedResources> stringLocalizer)
+    public AccomodationCommandHandler(IMapper mapper, IAccomodationService accomodationservice, IStringLocalizer<SharedResources> stringLocalizer) : base(stringLocalizer)
     {
         this.mapper = mapper;
         this.accomodationservice = accomodationservice;
