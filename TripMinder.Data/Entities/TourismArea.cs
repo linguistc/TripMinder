@@ -26,6 +26,13 @@ namespace TripMinder.Data.Entities
 
         public virtual Zone Zone { get; set; }
 
+        public double Rating { get; set; }
+        
+        [ForeignKey("Governorate")]
+        public int GovernorateId { get; set; }
+        
+        public Governorate Governorate { get; set; }
+
         public string? Description { get; set; }
         
         public string Address { get; set; }

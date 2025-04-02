@@ -33,6 +33,7 @@ namespace TripMinder.Infrastructure.Data
         public DbSet<BookMarkTourism> BookMarkTourisms { get; set; }
         public DbSet<BookMarkTrip> BookMarkTrips { get; set; }
         //
+        public DbSet<Governorate> Governorates { get; set; }
         public DbSet<Entertainment> Entertainments { get; set; }
         public DbSet<EntertainmentClass> EntertainmentsClasses { get; set; }
         public DbSet<EntertainmentSuggestion> EntertainmentsSuggestions { get; set; }
