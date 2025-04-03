@@ -23,14 +23,13 @@ namespace TripMinder.Infrastructure.Repositories
         #endregion
 
         #region Functions
-        public async Task<List<Accomodation>> GetAllAccomodationsAsync()
+        public async Task<List<Accomodation>> GetAccomodationsListAsync()
         {
 
-            var result = await this.accomodations.Include(r => r.Description)
+            var result = await this.accomodations.Include(r => r.AccomodationType)
                                          .Include(r => r.Zone)
                                          .Include(r => r.Class)
-                                         .Include(r => r.Location)
-                                         .Include(r => r.PlaceCategory)
+                                         .Include(r => r.PlaceType)
                                          .ToListAsync();
 
             return result;

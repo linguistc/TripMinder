@@ -26,11 +26,10 @@ namespace TripMinder.Infrastructure.Repositories
         public async Task<List<Entertainment>> GetAllEntertainmentsAsync()
         {
 
-            var result = await this.entertainments.Include(r => r.Description)
+            var result = await this.entertainments.Include(r => r.EntertainmentType)
                                          .Include(r => r.Zone)
                                          .Include(r => r.Class)
-                                         .Include(r => r.Location)
-                                         .Include(r => r.PlaceCategory)
+                                         .Include(r => r.PlaceType)
                                          .ToListAsync();
 
             return result;

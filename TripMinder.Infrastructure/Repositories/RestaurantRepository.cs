@@ -30,11 +30,10 @@ namespace TripMinder.Infrastructure.Repositories
         #region Functions
         public async Task<List<Restaurant>> GetAllRestaurantsAsync()
         {
-            var result = await this.restaurants.Include(r => r.Description)
+            var result = await this.restaurants.Include(r => r.FoodCategory)
                                          .Include(r => r.Zone)
                                          .Include(r => r.Class)
-                                         .Include(r => r.Location)
-                                         .Include(r => r.PlaceCategory)
+                                         .Include(r => r.PlaceType)
                                          .ToListAsync();
 
             return result;                     

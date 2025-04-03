@@ -3,6 +3,9 @@
 ##
 ## Get latest from `dotnet new gitignore`
 
+# Data
+TripMinder.Data/SeedData/*.json
+
 # dotenv files
 .env
 

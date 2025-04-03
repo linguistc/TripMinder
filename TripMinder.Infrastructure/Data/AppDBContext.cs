@@ -20,48 +20,44 @@ namespace TripMinder.Infrastructure.Data
         }
 
         // Define DbSets
-        #region
+        #region DbSets
 
-        DbSet<Accomodation> Accomodations { get; set; }
-        DbSet<AccomodationClass> AccomodationsClasses { get; set; }
-        DbSet<AccomodationDescription> AccomodationsDescriptions { get; set; }
-        DbSet<AccomodationImage> AccomodationsImages { get; set; }
-        DbSet<AccomodationSocialProfile> AccomodationsSocialProfiles { get; set; }
-        DbSet<AccomodationSuggestion> AccomodationsSuggestions { get; set; }
-        DbSet<BookMarkAccomodation> BookMarkAccomodations { get; set; }
-        DbSet<BookmarkEntertainment> BookMarkEntertainments { get; set; }
-        DbSet<BookMarkRestaurant> BookMarkRestaurants { get; set; }
-        DbSet<BookMarkTourism> BookMarkTourisms { get; set; }
-        DbSet<BookMarkTrip> BookMarkTrips { get; set; }
-        DbSet<Entertainment> Entertainments { get; set; }
-        DbSet<EntertainmentDescription> EntertainmentsDescriptions { get; set; }
-        DbSet<EntertainmentImage> EntertainmentsImages { get; set; }
-        DbSet<EntertainmentSocialProfile> EntertainmentsSocialProfiles { get; set; }
-        DbSet<EntertainmentSuggestion> EntertainmentsSuggestions { get; set; }
-        DbSet<FoodCategory> FoodCategories { get; set; }
-        DbSet<GeneralClass> GeneralClasses { get; set; }
-        DbSet<PlaceCategory> PlaceCategories { get; set; }
-        DbSet<Restaurant> Restaurants { get; set; }
-        DbSet<RestaurantDescription> RestaurantDescriptions { get; set; }
-        DbSet<RestaurantFoodCategory> RestaurantFoodCategories { get; set; }
-        DbSet<RestaurantImage> RestaurantImages { get; set; }
-        DbSet<RestaurantSocialProfile> RestaurantSocialProfiles { get; set; }
-        DbSet<RestaurantSuggestion> RestaurantSuggestions { get; set; }
-        DbSet<TourismDescription> TourismAreasDescriptions { get; set; }
-        DbSet<TourismArea> TourismAreas { get; set; }
-        DbSet<TourismDescription> TourismDescriptions { get; set; }
-        DbSet<TourismImage> TourismImages { get; set; }
-        DbSet<TourismSocialProfile> TourismSocialProfiles { get; set; }
-        DbSet<TourismSuggestion> TourismSuggestions { get; set; }
-        DbSet<TripSuggestion> TripSuggestions { get; set; }
-        DbSet<User> Users { get; set; }
-        DbSet<UserBookMark> UsersBookMarks { get; set; }
-        DbSet<UserHistory> UsersHistory { get; set; }
-        DbSet<UserImage> UsersImages { get; set; }
-        //DbSet<UserPreference> UserPreferences { get; set; }
-        DbSet<UserRating> UsersRatings { get; set; }
-        DbSet<UserSocialProfile> UsersSocialProfiles { get; set; }
-        DbSet<Zone> Zones { get; set; }
+        public DbSet<Accomodation> Accomodations { get; set; }
+        public DbSet<AccomodationClass> AccomodationsClasses { get; set; }
+        public DbSet<AccomodationSuggestion> AccomodationsSuggestions { get; set; }
+        public DbSet<AccomodationType> AccomodationTypes { get; set; }
+        //
+        public DbSet<BookMarkAccomodation> BookMarkAccomodations { get; set; }
+        public DbSet<BookmarkEntertainment> BookMarkEntertainments { get; set; }
+        public DbSet<BookMarkRestaurant> BookMarkRestaurants { get; set; }
+        public DbSet<BookMarkTourism> BookMarkTourisms { get; set; }
+        public DbSet<BookMarkTrip> BookMarkTrips { get; set; }
+        //
+        public DbSet<Governorate> Governorates { get; set; }
+        public DbSet<Entertainment> Entertainments { get; set; }
+        public DbSet<EntertainmentClass> EntertainmentsClasses { get; set; }
+        public DbSet<EntertainmentSuggestion> EntertainmentsSuggestions { get; set; }
+        public DbSet<EntertainmentType> EntertainmentTypes { get; set; }
+        public DbSet<PlaceType> PlaceTypes { get; set; }
+        public DbSet<Restaurant> Restaurants { get; set; }
+        public DbSet<RestaurantClass> RestaurantsClasses { get; set; }
+        public DbSet<RestaurantSuggestion> RestaurantSuggestions { get; set; }
+        public DbSet<FoodCategory> FoodCategories { get; set; }
+        
+        //
+        public DbSet<TourismArea> TourismAreas { get; set; }
+        public DbSet<TourismAreaClass> TourismAreaClasses { get; set; }
+        public DbSet<TourismSuggestion> TourismSuggestions { get; set; }
+        public DbSet<TourismType> TourismAreaTypes { get; set; }
+        public DbSet<TripSuggestion> TripSuggestions { get; set; }
+        public DbSet<User> Users { get; set; }
+        public DbSet<UserBookMark> UsersBookMarks { get; set; }
+        public DbSet<UserHistory> UsersHistory { get; set; }
+        public DbSet<UserImage> UsersImages { get; set; }
+        //public DbSet<UserPreference> UserPreferences { get; set; }
+        public DbSet<UserRating> UsersRatings { get; set; }
+        public DbSet<UserSocialProfile> UsersSocialProfiles { get; set; }
+        public DbSet<Zone> Zones { get; set; }
         #endregion
 
 
@@ -72,20 +68,7 @@ namespace TripMinder.Infrastructure.Data
             modelBuilder.Entity<User>()
                 .HasIndex(u => u.Username)
                 .IsUnique();
-
-            modelBuilder.Entity<RestaurantFoodCategory>()
-                .HasKey(rfc => new { rfc.RestaurantId, rfc.FoodCategoryId });
-
-            modelBuilder.Entity<RestaurantFoodCategory>()
-                .HasOne(rfc => rfc.Restaurant)
-                .WithMany(r => r.RestaurantFoodCategories)
-                .HasForeignKey(rfc => rfc.RestaurantId);
-
-            modelBuilder.Entity<RestaurantFoodCategory>()
-                .HasOne(rfc => rfc.FoodCategory)
-                .WithMany(fc => fc.RestaurantFoodCategories)
-                .HasForeignKey(rfc => rfc.FoodCategoryId);
-
+            
 
 
             modelBuilder.Entity<UserBookMark>()

@@ -24,12 +24,7 @@ namespace TripMinder.Infrastructure.Bases
         }
 
         #endregion
-
-
-        #region Methods
-
-        #endregion
-
+        
         #region Actions
         public virtual async Task<T> GetByIdAsync(int id)
         {
@@ -50,7 +45,7 @@ namespace TripMinder.Infrastructure.Bases
             await dbContext.SaveChangesAsync();
 
         }
-        public virtual async Task<T> AddAsync(T entity)
+        public virtual async Task<T> CreateAsync(T entity)
         {
             await dbContext.Set<T>().AddAsync(entity);
             await dbContext.SaveChangesAsync();
@@ -115,6 +110,21 @@ namespace TripMinder.Infrastructure.Bases
         {
             dbContext.Set<T>().UpdateRange(entities);
             await dbContext.SaveChangesAsync();
+        }
+        
+        public async Task<IDbContextTransaction> BeginTransactionAsync()
+        {
+            return await dbContext.Database.BeginTransactionAsync();
+        }
+
+        public async Task CommitAsync()
+        {
+            await dbContext.Database.CommitTransactionAsync();
+        }
+
+        public async Task RollBackAsync()
+        {
+            await dbContext.Database.RollbackTransactionAsync();
         }
         #endregion
     }

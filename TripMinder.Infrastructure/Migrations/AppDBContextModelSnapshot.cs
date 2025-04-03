@@ -30,23 +30,39 @@ namespace TripMinder.Infrastructure.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<int>("AccomodationTypeId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Address")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<double>("AveragePricePerAdult")
                         .HasColumnType("float");
 
-                    b.Property<int>("CategoryID")
-                        .HasColumnType("int");
+                    b.Property<string>("BedStatus")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("ClassId")
                         .HasColumnType("int");
 
-                    b.Property<int>("DescriptionId")
+                    b.Property<string>("ContactLink")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("GovernorateId")
                         .HasColumnType("int");
 
                     b.Property<bool>("HasKidsArea")
                         .HasColumnType("bit");
 
-                    b.Property<int>("LocationId")
-                        .HasColumnType("int");
+                    b.Property<string>("ImageSource")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("MapLink")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -58,6 +74,12 @@ namespace TripMinder.Infrastructure.Migrations
                     b.Property<int>("NumOfMembers")
                         .HasColumnType("int");
 
+                    b.Property<int>("PlaceTypeId")
+                        .HasColumnType("int");
+
+                    b.Property<double>("Rating")
+                        .HasColumnType("float");
+
                     b.Property<int?>("TripSuggestionId")
                         .HasColumnType("int");
 
@@ -66,13 +88,13 @@ namespace TripMinder.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("CategoryID");
+                    b.HasIndex("AccomodationTypeId");
 
                     b.HasIndex("ClassId");
 
-                    b.HasIndex("DescriptionId");
+                    b.HasIndex("GovernorateId");
 
-                    b.HasIndex("LocationId");
+                    b.HasIndex("PlaceTypeId");
 
                     b.HasIndex("TripSuggestionId");
 
@@ -89,78 +111,13 @@ namespace TripMinder.Infrastructure.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("Name")
+                    b.Property<string>("Type")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 
                     b.ToTable("AccomodationsClasses");
-                });
-
-            modelBuilder.Entity("TripMinder.Data.Entities.AccomodationDescription", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("Text")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("AccomodationsDescriptions");
-                });
-
-            modelBuilder.Entity("TripMinder.Data.Entities.AccomodationImage", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("AccomodationId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Source")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("AccomodationId");
-
-                    b.ToTable("AccomodationsImages");
-                });
-
-            modelBuilder.Entity("TripMinder.Data.Entities.AccomodationSocialProfile", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("AccomodationId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("PlatformName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("ProfileLink")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("AccomodationId");
-
-                    b.ToTable("AccomodationsSocialProfiles");
                 });
 
             modelBuilder.Entity("TripMinder.Data.Entities.AccomodationSuggestion", b =>
@@ -184,6 +141,23 @@ namespace TripMinder.Infrastructure.Migrations
                     b.HasIndex("SuggestionId");
 
                     b.ToTable("AccomodationsSuggestions");
+                });
+
+            modelBuilder.Entity("TripMinder.Data.Entities.AccomodationType", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("AccomodationTypes");
                 });
 
             modelBuilder.Entity("TripMinder.Data.Entities.BookMarkAccomodation", b =>
@@ -284,27 +258,46 @@ namespace TripMinder.Infrastructure.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<string>("Address")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<double>("AveragePricePerAdult")
                         .HasColumnType("float");
-
-                    b.Property<int>("CategoryID")
-                        .HasColumnType("int");
 
                     b.Property<int>("ClassId")
                         .HasColumnType("int");
 
-                    b.Property<int>("DescriptionId")
+                    b.Property<string>("ContactLink")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("EntertainmentTypeId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("GovernorateId")
                         .HasColumnType("int");
 
                     b.Property<bool>("HasKidsArea")
                         .HasColumnType("bit");
 
-                    b.Property<int>("LocationId")
-                        .HasColumnType("int");
+                    b.Property<string>("ImageSource")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("MapLink")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("PlaceTypeId")
+                        .HasColumnType("int");
+
+                    b.Property<double>("Rating")
+                        .HasColumnType("float");
 
                     b.Property<int?>("TripSuggestionId")
                         .HasColumnType("int");
@@ -314,13 +307,13 @@ namespace TripMinder.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("CategoryID");
-
                     b.HasIndex("ClassId");
 
-                    b.HasIndex("DescriptionId");
+                    b.HasIndex("EntertainmentTypeId");
 
-                    b.HasIndex("LocationId");
+                    b.HasIndex("GovernorateId");
+
+                    b.HasIndex("PlaceTypeId");
 
                     b.HasIndex("TripSuggestionId");
 
@@ -329,7 +322,7 @@ namespace TripMinder.Infrastructure.Migrations
                     b.ToTable("Entertainments");
                 });
 
-            modelBuilder.Entity("TripMinder.Data.Entities.EntertainmentDescription", b =>
+            modelBuilder.Entity("TripMinder.Data.Entities.EntertainmentClass", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -337,61 +330,13 @@ namespace TripMinder.Infrastructure.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("Text")
+                    b.Property<string>("Type")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 
-                    b.ToTable("EntertainmentsDescriptions");
-                });
-
-            modelBuilder.Entity("TripMinder.Data.Entities.EntertainmentImage", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("EntertainmentId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Source")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("EntertainmentId");
-
-                    b.ToTable("EntertainmentsImages");
-                });
-
-            modelBuilder.Entity("TripMinder.Data.Entities.EntertainmentSocialProfile", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("EntertainmentId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("PlatformName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("ProfileLink")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("EntertainmentId");
-
-                    b.ToTable("EntertainmentsSocialProfiles");
+                    b.ToTable("EntertainmentsClasses");
                 });
 
             modelBuilder.Entity("TripMinder.Data.Entities.EntertainmentSuggestion", b =>
@@ -417,6 +362,23 @@ namespace TripMinder.Infrastructure.Migrations
                     b.ToTable("EntertainmentsSuggestions");
                 });
 
+            modelBuilder.Entity("TripMinder.Data.Entities.EntertainmentType", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("EntertainmentTypes");
+                });
+
             modelBuilder.Entity("TripMinder.Data.Entities.FoodCategory", b =>
                 {
                     b.Property<int>("Id")
@@ -434,7 +396,7 @@ namespace TripMinder.Infrastructure.Migrations
                     b.ToTable("FoodCategories");
                 });
 
-            modelBuilder.Entity("TripMinder.Data.Entities.GeneralClass", b =>
+            modelBuilder.Entity("TripMinder.Data.Entities.Governorate", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -448,33 +410,10 @@ namespace TripMinder.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("GeneralClasses");
+                    b.ToTable("Governorates");
                 });
 
-            modelBuilder.Entity("TripMinder.Data.Entities.Location", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("Address")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<double?>("Latitude")
-                        .HasColumnType("float");
-
-                    b.Property<double?>("Longitude")
-                        .HasColumnType("float");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Location");
-                });
-
-            modelBuilder.Entity("TripMinder.Data.Entities.PlaceCategory", b =>
+            modelBuilder.Entity("TripMinder.Data.Entities.PlaceType", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -488,7 +427,7 @@ namespace TripMinder.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("PlaceCategories");
+                    b.ToTable("PlaceTypes");
                 });
 
             modelBuilder.Entity("TripMinder.Data.Entities.Restaurant", b =>
@@ -499,27 +438,46 @@ namespace TripMinder.Infrastructure.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<string>("Address")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<double>("AveragePricePerAdult")
                         .HasColumnType("float");
-
-                    b.Property<int>("CategoryID")
-                        .HasColumnType("int");
 
                     b.Property<int>("ClassId")
                         .HasColumnType("int");
 
-                    b.Property<int>("DescriptionId")
+                    b.Property<string>("ContactLink")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("FoodCategoryId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("GovernorateId")
                         .HasColumnType("int");
 
                     b.Property<bool>("HasKidsArea")
                         .HasColumnType("bit");
 
-                    b.Property<int>("LocationId")
-                        .HasColumnType("int");
+                    b.Property<string>("ImageSource")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("MapLink")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("PlaceTypeId")
+                        .HasColumnType("int");
+
+                    b.Property<double>("Rating")
+                        .HasColumnType("float");
 
                     b.Property<int?>("TripSuggestionId")
                         .HasColumnType("int");
@@ -529,13 +487,13 @@ namespace TripMinder.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("CategoryID");
-
                     b.HasIndex("ClassId");
 
-                    b.HasIndex("DescriptionId");
+                    b.HasIndex("FoodCategoryId");
 
-                    b.HasIndex("LocationId");
+                    b.HasIndex("GovernorateId");
+
+                    b.HasIndex("PlaceTypeId");
 
                     b.HasIndex("TripSuggestionId");
 
@@ -544,7 +502,7 @@ namespace TripMinder.Infrastructure.Migrations
                     b.ToTable("Restaurants");
                 });
 
-            modelBuilder.Entity("TripMinder.Data.Entities.RestaurantDescription", b =>
+            modelBuilder.Entity("TripMinder.Data.Entities.RestaurantClass", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -552,76 +510,13 @@ namespace TripMinder.Infrastructure.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("Text")
+                    b.Property<string>("Type")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 
-                    b.ToTable("RestaurantDescriptions");
-                });
-
-            modelBuilder.Entity("TripMinder.Data.Entities.RestaurantFoodCategory", b =>
-                {
-                    b.Property<int>("RestaurantId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("FoodCategoryId")
-                        .HasColumnType("int");
-
-                    b.HasKey("RestaurantId", "FoodCategoryId");
-
-                    b.HasIndex("FoodCategoryId");
-
-                    b.ToTable("RestaurantFoodCategories");
-                });
-
-            modelBuilder.Entity("TripMinder.Data.Entities.RestaurantImage", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("RestaurantId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Source")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("RestaurantId");
-
-                    b.ToTable("RestaurantImages");
-                });
-
-            modelBuilder.Entity("TripMinder.Data.Entities.RestaurantSocialProfile", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("PlatformName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("ProfileLink")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("RestaurantId")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("RestaurantId");
-
-                    b.ToTable("RestaurantSocialProfiles");
+                    b.ToTable("RestaurantsClasses");
                 });
 
             modelBuilder.Entity("TripMinder.Data.Entities.RestaurantSuggestion", b =>
@@ -655,27 +550,46 @@ namespace TripMinder.Infrastructure.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<string>("Address")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<double>("AveragePricePerAdult")
                         .HasColumnType("float");
-
-                    b.Property<int>("CategoryID")
-                        .HasColumnType("int");
 
                     b.Property<int>("ClassId")
                         .HasColumnType("int");
 
-                    b.Property<int>("DescriptionId")
+                    b.Property<string>("ContactLink")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("GovernorateId")
                         .HasColumnType("int");
 
                     b.Property<bool>("HasKidsArea")
                         .HasColumnType("bit");
 
-                    b.Property<int>("LocationId")
-                        .HasColumnType("int");
+                    b.Property<string>("ImageSource")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("MapLink")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("PlaceTypeId")
+                        .HasColumnType("int");
+
+                    b.Property<double>("Rating")
+                        .HasColumnType("float");
+
+                    b.Property<int>("TourismTypeId")
+                        .HasColumnType("int");
 
                     b.Property<int?>("TripSuggestionId")
                         .HasColumnType("int");
@@ -685,13 +599,13 @@ namespace TripMinder.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("CategoryID");
-
                     b.HasIndex("ClassId");
 
-                    b.HasIndex("DescriptionId");
+                    b.HasIndex("GovernorateId");
 
-                    b.HasIndex("LocationId");
+                    b.HasIndex("PlaceTypeId");
+
+                    b.HasIndex("TourismTypeId");
 
                     b.HasIndex("TripSuggestionId");
 
@@ -700,7 +614,7 @@ namespace TripMinder.Infrastructure.Migrations
                     b.ToTable("TourismAreas");
                 });
 
-            modelBuilder.Entity("TripMinder.Data.Entities.TourismDescription", b =>
+            modelBuilder.Entity("TripMinder.Data.Entities.TourismAreaClass", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -708,61 +622,13 @@ namespace TripMinder.Infrastructure.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("Text")
+                    b.Property<string>("Type")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 
-                    b.ToTable("TourismDescription");
-                });
-
-            modelBuilder.Entity("TripMinder.Data.Entities.TourismImage", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("Source")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("TourismAreaId")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("TourismAreaId");
-
-                    b.ToTable("TourismImages");
-                });
-
-            modelBuilder.Entity("TripMinder.Data.Entities.TourismSocialProfile", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("PlatformName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("ProfileLink")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("TourismAreaId")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("TourismAreaId");
-
-                    b.ToTable("TourismSocialProfiles");
+                    b.ToTable("TourismAreaClasses");
                 });
 
             modelBuilder.Entity("TripMinder.Data.Entities.TourismSuggestion", b =>
@@ -786,6 +652,23 @@ namespace TripMinder.Infrastructure.Migrations
                     b.HasIndex("TourismAreaId");
 
                     b.ToTable("TourismSuggestions");
+                });
+
+            modelBuilder.Entity("TripMinder.Data.Entities.TourismType", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("TourismAreaTypes");
                 });
 
             modelBuilder.Entity("TripMinder.Data.Entities.TripSuggestion", b =>
@@ -816,9 +699,6 @@ namespace TripMinder.Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("LocationId")
-                        .HasColumnType("int");
-
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(50)
@@ -834,8 +714,6 @@ namespace TripMinder.Infrastructure.Migrations
                         .HasColumnType("nvarchar(20)");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("LocationId");
 
                     b.HasIndex("Username")
                         .IsUnique();
@@ -973,20 +851,25 @@ namespace TripMinder.Infrastructure.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<int>("GovernorateId")
+                        .HasColumnType("int");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 
+                    b.HasIndex("GovernorateId");
+
                     b.ToTable("Zones");
                 });
 
             modelBuilder.Entity("TripMinder.Data.Entities.Accomodation", b =>
                 {
-                    b.HasOne("TripMinder.Data.Entities.PlaceCategory", "PlaceCategory")
+                    b.HasOne("TripMinder.Data.Entities.AccomodationType", "AccomodationType")
                         .WithMany()
-                        .HasForeignKey("CategoryID")
+                        .HasForeignKey("AccomodationTypeId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -996,15 +879,15 @@ namespace TripMinder.Infrastructure.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("TripMinder.Data.Entities.AccomodationDescription", "Description")
+                    b.HasOne("TripMinder.Data.Entities.Governorate", "Governorate")
                         .WithMany()
-                        .HasForeignKey("DescriptionId")
+                        .HasForeignKey("GovernorateId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("TripMinder.Data.Entities.Location", "Location")
+                    b.HasOne("TripMinder.Data.Entities.PlaceType", "PlaceType")
                         .WithMany()
-                        .HasForeignKey("LocationId")
+                        .HasForeignKey("PlaceTypeId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -1018,37 +901,15 @@ namespace TripMinder.Infrastructure.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.Navigation("AccomodationType");
+
                     b.Navigation("Class");
 
-                    b.Navigation("Description");
+                    b.Navigation("Governorate");
 
-                    b.Navigation("Location");
-
-                    b.Navigation("PlaceCategory");
+                    b.Navigation("PlaceType");
 
                     b.Navigation("Zone");
-                });
-
-            modelBuilder.Entity("TripMinder.Data.Entities.AccomodationImage", b =>
-                {
-                    b.HasOne("TripMinder.Data.Entities.Accomodation", "Accomodation")
-                        .WithMany("Images")
-                        .HasForeignKey("AccomodationId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Accomodation");
-                });
-
-            modelBuilder.Entity("TripMinder.Data.Entities.AccomodationSocialProfile", b =>
-                {
-                    b.HasOne("TripMinder.Data.Entities.Accomodation", "Accomodation")
-                        .WithMany("BusinessSocialProfiles")
-                        .HasForeignKey("AccomodationId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Accomodation");
                 });
 
             modelBuilder.Entity("TripMinder.Data.Entities.AccomodationSuggestion", b =>
@@ -1167,27 +1028,27 @@ namespace TripMinder.Infrastructure.Migrations
 
             modelBuilder.Entity("TripMinder.Data.Entities.Entertainment", b =>
                 {
-                    b.HasOne("TripMinder.Data.Entities.PlaceCategory", "PlaceCategory")
-                        .WithMany()
-                        .HasForeignKey("CategoryID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("TripMinder.Data.Entities.GeneralClass", "Class")
+                    b.HasOne("TripMinder.Data.Entities.EntertainmentClass", "Class")
                         .WithMany()
                         .HasForeignKey("ClassId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("TripMinder.Data.Entities.EntertainmentDescription", "Description")
+                    b.HasOne("TripMinder.Data.Entities.EntertainmentType", "EntertainmentType")
                         .WithMany()
-                        .HasForeignKey("DescriptionId")
+                        .HasForeignKey("EntertainmentTypeId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("TripMinder.Data.Entities.Location", "Location")
+                    b.HasOne("TripMinder.Data.Entities.Governorate", "Governorate")
                         .WithMany()
-                        .HasForeignKey("LocationId")
+                        .HasForeignKey("GovernorateId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("TripMinder.Data.Entities.PlaceType", "PlaceType")
+                        .WithMany()
+                        .HasForeignKey("PlaceTypeId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -1203,35 +1064,13 @@ namespace TripMinder.Infrastructure.Migrations
 
                     b.Navigation("Class");
 
-                    b.Navigation("Description");
+                    b.Navigation("EntertainmentType");
 
-                    b.Navigation("Location");
+                    b.Navigation("Governorate");
 
-                    b.Navigation("PlaceCategory");
+                    b.Navigation("PlaceType");
 
                     b.Navigation("Zone");
-                });
-
-            modelBuilder.Entity("TripMinder.Data.Entities.EntertainmentImage", b =>
-                {
-                    b.HasOne("TripMinder.Data.Entities.Entertainment", "Entertainment")
-                        .WithMany("Images")
-                        .HasForeignKey("EntertainmentId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Entertainment");
-                });
-
-            modelBuilder.Entity("TripMinder.Data.Entities.EntertainmentSocialProfile", b =>
-                {
-                    b.HasOne("TripMinder.Data.Entities.Entertainment", "Entertainment")
-                        .WithMany("BusinessSocialProfiles")
-                        .HasForeignKey("EntertainmentId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Entertainment");
                 });
 
             modelBuilder.Entity("TripMinder.Data.Entities.EntertainmentSuggestion", b =>
@@ -1255,27 +1094,27 @@ namespace TripMinder.Infrastructure.Migrations
 
             modelBuilder.Entity("TripMinder.Data.Entities.Restaurant", b =>
                 {
-                    b.HasOne("TripMinder.Data.Entities.PlaceCategory", "PlaceCategory")
-                        .WithMany()
-                        .HasForeignKey("CategoryID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("TripMinder.Data.Entities.GeneralClass", "Class")
+                    b.HasOne("TripMinder.Data.Entities.RestaurantClass", "Class")
                         .WithMany()
                         .HasForeignKey("ClassId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("TripMinder.Data.Entities.RestaurantDescription", "Description")
+                    b.HasOne("TripMinder.Data.Entities.FoodCategory", "FoodCategory")
                         .WithMany()
-                        .HasForeignKey("DescriptionId")
+                        .HasForeignKey("FoodCategoryId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("TripMinder.Data.Entities.Location", "Location")
+                    b.HasOne("TripMinder.Data.Entities.Governorate", "Governorate")
                         .WithMany()
-                        .HasForeignKey("LocationId")
+                        .HasForeignKey("GovernorateId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("TripMinder.Data.Entities.PlaceType", "PlaceType")
+                        .WithMany()
+                        .HasForeignKey("PlaceTypeId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -1291,54 +1130,13 @@ namespace TripMinder.Infrastructure.Migrations
 
                     b.Navigation("Class");
 
-                    b.Navigation("Description");
-
-                    b.Navigation("Location");
-
-                    b.Navigation("PlaceCategory");
-
-                    b.Navigation("Zone");
-                });
-
-            modelBuilder.Entity("TripMinder.Data.Entities.RestaurantFoodCategory", b =>
-                {
-                    b.HasOne("TripMinder.Data.Entities.FoodCategory", "FoodCategory")
-                        .WithMany("RestaurantFoodCategories")
-                        .HasForeignKey("FoodCategoryId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("TripMinder.Data.Entities.Restaurant", "Restaurant")
-                        .WithMany("RestaurantFoodCategories")
-                        .HasForeignKey("RestaurantId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.Navigation("FoodCategory");
 
-                    b.Navigation("Restaurant");
-                });
+                    b.Navigation("Governorate");
 
-            modelBuilder.Entity("TripMinder.Data.Entities.RestaurantImage", b =>
-                {
-                    b.HasOne("TripMinder.Data.Entities.Restaurant", "Restaurant")
-                        .WithMany("Images")
-                        .HasForeignKey("RestaurantId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                    b.Navigation("PlaceType");
 
-                    b.Navigation("Restaurant");
-                });
-
-            modelBuilder.Entity("TripMinder.Data.Entities.RestaurantSocialProfile", b =>
-                {
-                    b.HasOne("TripMinder.Data.Entities.Restaurant", "Restaurant")
-                        .WithMany("BusinessSocialProfiles")
-                        .HasForeignKey("RestaurantId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Restaurant");
+                    b.Navigation("Zone");
                 });
 
             modelBuilder.Entity("TripMinder.Data.Entities.RestaurantSuggestion", b =>
@@ -1362,27 +1160,27 @@ namespace TripMinder.Infrastructure.Migrations
 
             modelBuilder.Entity("TripMinder.Data.Entities.TourismArea", b =>
                 {
-                    b.HasOne("TripMinder.Data.Entities.PlaceCategory", "PlaceCategory")
-                        .WithMany()
-                        .HasForeignKey("CategoryID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("TripMinder.Data.Entities.GeneralClass", "Class")
+                    b.HasOne("TripMinder.Data.Entities.TourismAreaClass", "Class")
                         .WithMany()
                         .HasForeignKey("ClassId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("TripMinder.Data.Entities.TourismDescription", "Description")
+                    b.HasOne("TripMinder.Data.Entities.Governorate", "Governorate")
                         .WithMany()
-                        .HasForeignKey("DescriptionId")
+                        .HasForeignKey("GovernorateId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("TripMinder.Data.Entities.Location", "Location")
+                    b.HasOne("TripMinder.Data.Entities.PlaceType", "PlaceType")
                         .WithMany()
-                        .HasForeignKey("LocationId")
+                        .HasForeignKey("PlaceTypeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("TripMinder.Data.Entities.TourismType", "TourismType")
+                        .WithMany()
+                        .HasForeignKey("TourismTypeId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -1398,35 +1196,13 @@ namespace TripMinder.Infrastructure.Migrations
 
                     b.Navigation("Class");
 
-                    b.Navigation("Description");
+                    b.Navigation("Governorate");
 
-                    b.Navigation("Location");
+                    b.Navigation("PlaceType");
 
-                    b.Navigation("PlaceCategory");
+                    b.Navigation("TourismType");
 
                     b.Navigation("Zone");
-                });
-
-            modelBuilder.Entity("TripMinder.Data.Entities.TourismImage", b =>
-                {
-                    b.HasOne("TripMinder.Data.Entities.TourismArea", "TourismArea")
-                        .WithMany("Images")
-                        .HasForeignKey("TourismAreaId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("TourismArea");
-                });
-
-            modelBuilder.Entity("TripMinder.Data.Entities.TourismSocialProfile", b =>
-                {
-                    b.HasOne("TripMinder.Data.Entities.TourismArea", "TourismArea")
-                        .WithMany("BusinessSocialProfiles")
-                        .HasForeignKey("TourismAreaId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("TourismArea");
                 });
 
             modelBuilder.Entity("TripMinder.Data.Entities.TourismSuggestion", b =>
@@ -1446,17 +1222,6 @@ namespace TripMinder.Infrastructure.Migrations
                     b.Navigation("TourismArea");
 
                     b.Navigation("TripSuggestion");
-                });
-
-            modelBuilder.Entity("TripMinder.Data.Entities.User", b =>
-                {
-                    b.HasOne("TripMinder.Data.Entities.Location", "Location")
-                        .WithMany()
-                        .HasForeignKey("LocationId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Location");
                 });
 
             modelBuilder.Entity("TripMinder.Data.Entities.UserBookMark", b =>
@@ -1514,39 +1279,15 @@ namespace TripMinder.Infrastructure.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("TripMinder.Data.Entities.Accomodation", b =>
+            modelBuilder.Entity("TripMinder.Data.Entities.Zone", b =>
                 {
-                    b.Navigation("BusinessSocialProfiles");
+                    b.HasOne("TripMinder.Data.Entities.Governorate", "Governorate")
+                        .WithMany()
+                        .HasForeignKey("GovernorateId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
-                    b.Navigation("Images");
-                });
-
-            modelBuilder.Entity("TripMinder.Data.Entities.Entertainment", b =>
-                {
-                    b.Navigation("BusinessSocialProfiles");
-
-                    b.Navigation("Images");
-                });
-
-            modelBuilder.Entity("TripMinder.Data.Entities.FoodCategory", b =>
-                {
-                    b.Navigation("RestaurantFoodCategories");
-                });
-
-            modelBuilder.Entity("TripMinder.Data.Entities.Restaurant", b =>
-                {
-                    b.Navigation("BusinessSocialProfiles");
-
-                    b.Navigation("Images");
-
-                    b.Navigation("RestaurantFoodCategories");
-                });
-
-            modelBuilder.Entity("TripMinder.Data.Entities.TourismArea", b =>
-                {
-                    b.Navigation("BusinessSocialProfiles");
-
-                    b.Navigation("Images");
+                    b.Navigation("Governorate");
                 });
 
             modelBuilder.Entity("TripMinder.Data.Entities.TripSuggestion", b =>

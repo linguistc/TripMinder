@@ -13,11 +13,17 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="9.0.1" />
+    <PackageReference Include="Serilog.AspNetCore" Version="9.0.0" />
+    <PackageReference Include="Serilog.Sinks.Console" Version="6.0.1-dev-00953" />
+    <PackageReference Include="Serilog.Sinks.MSSqlServer" Version="8.1.1-dev-00122" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="7.3.1" />
+    <PackageReference Include="Swashbuckle.AspNetCore.SwaggerUI" Version="7.3.1" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\TripMinder.Core\TripMinder.Core.csproj" />
     <ProjectReference Include="..\TripMinder.Infrastructure\TripMinder.Infrastructure.csproj" />
+    <ProjectReference Include="..\TripMinder.Service\TripMinder.Service.csproj" />
   </ItemGroup>
 
 </Project>

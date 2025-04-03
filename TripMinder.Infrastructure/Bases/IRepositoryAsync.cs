@@ -12,10 +12,15 @@ namespace TripMinder.Infrastructure.Bases
         void RollBack();
         IQueryable<T> GetTableNoTracking();
         IQueryable<T> GetTableAsTracking();
-        Task<T> AddAsync(T entity);
+        Task<T> CreateAsync(T entity);
         Task AddRangeAsync(ICollection<T> entities);
         Task UpdateAsync(T entity);
         Task UpdateRangeAsync(ICollection<T> entities);
         Task DeleteAsync(T entity);
+        
+        Task<IDbContextTransaction> BeginTransactionAsync();
+        Task CommitAsync();
+        Task RollBackAsync();
+
     }
 }
