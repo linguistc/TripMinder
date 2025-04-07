@@ -1,5 +1,7 @@
 # TripMinder
 
+**Note**: Work in progress on the "develop" branch. "master" does not contain the latest updates. Please check the [develop branch](https://github.com/linguistc/TripMinder/tree/develop) for the most recent progress.
+
 My graduation project, a RESTful Web API for generating personalized travel itineraries based on user preferences.
 
 ## Features
