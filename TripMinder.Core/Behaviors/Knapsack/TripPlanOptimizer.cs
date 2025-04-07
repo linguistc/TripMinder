@@ -11,78 +11,21 @@ public class TripPlanOptimizer
 {
     private readonly IMediator _mediator;
     private readonly IKnapsackSolver _solver;
+    private readonly IItemFetcher _itemFetcher;
 
-    public TripPlanOptimizer(IMediator mediator, IKnapsackSolver solver)
+    public TripPlanOptimizer(IMediator mediator, IKnapsackSolver solver, ItemFetcher itemFetcher)
     {
         this._mediator = mediator;
         this._solver = solver;
-        
+        this._itemFetcher = itemFetcher;
     }
 
     public async Task<Respond<TripPlanResponse>> OptimizePlan(TripPlanRequest request)
     {
-        // تحويل الـ Interests لـ Priorities
-        var (accommodationPriority, foodPriority, entertainmentPriority, tourismPriority) = CalculatePriorities(request.Interests);
-
-        // جيب البيانات باستخدام Queries
-        var accommodationsResponse = await _mediator.Send(new GetAccomodationsListByZoneIdQuery(request.ZoneId, accommodationPriority));
-        var restaurantsResponse = await _mediator.Send(new GetRestaurantsListByZoneIdQuery(request.ZoneId, foodPriority));
-        var entertainmentsResponse = await _mediator.Send(new GetEntertainmentsListByZoneIdQuery(request.ZoneId, entertainmentPriority));
-        var tourismAreasResponse = await _mediator.Send(new GetTourismAreasListByZoneIdQuery(request.ZoneId, tourismPriority));
-
-        // تحويل البيانات لـ Items للألجورزم
-        var allItems = new List<TripMinder.Core.Behaviors.Knapsack.Item>();
-
-        if (accommodationsResponse?.Succeeded == true && accommodationsResponse.Data != null)
-        {
-            allItems.AddRange(accommodationsResponse.Data.Select(a => new TripMinder.Core.Behaviors.Knapsack.Item
-            {
-                Id = a.Id,
-                Name = a.Name,
-                AveragePricePerAdult = (float)a.AveragePricePerAdult,
-                Score = a.Score,
-                PlaceType= ItemType.Accommodation
-            }));
-        }
-
-        if (restaurantsResponse?.Succeeded == true && restaurantsResponse.Data != null)
-        {
-            allItems.AddRange(restaurantsResponse.Data.Select(r => new TripMinder.Core.Behaviors.Knapsack.Item
-            {
-                Id = r.Id,
-                Name = r.Name,
-                AveragePricePerAdult = (float)r.AveragePricePerAdult,
-                Score = r.Score,
-                PlaceType= ItemType.Restaurant
-            }));
-        }
-
-        if (entertainmentsResponse?.Succeeded == true && entertainmentsResponse.Data != null)
-        {
-            allItems.AddRange(entertainmentsResponse.Data.Select(e => new TripMinder.Core.Behaviors.Knapsack.Item
-            {
-                Id = e.Id,
-                Name = e.Name,
-                AveragePricePerAdult = (float)e.AveragePricePerAdult,
-                Score = e.Score,
-                PlaceType= ItemType.Entertainment
-            }));
-        }
-
-        if (tourismAreasResponse?.Succeeded == true && tourismAreasResponse.Data != null)
-        {
-            allItems.AddRange(tourismAreasResponse.Data.Select(t => new TripMinder.Core.Behaviors.Knapsack.Item
-            {
-                Id = t.Id,
-                Name = t.Name,
-                AveragePricePerAdult = (float)t.AveragePricePerAdult,
-                Score = t.Score,
-                PlaceType= ItemType.TourismArea
-            }));
-        }
-
-        // تطبيق الألجورزم
-        var totalBudget = request.BudgetPerAdult * request.NumberOfTravelers;
+        var priorities = CalculatePriorities(request.Interests);
+        var allItems = await this._itemFetcher.FetchItems(request.ZoneId, priorities, _mediator);
+        
+        var totalBudget = (int)request.BudgetPerAdult;
         var (maxProfit, selectedItems) = this._solver.GetMaxProfit((int)totalBudget, allItems);
 
         // تحويل النتيجة لـ Response

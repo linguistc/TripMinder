@@ -27,15 +27,17 @@ namespace TripMinder.Core
             //
             services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>));
             
-            // Solver Dependencies
+            // Optimizer Dependencies
             services.AddScoped<IKnapsackSolver, KnapsackSolver>();
-            services.AddScoped<KnapsackDP>();
-            services.AddScoped<KnapsackBacktracker>();
-            
-            // Trip Plan Optimizer
+            services.AddScoped<IKnapsackDP ,KnapsackDP>();
+            services.AddScoped<IKnapsackBacktracker, KnapsackBacktracker>();
+            services.AddScoped<IProfitFinder, ProfitFinder>();
+            services.AddScoped<IDynamicProgrammingCalculator, DynamicProgrammingCalculator>();
+            services.AddScoped<IItemFetcher, IItemFetcher>();
             services.AddScoped<TripPlanOptimizer>();
             
             //
+            
             
             return services;
         }
