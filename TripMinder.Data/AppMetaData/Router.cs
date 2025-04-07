@@ -170,6 +170,17 @@
             }
         
         #endregion
+
+        #region TripSuggestionner Routing
+        
+        public class TripSuggestionnerRouting
+        {
+            public const string Prefix = Rule + "tripsuggestionner/";
+            public const string OptimizeTrip = Prefix + "optimize/";
+        }
+        
+
+        #endregion
     }
 }
 
