@@ -50,6 +50,8 @@ namespace TripMinder.Data.Entities
         public string? ContactLink { get; set; } 
         
         public string? ImageSource { get; set; }
+        public float Score { get; set; }
+
 
 
 

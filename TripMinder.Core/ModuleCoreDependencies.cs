@@ -4,6 +4,7 @@ using FluentValidation;
 using System.Reflection;
 using MediatR;
 using TripMinder.Core.Behaviors;
+using TripMinder.Core.Behaviors.Knapsack;
 using TripMinder.Service.Contracts;
 
 namespace TripMinder.Core
@@ -25,6 +26,16 @@ namespace TripMinder.Core
 
             //
             services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>));
+            
+            // Solver Dependencies
+            services.AddScoped<IKnapsackSolver, KnapsackSolver>();
+            services.AddScoped<KnapsackDP>();
+            services.AddScoped<KnapsackBacktracker>();
+            
+            // Trip Plan Optimizer
+            services.AddScoped<TripPlanOptimizer>();
+            
+            //
             
             return services;
         }

@@ -4,7 +4,9 @@ namespace TripMinder.Service.Contracts
 {
     public interface IEntertainmentService
     {
-        public Task<List<Entertainment>> GetAllEntertainmentsAsync();
+        public Task<List<Entertainment>> GetEntertainmentsListAsync();
+        public Task<List<Entertainment>> GetEntertainmentsListByZoneIdAsync(int zoneId, CancellationToken cancellationToken = default);
+        public Task<List<Entertainment>> GetEntertainmentsListByGovernorateIdAsync(int governorateId, CancellationToken cancellationToken = default);
         public Task<Entertainment> GetEntertainmentByIdWithIncludeAsync(int id);
         public Task<Entertainment> GetEntertainmentByIdAsync(int id);
         public Task<string> CreateAsync(Entertainment newEntertainment);

@@ -5,7 +5,9 @@ namespace TripMinder.Service.Contracts
 {
     public interface IRestaurantService
     {
-        public Task<List<Restaurant>> GetAllRestaurantsAsync();
+        public Task<List<Restaurant>> GetRestaurantsListAsync();
+        public Task<List<Restaurant>> GetRestaurantsListByZoneIdAsync(int zoneId, CancellationToken cancellationToken = default);
+        public Task<List<Restaurant>> GetRestaurantsListByGovernorateIdAsync(int governorateId, CancellationToken cancellationToken = default);
         public Task<Restaurant> GetRestaurantByIdWithIncludeAsync(int id);
         public Task<Restaurant> GetRestaurantByIdAsync(int id);
         public Task<string> CreateAsync(Restaurant newRestaurant);

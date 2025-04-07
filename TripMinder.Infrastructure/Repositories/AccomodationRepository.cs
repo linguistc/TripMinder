@@ -35,8 +35,28 @@ namespace TripMinder.Infrastructure.Repositories
             return result;
         }
 
+        public async Task<List<Accomodation>> GetAccomodationsListByZoneIdAsync(int zoneId, CancellationToken cancellationToken = default)
+        {
+            return await this.accomodations
+                    .Include(r => r.AccomodationType)
+                    .Include(r => r.Zone)
+                    .Include(r => r.Class)
+                    .Include(r => r.PlaceType)
+                    .Where(r => r.ZoneId == zoneId)
+                    .ToListAsync(cancellationToken); 
+        }
+
+        public async Task<List<Accomodation>> GetAccomodationsListByGovernorateIdAsync(int governorateId, CancellationToken cancellationToken = default)
+        {
+            return await this.accomodations
+                    .Include(r => r.AccomodationType)
+                    .Include(r => r.Zone)
+                    .Include(r => r.Class)
+                    .Include(r => r.PlaceType)
+                    .Where(r => r.GovernorateId == governorateId)
+                    .ToListAsync(cancellationToken);
+        }
+
         #endregion
-
-
     }
 }

@@ -9,26 +9,36 @@ namespace TripMinder.Service.Implementations
     {
 
         #region Fields
-        private readonly IAccomodationRepository repository;
+        private readonly IAccomodationRepository _repository;
 
         #endregion
 
         #region Constructors
         public AccomodationService(IAccomodationRepository repository)
         {
-            this.repository = repository;
+            this._repository = repository;
         }
         #endregion
 
         #region Functions
         public Task<List<Accomodation>> GetAccomodationsListAsync()
         {
-            return this.repository.GetAccomodationsListAsync();
+            return this._repository.GetAccomodationsListAsync();
         }
 
+        public Task<List<Accomodation>> GetAccomodationsListByZoneIdAsync(int zoneId, CancellationToken cancellationToken = default)
+        {
+            return this._repository.GetAccomodationsListByZoneIdAsync(zoneId, cancellationToken);
+        }
+
+        public Task<List<Accomodation>> GetAccomodationsListByGovernorateIdAsync(int governorateId, CancellationToken cancellationToken = default)
+        {
+            return this._repository.GetAccomodationsListByGovernorateIdAsync(governorateId, cancellationToken);
+        }
+        
         public async Task<Accomodation> GetAccomodationByIdWithIncludeAsync(int id)
         {
-            var accomodation = this.repository.GetTableNoTracking()
+            var accomodation = this._repository.GetTableNoTracking()
                                         .Include(a => a.PlaceType)
                                         .Include(a => a.Class)
                                         .Include(a => a.Zone)
@@ -39,13 +49,13 @@ namespace TripMinder.Service.Implementations
 
         public async Task<Accomodation> GetAccomodationByIdAsync(int id)
         {
-            var accomodation = await this.repository.GetByIdAsync(id);
+            var accomodation = await this._repository.GetByIdAsync(id);
             return accomodation;
         }
 
         public async Task<string> CreateAsync(Accomodation newAccomodation)
         {
-            await this.repository.CreateAsync(newAccomodation);
+            await this._repository.CreateAsync(newAccomodation);
             return "Created";
         }
 
@@ -71,17 +81,17 @@ namespace TripMinder.Service.Implementations
 
         public async Task<string> UpdateAsync(Accomodation accomodation)
         {
-            await this.repository.UpdateAsync(accomodation);
+            await this._repository.UpdateAsync(accomodation);
             return "Updated";
         }
 
         public async Task<string> DeleteAsync(Accomodation accomodation)
         {
-            var trans = this.repository.BeginTransaction();
+            var trans = this._repository.BeginTransaction();
 
             try
             {
-                await this.repository.DeleteAsync(accomodation);
+                await this._repository.DeleteAsync(accomodation);
                 await trans.CommitAsync();
                 return "Deleted";
             }

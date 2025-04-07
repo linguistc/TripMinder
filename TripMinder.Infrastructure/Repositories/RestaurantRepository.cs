@@ -28,7 +28,7 @@ namespace TripMinder.Infrastructure.Repositories
         #endregion
 
         #region Functions
-        public async Task<List<Restaurant>> GetAllRestaurantsAsync()
+        public async Task<List<Restaurant>> GetRestaurantsListAsync()
         {
             var result = await this.restaurants.Include(r => r.FoodCategory)
                                          .Include(r => r.Zone)
@@ -39,6 +39,27 @@ namespace TripMinder.Infrastructure.Repositories
             return result;                     
         }
 
+        public async Task<List<Restaurant>> GetRestaurantsListByZoneIdAsync(int zoneId, CancellationToken cancellationToken = default)
+        {
+            return await this.restaurants
+                .Include(r => r.FoodCategory)
+                .Include(r => r.Zone)
+                .Include(r => r.Class)
+                .Include(r => r.PlaceType)
+                .Where(r => r.ZoneId == zoneId)
+                .ToListAsync(cancellationToken);
+        }
+
+        public async Task<List<Restaurant>> GetRestaurantsListByGovernorateIdAsync(int governorateId, CancellationToken cancellationToken = default)
+        {
+            return await this.restaurants
+                .Include(r => r.FoodCategory)
+                .Include(r => r.Zone)
+                .Include(r => r.Class)
+                .Include(r => r.PlaceType)                
+                .Where(r => r.Zone.GovernorateId == governorateId)
+                .ToListAsync(cancellationToken);
+        }
         #endregion
 
 

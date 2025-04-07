@@ -21,9 +21,20 @@ namespace TripMinder.Service.Implementations
         #endregion
 
         #region Functions
-        public async Task<List<Entertainment>> GetAllEntertainmentsAsync()
+        public async Task<List<Entertainment>> GetEntertainmentsListAsync()
         {
-            return await this.repository.GetAllEntertainmentsAsync();
+            return await this.repository.GetEntertainmentsListAsync();
+        }
+
+        public async Task<List<Entertainment>> GetEntertainmentsListByZoneIdAsync(int zoneId, CancellationToken cancellationToken = default)
+        {
+            return await this.repository.GetEntertainmentsListByZoneIdAsync(zoneId, cancellationToken);
+        }
+
+        public async Task<List<Entertainment>> GetEntertainmentsListByGovernorateIdAsync(int governorateId, CancellationToken cancellationToken = default)
+        {
+            return await this.repository.GetEntertainmentsListByGovernorateIdAsync(governorateId, cancellationToken);
+
         }
 
         public async Task<Entertainment> GetEntertainmentByIdWithIncludeAsync(int id)

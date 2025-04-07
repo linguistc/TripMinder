@@ -28,6 +28,7 @@
             public const string Prefix = Rule + "accommodation/";
             public const string List = Prefix + "list/";
             public const string GetById = Prefix + SingleRouter;
+            public const string ListByZoneId = Prefix + "zone/{zoneId}/";
             public const string Create = Prefix + "create/";
             public const string Update = Prefix + "Update/";
             public const string Delete = Prefix + SingleRouter;
