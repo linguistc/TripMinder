@@ -27,15 +27,19 @@ public class TripPlanOptimizer
             request.MaxAccommodations,
             request.MaxEntertainments,
             request.MaxTourismAreas);
-        
-        var (maxProfit, selectedItems) = _solver.GetMaxProfit(totalBudget, allItems, constraints);
+
+        var (maxProfit, allSolutions) = _solver.GetMaxProfitMultiple(totalBudget, allItems, constraints);
+        var selectedItems = allSolutions.FirstOrDefault() ?? _solver.GetMaxProfit(totalBudget, allItems, constraints).selectedItems;
 
         var tripPlanResponse = new TripPlanResponse
         {
             Accommodation = selectedItems.FirstOrDefault(i => i.PlaceType == ItemType.Accommodation)?.ToResponse(),
-            Restaurants = selectedItems.Where(i => i.PlaceType == ItemType.Restaurant).Take(request.MaxRestaurants).Select(i => i.ToResponse()).ToList(),
-            Entertainments = selectedItems.Where(i => i.PlaceType == ItemType.Entertainment).Take(request.MaxEntertainments).Select(i => i.ToResponse()).ToList(),
-            TourismAreas = selectedItems.Where(i => i.PlaceType == ItemType.TourismArea).Take(request.MaxTourismAreas).Select(i => i.ToResponse()).ToList()
+            Restaurants = selectedItems.Where(i => i.PlaceType == ItemType.Restaurant)
+                .Take(request.MaxRestaurants).Select(i => i.ToResponse()).ToList(),
+            Entertainments = selectedItems.Where(i => i.PlaceType == ItemType.Entertainment)
+                .Take(request.MaxEntertainments).Select(i => i.ToResponse()).ToList(),
+            TourismAreas = selectedItems.Where(i => i.PlaceType == ItemType.TourismArea)
+                .Take(request.MaxTourismAreas).Select(i => i.ToResponse()).ToList()
         };
 
         return new Respond<TripPlanResponse>
@@ -43,13 +47,13 @@ public class TripPlanOptimizer
             Succeeded = true,
             Message = "Trip plan optimized successfully",
             Data = tripPlanResponse,
-            Meta = new { TotalItems = selectedItems.Count }
+            Meta = new { TotalItems = selectedItems.Count, TotalSolutions = allSolutions.Count }
         };
     }
 
     private (int accommodation, int food, int entertainment, int tourism) CalculatePriorities(Queue<string> interests)
     {
-        int maxPriority = interests.Count; // أعلى أولوية هي عدد العناصر
+        int maxPriority = interests.Count;
         int accommodationPriority = 0, foodPriority = 0, entertainmentPriority = 0, tourismPriority = 0;
 
         while (interests.Count > 0)
@@ -57,28 +61,16 @@ public class TripPlanOptimizer
             var interest = interests.Dequeue();
             switch (interest.ToLower())
             {
-                case "accommodation":
-                    accommodationPriority = maxPriority--;
-                    break;
-                case "restaurants":
-                case "food":
-                    foodPriority = maxPriority--;
-                    break;
-                case "entertainments":
-                case "entertainment":
-                    entertainmentPriority = maxPriority--;
-                    break;
-                case "tourismareas":
-                case "tourism":
-                    tourismPriority = maxPriority--;
-                    break;
+                case "accommodation": accommodationPriority = maxPriority--; break;
+                case "restaurants": case "food": foodPriority = maxPriority--; break;
+                case "entertainments": case "entertainment": entertainmentPriority = maxPriority--; break;
+                case "tourismareas": case "tourism": tourismPriority = maxPriority--; break;
             }
         }
 
         return (accommodationPriority, foodPriority, entertainmentPriority, tourismPriority);
     }
 }
-
 
 // HELPER CLASSES
 public record TripPlanRequest(

@@ -3,6 +3,7 @@ using TripMinder.API.Bases;
 using TripMinder.Core.Behaviors.Knapsack;
 using TripMinder.Data.AppMetaData;
 using System.ComponentModel.DataAnnotations;
+using Microsoft.Extensions.Logging; // لو عايز Logging
 
 namespace TripMinder.API.Controllers;
 
@@ -38,20 +39,23 @@ public record TripPlanRequestDto(
     [Range(0, int.MaxValue, ErrorMessage = "MaxTourismAreas must be non-negative")]
     int MaxTourismAreas);
 
-
 [ApiController]
 public class TripSuggesterController : AppControllerBase
 {
     private readonly TripPlanOptimizer _optimizer;
+    private readonly ILogger<TripSuggesterController> _logger; // إضافة Logger
 
-    public TripSuggesterController(TripPlanOptimizer optimizer)
+    public TripSuggesterController(TripPlanOptimizer optimizer, ILogger<TripSuggesterController> logger)
     {
         this._optimizer = optimizer;
+        this._logger = logger;
     }
 
     [HttpPost(Router.TripSuggestionnerRouting.OptimizeTrip)]
     public async Task<IActionResult> OptimizeTrip([FromBody] TripPlanRequestDto requestDto)
     {
+        _logger.LogInformation("Received trip optimization request: {@Request}", requestDto);
+
         var interestsQueue = new Queue<string>(requestDto.Interests);
         var request = new TripPlanRequest(
             requestDto.ZoneId,
@@ -65,8 +69,21 @@ public class TripSuggesterController : AppControllerBase
         );
 
         var response = await _optimizer.OptimizePlan(request);
-        return response.Succeeded 
-            ? Ok(response) 
-            : BadRequest(new { response.Message, response.Errors });
+
+        if (response.Succeeded)
+        {
+            // تحقق إضافي لو عايز تتاكد إن الـ Response فيه بيانات كافية
+            if (response.Data.Accommodation == null || 
+                !response.Data.Restaurants.Any() || 
+                !response.Data.Entertainments.Any() || 
+                !response.Data.TourismAreas.Any())
+            {
+                _logger.LogWarning("Response is incomplete: {@Response}", response);
+            }
+            return Ok(response);
+        }
+
+        _logger.LogError("Optimization failed: {Message}, Errors: {@Errors}", response.Message, response.Errors);
+        return BadRequest(new { response.Message, response.Errors });
     }
 }

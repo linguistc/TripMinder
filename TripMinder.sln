@@ -13,6 +13,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TripMinder.Service", "TripM
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TripMinder.Data", "TripMinder.Data\TripMinder.Data.csproj", "{2413245F-E380-4E19-AE20-4BBC61F08D7A}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TripMinder.Core.Tests", "TripMinder.Core.Tests\TripMinder.Core.Tests.csproj", "{87B404E6-1BEB-4979-9C35-CFC9693E4D91}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -39,6 +41,10 @@ Global
 		{2413245F-E380-4E19-AE20-4BBC61F08D7A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2413245F-E380-4E19-AE20-4BBC61F08D7A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2413245F-E380-4E19-AE20-4BBC61F08D7A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{87B404E6-1BEB-4979-9C35-CFC9693E4D91}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{87B404E6-1BEB-4979-9C35-CFC9693E4D91}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{87B404E6-1BEB-4979-9C35-CFC9693E4D91}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{87B404E6-1BEB-4979-9C35-CFC9693E4D91}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
