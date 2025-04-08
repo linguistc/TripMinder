@@ -2,26 +2,47 @@ namespace TripMinder.Core.Behaviors.Knapsack;
 
 public class ProfitFinder : IProfitFinder
 {
-    private const int MaxRestaurants = 3;
-    private const int MaxAccommodations = 1;
-    private const int MaxEntertainments = 3;
-    private const int MaxTourismAreas = 3;
+    private readonly IKnapsackConstraints _constraints;
+
+    public ProfitFinder(IKnapsackConstraints constraints)
+    {
+        _constraints = constraints;
+    }
 
     public (float maxProfit, int r, int a, int e, int t) FindMaxProfit(float[,,,,] dp, int budget)
     {
-        float maxProfit = 0;
-        int finalR = 0, finalA = 0, finalE = 0, finalT = 0;
-        for (int r = 0; r <= MaxRestaurants; r++)
-        for (int a = 0; a <= MaxAccommodations; a++)
-        for (int e = 0; e <= MaxEntertainments; e++)
-        for (int t = 0; t <= MaxTourismAreas; t++)
-        {
-            if (dp[budget, r, a, e, t] > maxProfit)
-            {
-                maxProfit = dp[budget, r, a, e, t];
-                finalR = r; finalA = a; finalE = e; finalT = t;
-            }
-        }
-        return (maxProfit, finalR, finalA, finalE, finalT);
+        var combinations = from r in Enumerable.Range(0, _constraints.MaxRestaurants + 1)
+            from a in Enumerable.Range(0, _constraints.MaxAccommodations + 1)
+            from e in Enumerable.Range(0, _constraints.MaxEntertainments + 1)
+            from t in Enumerable.Range(0, _constraints.MaxTourismAreas + 1)
+            select (r, a, e, t, profit: dp[budget, r, a, e, t]);
+
+        var best = combinations.OrderByDescending(x => x.profit).First();
+        return (best.profit, best.r, best.a, best.e, best.t);
     }
 }
+
+// Using LINQ but low performance bcz of Overhead
+/*
+public class ProfitFinder : IProfitFinder
+{
+    private readonly IKnapsackConstraints _constraints;
+
+    public ProfitFinder(IKnapsackConstraints constraints)
+    {
+        _constraints = constraints;
+    }
+
+    public (float maxProfit, int r, int a, int e, int t) FindMaxProfit(float[,,,,] dp, int budget)
+    {
+        var combinations = from r in Enumerable.Range(0, _constraints.MaxRestaurants + 1)
+                          from a in Enumerable.Range(0, _constraints.MaxAccommodations + 1)
+                          from e in Enumerable.Range(0, _constraints.MaxEntertainments + 1)
+                          from t in Enumerable.Range(0, _constraints.MaxTourismAreas + 1)
+                          select (r, a, e, t, profit: dp[budget, r, a, e, t]);
+
+        var best = combinations.OrderByDescending(x => x.profit).First();
+        return (best.profit, best.r, best.a, best.e, best.t);
+    }
+} 
+*/

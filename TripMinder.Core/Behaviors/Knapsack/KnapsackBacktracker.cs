@@ -2,8 +2,15 @@ namespace TripMinder.Core.Behaviors.Knapsack;
 
 public class KnapsackBacktracker : IKnapsackBacktracker
 {
-    public void BacktrackAllSolutions(
-        KnapsackState state)
+    private readonly List<Item> _items;
+    private readonly bool[,,,,,] _decision;
+    private readonly IItemFetcher _itemFetcher;
+
+    public KnapsackBacktracker()
+    {
+        
+    }
+    public void BacktrackAllSolutions(KnapsackState state)
     {
         if (state.Budget <= 0 || state.Index < 0 || 
             (state.Restaurants == 0 && state.Accommodations == 0 && state.Entertainments == 0 && state.TourismAreas == 0))

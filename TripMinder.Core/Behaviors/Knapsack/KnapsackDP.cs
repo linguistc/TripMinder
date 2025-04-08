@@ -2,20 +2,18 @@ namespace TripMinder.Core.Behaviors.Knapsack;
 
 public class KnapsackDP : IKnapsackDP
 {
-    private const int MaxRestaurants = 3;
-    private const int MaxAccommodations = 1;
-    private const int MaxEntertainments = 3;
-    private const int MaxTourismAreas = 3;
-
     private readonly IDynamicProgrammingCalculator _calculator;
+    private readonly IKnapsackConstraints _constraints;
     
-    public KnapsackDP(IDynamicProgrammingCalculator calculator)
+    public KnapsackDP(IDynamicProgrammingCalculator calculator, IKnapsackConstraints constraints)
     {
         this._calculator = calculator;
+        this._constraints = constraints;
     }
     
     public (float[,,,,] dp, bool[,,,,,] decision) CalculateDP(int budget, List<Item> items)
     {
-        return this._calculator.Calculate(budget, items, MaxRestaurants, MaxAccommodations, MaxEntertainments, MaxTourismAreas);
+        return this._calculator.Calculate(budget, items, this._constraints.MaxRestaurants, this._constraints.MaxAccommodations, 
+            this._constraints.MaxEntertainments, this._constraints.MaxTourismAreas);
     }
 }

@@ -2,19 +2,22 @@ namespace TripMinder.Core.Behaviors.Knapsack;
 
 public class KnapsackSolver : IKnapsackSolver
 {
-    private readonly KnapsackDP _dpCalculator;
-    private readonly KnapsackBacktracker _backtracker;
+    private readonly IKnapsackDP _dpCalculator;
+    private readonly IKnapsackBacktracker _backtracker;
     private readonly IProfitFinder _profitFinder;
 
-    public KnapsackSolver(KnapsackDP dpCalculator, KnapsackBacktracker backtracker, IProfitFinder profitFinder)
+    public KnapsackSolver(IKnapsackDP dpCalculator, IKnapsackBacktracker backtracker, IProfitFinder profitFinder)
     {
         this._dpCalculator = dpCalculator;
         this._backtracker = backtracker;
         this._profitFinder = profitFinder;
     }
 
-    public (float maxProfit, List<Item> selectedItems) GetMaxProfit(int budget, List<Item> items)
+    public (float maxProfit, List<Item> selectedItems) GetMaxProfit(int budget, List<Item> items, IKnapsackConstraints constraints)
     {
+        if (budget < 0) throw new ArgumentException("Budget cannot be negative.");
+        if (items == null || !items.Any()) throw new ArgumentException("Items list cannot be null or empty.");
+        
         var (dp, decision) = this._dpCalculator.CalculateDP(budget, items);
         var (maxProfit, finalR, finalA, finalE, finalT) = this._profitFinder.FindMaxProfit(dp, budget);
         var state = new KnapsackState(budget, finalR, finalA, finalE, finalT, items.Count - 1, items, decision, new List<Item>());
@@ -22,7 +25,7 @@ public class KnapsackSolver : IKnapsackSolver
         return (maxProfit, selectedItems);
     }
     
-    public (float maxProfit, List<List<Item>> allSelectedItems) GetMaxProfitMultiple(int budget, List<Item> items)
+    public (float maxProfit, List<List<Item>> allSelectedItems) GetMaxProfitMultiple(int budget, List<Item> items, IKnapsackConstraints constraints)
     {
         var (dp, decision) = this._dpCalculator.CalculateDP(budget, items);
         var (maxProfit, finalR, finalA, finalE, finalT) = this._profitFinder.FindMaxProfit(dp, budget);

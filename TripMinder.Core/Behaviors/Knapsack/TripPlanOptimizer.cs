@@ -1,8 +1,4 @@
 using MediatR;
-using TripMinder.Core.Features.Accomodataions.Queries.Models;
-using TripMinder.Core.Features.Entertainments.Queries.Models;
-using TripMinder.Core.Features.Restaurants.Queries.Models;
-using TripMinder.Core.Features.TourismAreas.Queries.Models;
 using TripMinder.Core.Bases;
 
 namespace TripMinder.Core.Behaviors.Knapsack;
@@ -13,7 +9,7 @@ public class TripPlanOptimizer
     private readonly IKnapsackSolver _solver;
     private readonly IItemFetcher _itemFetcher;
 
-    public TripPlanOptimizer(IMediator mediator, IKnapsackSolver solver, ItemFetcher itemFetcher)
+    public TripPlanOptimizer(IMediator mediator, IKnapsackSolver solver, IItemFetcher itemFetcher)
     {
         this._mediator = mediator;
         this._solver = solver;
@@ -23,24 +19,29 @@ public class TripPlanOptimizer
     public async Task<Respond<TripPlanResponse>> OptimizePlan(TripPlanRequest request)
     {
         var priorities = CalculatePriorities(request.Interests);
-        var allItems = await this._itemFetcher.FetchItems(request.ZoneId, priorities, _mediator);
-        
-        var totalBudget = (int)request.BudgetPerAdult;
-        var (maxProfit, selectedItems) = this._solver.GetMaxProfit((int)totalBudget, allItems);
+        var allItems = await _itemFetcher.FetchItems(request.ZoneId, priorities, _mediator);
+        var totalBudget = (int)(request.BudgetPerAdult * request.NumberOfTravelers);
 
-        // تحويل النتيجة لـ Response
+        var constraints = new UserDefinedKnapsackConstraints(
+            request.MaxRestaurants,
+            request.MaxAccommodations,
+            request.MaxEntertainments,
+            request.MaxTourismAreas);
+        
+        var (maxProfit, selectedItems) = _solver.GetMaxProfit(totalBudget, allItems, constraints);
+
         var tripPlanResponse = new TripPlanResponse
         {
             Accommodation = selectedItems.FirstOrDefault(i => i.PlaceType == ItemType.Accommodation)?.ToResponse(),
-            Restaurants = selectedItems.Where(i => i.PlaceType == ItemType.Restaurant).Take(3).Select(i => i.ToResponse()).ToList(),
-            Entertainments = selectedItems.Where(i => i.PlaceType == ItemType.Entertainment).Take(3).Select(i => i.ToResponse()).ToList(),
-            TourismAreas = selectedItems.Where(i => i.PlaceType == ItemType.TourismArea).Take(3).Select(i => i.ToResponse()).ToList()
+            Restaurants = selectedItems.Where(i => i.PlaceType == ItemType.Restaurant).Take(request.MaxRestaurants).Select(i => i.ToResponse()).ToList(),
+            Entertainments = selectedItems.Where(i => i.PlaceType == ItemType.Entertainment).Take(request.MaxEntertainments).Select(i => i.ToResponse()).ToList(),
+            TourismAreas = selectedItems.Where(i => i.PlaceType == ItemType.TourismArea).Take(request.MaxTourismAreas).Select(i => i.ToResponse()).ToList()
         };
 
         return new Respond<TripPlanResponse>
         {
             Succeeded = true,
-            Message = "Trip plan optimized Succeededfully",
+            Message = "Trip plan optimized successfully",
             Data = tripPlanResponse,
             Meta = new { TotalItems = selectedItems.Count }
         };
@@ -80,8 +81,15 @@ public class TripPlanOptimizer
 
 
 // HELPER CLASSES
-public record TripPlanRequest(int ZoneId, double BudgetPerAdult, int NumberOfTravelers, Queue<string> Interests);
-
+public record TripPlanRequest(
+    int ZoneId, 
+    double BudgetPerAdult, 
+    int NumberOfTravelers, 
+    Queue<string> Interests, 
+    int MaxRestaurants, 
+    int MaxAccommodations, 
+    int MaxEntertainments, 
+    int MaxTourismAreas);
 public record TripPlanResponse
 {
     public ItemResponse Accommodation { get; init; }
