@@ -28,6 +28,7 @@
             public const string Prefix = Rule + "accommodation/";
             public const string List = Prefix + "list/";
             public const string GetById = Prefix + SingleRouter;
+            public const string ListByZoneId = Prefix + "zone/{zoneId}/";
             public const string Create = Prefix + "create/";
             public const string Update = Prefix + "Update/";
             public const string Delete = Prefix + SingleRouter;
@@ -168,6 +169,17 @@
                 public const string Paginate = Prefix + "paginate/";
             }
         
+        #endregion
+
+        #region TripSuggestionner Routing
+        
+        public class TripSuggestionnerRouting
+        {
+            public const string Prefix = Rule + "tripsuggestionner/";
+            public const string OptimizeTrip = Prefix + "optimize/";
+        }
+        
+
         #endregion
     }
 }

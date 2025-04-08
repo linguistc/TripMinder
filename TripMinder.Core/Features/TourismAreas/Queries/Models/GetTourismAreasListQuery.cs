@@ -4,7 +4,7 @@ using TripMinder.Core.Features.TourismAreas.Queries.Responses;
 
 namespace TripMinder.Core.Features.TourismAreas.Queries.Models
 {
-    public class GetAllTourismAreasQuery : IRequest<Respond<List<GetTourismAreasListResponse>>>
+    public class GetTourismAreasListQuery : IRequest<Respond<List<GetTourismAreasListResponse>>>
     {
     }
 }

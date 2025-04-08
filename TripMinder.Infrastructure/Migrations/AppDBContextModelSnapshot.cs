@@ -80,6 +80,9 @@ namespace TripMinder.Infrastructure.Migrations
                     b.Property<double>("Rating")
                         .HasColumnType("float");
 
+                    b.Property<float>("Score")
+                        .HasColumnType("real");
+
                     b.Property<int?>("TripSuggestionId")
                         .HasColumnType("int");
 
@@ -299,6 +302,9 @@ namespace TripMinder.Infrastructure.Migrations
                     b.Property<double>("Rating")
                         .HasColumnType("float");
 
+                    b.Property<float>("Score")
+                        .HasColumnType("real");
+
                     b.Property<int?>("TripSuggestionId")
                         .HasColumnType("int");
 
@@ -479,6 +485,9 @@ namespace TripMinder.Infrastructure.Migrations
                     b.Property<double>("Rating")
                         .HasColumnType("float");
 
+                    b.Property<float>("Score")
+                        .HasColumnType("real");
+
                     b.Property<int?>("TripSuggestionId")
                         .HasColumnType("int");
 
@@ -587,6 +596,9 @@ namespace TripMinder.Infrastructure.Migrations
 
                     b.Property<double>("Rating")
                         .HasColumnType("float");
+
+                    b.Property<float>("Score")
+                        .HasColumnType("real");
 
                     b.Property<int>("TourismTypeId")
                         .HasColumnType("int");

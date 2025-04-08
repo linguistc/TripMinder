@@ -23,7 +23,7 @@ namespace TripMinder.Infrastructure.Repositories
         #endregion
 
         #region Functions
-        public async Task<List<Entertainment>> GetAllEntertainmentsAsync()
+        public async Task<List<Entertainment>> GetEntertainmentsListAsync()
         {
 
             var result = await this.entertainments.Include(r => r.EntertainmentType)
@@ -33,6 +33,28 @@ namespace TripMinder.Infrastructure.Repositories
                                          .ToListAsync();
 
             return result;
+        }
+
+        public async Task<List<Entertainment>> GetEntertainmentsListByZoneIdAsync(int zoneId, CancellationToken cancellationToken = default)
+        {
+            return await this.entertainments
+                .Include(r => r.EntertainmentType)
+                                         .Include(r => r.Zone)
+                                         .Include(r => r.Class)
+                                         .Include(r => r.PlaceType)
+                                         .Where(r => r.ZoneId == zoneId)
+                                         .ToListAsync(cancellationToken);
+        }
+
+        public async Task<List<Entertainment>> GetEntertainmentsListByGovernorateIdAsync(int governorateId, CancellationToken cancellationToken = default)
+        {
+            return await this.entertainments
+                .Include(r => r.EntertainmentType)
+                .Include(r => r.Zone)
+                .Include(r => r.Class)
+                .Include(r => r.PlaceType)
+                .Where(r => r.GovernorateId == governorateId)
+                .ToListAsync(cancellationToken);
         }
 
         #endregion

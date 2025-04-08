@@ -24,9 +24,19 @@ namespace TripMinder.Service.Implementations
         #endregion
 
         #region Functions
-        public async Task<List<Restaurant>> GetAllRestaurantsAsync()
+        public async Task<List<Restaurant>> GetRestaurantsListAsync()
         {
-            return await repository.GetAllRestaurantsAsync();
+            return await repository.GetRestaurantsListAsync();
+        }
+
+        public async Task<List<Restaurant>> GetRestaurantsListByZoneIdAsync(int zoneId, CancellationToken cancellationToken = default)
+        {
+            return await repository.GetRestaurantsListByZoneIdAsync(zoneId, cancellationToken);
+        }
+
+        public async Task<List<Restaurant>> GetRestaurantsListByGovernorateIdAsync(int governorateId, CancellationToken cancellationToken = default)
+        {
+            return await repository.GetRestaurantsListByGovernorateIdAsync(governorateId, cancellationToken);
         }
 
         public async Task<Restaurant> GetRestaurantByIdWithIncludeAsync(int id)

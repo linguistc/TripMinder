@@ -2,6 +2,7 @@
 using MediatR;
 using Microsoft.Extensions.Localization;
 using TripMinder.Core.Bases;
+using TripMinder.Core.Behaviors;
 using TripMinder.Core.Features.Accomodataions.Queries.Models;
 using TripMinder.Core.Features.Accomodataions.Queries.Responses;
 using TripMinder.Service.Contracts;
@@ -12,6 +13,8 @@ namespace TripMinder.Core.Features.Accomodataions.Queries.Hanlders
     public class AccomodationQueryHandler : RespondHandler
                                          , IRequestHandler<GetAccomodationByIdQuery, Respond<GetAccomodationByIdResponse>>
                                          , IRequestHandler<GetAccomodationsListQuery, Respond<List<GetAccomodationsListResponse>>>
+                                         , IRequestHandler<GetAccomodationsListByGovernorateIdQuery, Respond<List<GetAccomodationsListResponse>>>
+                                         , IRequestHandler<GetAccomodationsListByZoneIdQuery, Respond<List<GetAccomodationsListResponse>>>
     {
         #region Fields
         private readonly IAccomodationService service;
@@ -55,7 +58,36 @@ namespace TripMinder.Core.Features.Accomodataions.Queries.Hanlders
 
             return result;
         }
+        public async Task<Respond<List<GetAccomodationsListResponse>>> Handle(GetAccomodationsListByZoneIdQuery request, CancellationToken cancellationToken)
+        {
+            var accomodationList = await this.service.GetAccomodationsListByZoneIdAsync(request.ZoneId, cancellationToken);
+            
+            accomodationList.ForEach(a => a.Score = CalculateScoreBehavior.CalculateScore(a.Class.Type, request.Priority));
+
+            var accomodationMapper = this.mapper.Map<List<GetAccomodationsListResponse>>(accomodationList);
+
+            var result = Success(accomodationMapper);
+
+            result.Meta = new { Count = accomodationMapper.Count };
+
+            return result;
+        }
+        public async Task<Respond<List<GetAccomodationsListResponse>>> Handle(GetAccomodationsListByGovernorateIdQuery request, CancellationToken cancellationToken)
+        {
+            var accomodationList = await this.service.GetAccomodationsListByGovernorateIdAsync(request.GovernorateId, cancellationToken);
+            
+            accomodationList.ForEach(a => a.Score = CalculateScoreBehavior.CalculateScore(a.Class.Type, request.Priority));
+            
+            var accomodationMapper = this.mapper.Map<List<GetAccomodationsListResponse>>(accomodationList);
+
+            var result = Success(accomodationMapper);
+
+            result.Meta = new { Count = accomodationMapper.Count };
+
+            return result;
+        }
 
         #endregion
+        
     }
 }

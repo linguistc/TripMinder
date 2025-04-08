@@ -9,6 +9,8 @@ namespace TripMinder.Core.Features.TourismAreas.Queries.Responses
         public string Description { get; set; }
         public string ClassType { get; set; }
         public string Zone { get; set; }
+        public string Governorate { get; set; }
+        public double Rating { get; set; }
         public double AveragePricePerAdult { get; set; }
         public string TourismType { get; set; }
         public bool HasKidsArea { get; set; }
@@ -19,6 +21,8 @@ namespace TripMinder.Core.Features.TourismAreas.Queries.Responses
         
         public string? ImageSource { get; set; }
         public string PlaceType { get; set; }
+        
+        public float Score { get; set; }
 
     }
 }

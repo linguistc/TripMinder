@@ -9,6 +9,8 @@
         public string AccomodationType { get; set; }
         public string ClassType { get; set; }
         public string Zone { get; set; }
+        public string Governorate { get; set; }
+        public double Rating { get; set; }
         public string PlaceType { get; set; }
         public double AveragePricePerAdult { get; set; }
         public bool HasKidsArea { get; set; }
@@ -26,6 +28,7 @@
         public int NumOfBeds { get; set; }
         public string? BedStatus { get; set; }
         public int NumOfPersons { get; set; }
+        public float Score { get; set; }
     }
     
     

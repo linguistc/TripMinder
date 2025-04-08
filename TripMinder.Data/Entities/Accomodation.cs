@@ -62,8 +62,9 @@ namespace TripMinder.Data.Entities
         public int NumOfBeds { get; set; } = 1;
         
         public string? BedStatus { get; set; }
-        public int NumOfMembers { get; set; } = 1;   
-
+        public int NumOfMembers { get; set; } = 1;
+        
+        public float Score { get; set; }
     }
     
 }

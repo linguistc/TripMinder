@@ -14,6 +14,14 @@ namespace TripMinder.API.Controllers
             var response = await Mediator.Send(new GetAccomodationsListQuery());
             return Ok(response);
         }
+        
+        [HttpGet(Router.AccomodationRouting.ListByZoneId)]
+        public async Task<IActionResult> GetAccommodationListByZoneIdAsync([FromRoute]int zoneId, [FromQuery]int? priority = 0)
+        {
+            var query = new GetAccomodationsListByZoneIdQuery(zoneId, priority ?? 0);
+            var response = await Mediator.Send(query);
+            return Ok(response);
+        }
 
         [HttpGet(Router.AccomodationRouting.GetById)]
         public async Task<IActionResult> GetAccommodationById(int id)

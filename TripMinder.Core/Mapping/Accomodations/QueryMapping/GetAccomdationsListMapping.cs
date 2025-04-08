@@ -20,6 +20,12 @@ namespace TripMinder.Core.Mapping.Accomodations
                     options => options.MapFrom(src => src.Class.Type))
                 .ForMember(dest => dest.Zone, 
                     options => options.MapFrom(src => src.Zone.Name ))
+                .ForMember(dest => dest.Governorate, 
+                    options => options.MapFrom(src => src.Zone.Governorate.Name))
+                .ForMember(dest => dest.Rating,
+                    options => options.MapFrom(src => src.Rating))
+                .ForMember(dest => dest.Score,
+                    options => options.MapFrom(src => src.Score))
                 .ForMember(dest => dest.PlaceType, 
                     options => options.MapFrom(src => src.PlaceType.Type))
                 .ForMember(dest => dest.AveragePricePerAdult, 

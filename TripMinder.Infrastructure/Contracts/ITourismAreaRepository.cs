@@ -7,5 +7,7 @@ namespace TripMinder.Infrastructure.Contracts
     {
         public Task<List<TourismArea>> GetAllTourismAreasAsync();
 
+        public Task<List<TourismArea>> GetTourismAreasByZoneIdAsync(int zoneId, CancellationToken cancellationToken = default);
+        public Task<List<TourismArea>> GetTourismAreasByGovernorateIdAsync(int governorateId, CancellationToken cancellationToken = default);
     }
 }
