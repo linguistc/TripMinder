@@ -6,7 +6,7 @@ My graduation project, a RESTful Web API for generating personalized travel itin
 
 ## Features
 - **Backend**: Built with C#, .NET Core, RESTful APIs, and Entity Framework.
-- **Algorithm**: Innovative 5D dynamic programming for efficient itinerary planning.
+- **Algorithm**: Innovative 5D dynamic programming, implemented following established design principles for efficient itinerary planning.
 - **Database**: Normalized SQL database with relational integrity.
 - **Architecture**: CQRS pattern for scalability, maintainability, and performance.
 - **Testing**: Unit tests to ensure reliability.
