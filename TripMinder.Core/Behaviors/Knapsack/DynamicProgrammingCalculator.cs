@@ -13,7 +13,7 @@ public class DynamicProgrammingCalculator : IDynamicProgrammingCalculator
             int cost = (int)item.AveragePricePerAdult;
 
             for (int w = budget; w >= cost; w--)
-            for (int r = maxR; r >= 0; r--) // من maxR لـ 0
+            for (int r = maxR; r >= 0; r--)
             for (int a = maxA; a >= 0; a--)
             for (int e = maxE; e >= 0; e--)
             for (int t = maxT; t >= 0; t--)

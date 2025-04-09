@@ -11,9 +11,9 @@ public class TripPlanOptimizer
 
     public TripPlanOptimizer(IMediator mediator, IKnapsackSolver solver, IItemFetcher itemFetcher)
     {
-        this._mediator = mediator;
-        this._solver = solver;
-        this._itemFetcher = itemFetcher;
+        _mediator = mediator;
+        _solver = solver;
+        _itemFetcher = itemFetcher;
     }
 
     public async Task<Respond<TripPlanResponse>> OptimizePlan(TripPlanRequest request)
@@ -28,10 +28,44 @@ public class TripPlanOptimizer
             request.MaxEntertainments,
             request.MaxTourismAreas);
 
-        var (maxProfit, allSolutions) = _solver.GetMaxProfitMultiple(totalBudget, allItems, constraints);
-        var selectedItems = allSolutions.FirstOrDefault() ?? _solver.GetMaxProfit(totalBudget, allItems, constraints).selectedItems;
+        var (maxProfit, selectedItems) = _solver.GetMaxProfit(totalBudget, allItems, constraints, priorities);
+        var tripPlanResponse = BuildTripPlanResponse(selectedItems, request);
+        return new Respond<TripPlanResponse>
+        {
+            Succeeded = true,
+            Message = "Trip plan optimized successfully",
+            Data = tripPlanResponse,
+            Meta = new { TotalItems = selectedItems.Count, TotalSolutions = 1 }
+        };
+    }
 
-        var tripPlanResponse = new TripPlanResponse
+    public async Task<Respond<List<TripPlanResponse>>> OptimizePlanMultiple(TripPlanRequest request)
+    {
+        var priorities = CalculatePriorities(request.Interests);
+        var allItems = await _itemFetcher.FetchItems(request.ZoneId, priorities, _mediator);
+        var totalBudget = (int)(request.BudgetPerAdult * request.NumberOfTravelers);
+
+        var constraints = new UserDefinedKnapsackConstraints(
+            request.MaxRestaurants,
+            request.MaxAccommodations,
+            request.MaxEntertainments,
+            request.MaxTourismAreas);
+
+        var (maxProfit, allSolutions) = _solver.GetMaxProfitMultiple(totalBudget, allItems, constraints, priorities);
+        var tripPlans = allSolutions.Select(items => BuildTripPlanResponse(items, request)).ToList();
+
+        return new Respond<List<TripPlanResponse>>
+        {
+            Succeeded = true,
+            Message = "Trip plans optimized successfully",
+            Data = tripPlans,
+            Meta = new { TotalItems = tripPlans.Sum(p => p.Restaurants.Count + p.Entertainments.Count + p.TourismAreas.Count + (p.Accommodation != null ? 1 : 0)), TotalSolutions = allSolutions.Count }
+        };
+    }
+
+    private TripPlanResponse BuildTripPlanResponse(List<Item> selectedItems, TripPlanRequest request)
+    {
+        return new TripPlanResponse
         {
             Accommodation = selectedItems.FirstOrDefault(i => i.PlaceType == ItemType.Accommodation)?.ToResponse(),
             Restaurants = selectedItems.Where(i => i.PlaceType == ItemType.Restaurant)
@@ -40,14 +74,6 @@ public class TripPlanOptimizer
                 .Take(request.MaxEntertainments).Select(i => i.ToResponse()).ToList(),
             TourismAreas = selectedItems.Where(i => i.PlaceType == ItemType.TourismArea)
                 .Take(request.MaxTourismAreas).Select(i => i.ToResponse()).ToList()
-        };
-
-        return new Respond<TripPlanResponse>
-        {
-            Succeeded = true,
-            Message = "Trip plan optimized successfully",
-            Data = tripPlanResponse,
-            Meta = new { TotalItems = selectedItems.Count, TotalSolutions = allSolutions.Count }
         };
     }
 
@@ -71,6 +97,7 @@ public class TripPlanOptimizer
         return (accommodationPriority, foodPriority, entertainmentPriority, tourismPriority);
     }
 }
+
 
 // HELPER CLASSES
 public record TripPlanRequest(

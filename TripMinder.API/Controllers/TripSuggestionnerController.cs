@@ -51,7 +51,7 @@ public class TripSuggesterController : AppControllerBase
         this._logger = logger;
     }
 
-    [HttpPost(Router.TripSuggestionnerRouting.OptimizeTrip)]
+    [HttpPost(Router.TripSuggesterRouting.OptimizeTrip)]
     public async Task<IActionResult> OptimizeTrip([FromBody] TripPlanRequestDto requestDto)
     {
         _logger.LogInformation("Received trip optimization request: {@Request}", requestDto);
