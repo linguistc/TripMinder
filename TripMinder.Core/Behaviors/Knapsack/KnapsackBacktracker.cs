@@ -78,6 +78,80 @@ public class KnapsackBacktracker : IKnapsackBacktracker
         int maxE = state.Items.Any(i => i.PlaceType == ItemType.Entertainment) ? 2 : 0;
         int maxT = state.Items.Any(i => i.PlaceType == ItemType.TourismArea) ? 1 : 0;
 
+        var priorityOrder = new List<(ItemType Type, int Priority)>();
+        if (state.Priorities.HasValue)
+        {
+            if (state.Priorities.Value.a > 0) priorityOrder.Add((ItemType.Accommodation, state.Priorities.Value.a));
+            if (state.Priorities.Value.f > 0) priorityOrder.Add((ItemType.Restaurant, state.Priorities.Value.f));
+            if (state.Priorities.Value.e > 0) priorityOrder.Add((ItemType.Entertainment, state.Priorities.Value.e));
+            if (state.Priorities.Value.t > 0) priorityOrder.Add((ItemType.TourismArea, state.Priorities.Value.t));
+        }
+        priorityOrder = priorityOrder.OrderByDescending(p => p.Priority).ToList();
+
+        // المرحلة الأولى: ضمان تغطية الـ Interests
+        foreach (var (type, _) in priorityOrder)
+        {
+            var availableItems = state.Items.Where(i => i.PlaceType == type && i.AveragePricePerAdult <= currentBudget && !usedItemIds.Contains(i.Id))
+                .OrderByDescending(i => i.Score / i.AveragePricePerAdult).ToList();
+            if (availableItems.Any())
+            {
+                var bestItem = availableItems.First();
+                selectedItems.Add(bestItem);
+                usedItemIds.Add(bestItem.Id);
+                currentBudget -= (int)bestItem.AveragePricePerAdult;
+                if (bestItem.PlaceType == ItemType.Restaurant) currentR++;
+                if (bestItem.PlaceType == ItemType.Accommodation) currentA++;
+                if (bestItem.PlaceType == ItemType.Entertainment) currentE++;
+                if (bestItem.PlaceType == ItemType.TourismArea) currentT++;
+            }
+        }
+
+        // المرحلة الثانية: استخدام الـ DP لاستغلال الـ Budget المتبقي
+        for (int i = state.Items.Count - 1; i >= 0 && currentBudget > 0; i--)
+        {
+            if (state.Decision[currentBudget, currentR, currentA, currentE, currentT, i])
+            {
+                var selectedItem = state.Items[i];
+                if (!usedItemIds.Contains(selectedItem.Id))
+                {
+                    int cost = (int)selectedItem.AveragePricePerAdult;
+                    if (cost <= currentBudget &&
+                        ((selectedItem.PlaceType == ItemType.Restaurant && currentR < maxR) ||
+                         (selectedItem.PlaceType == ItemType.Accommodation && currentA < maxA) ||
+                         (selectedItem.PlaceType == ItemType.Entertainment && currentE < maxE) ||
+                         (selectedItem.PlaceType == ItemType.TourismArea && currentT < maxT)))
+                    {
+                        selectedItems.Add(selectedItem);
+                        usedItemIds.Add(selectedItem.Id);
+                        currentBudget -= cost;
+                        currentR += selectedItem.PlaceType == ItemType.Restaurant ? 1 : 0;
+                        currentA += selectedItem.PlaceType == ItemType.Accommodation ? 1 : 0;
+                        currentE += selectedItem.PlaceType == ItemType.Entertainment ? 1 : 0;
+                        currentT += selectedItem.PlaceType == ItemType.TourismArea ? 1 : 0;
+                    }
+                }
+            }
+        }
+
+        return selectedItems;
+    }
+    
+    
+    /*
+    public List<Item> BacktrackSingleSolution(KnapsackState state)
+    {
+        var selectedItems = new List<Item>();
+        var currentBudget = state.Budget;
+        var currentR = 0;
+        var currentA = 0;
+        var currentE = 0;
+        var currentT = 0;
+        var usedItemIds = new HashSet<int>();
+        int maxR = state.Items.Any(i => i.PlaceType == ItemType.Restaurant) ? 4 : 0;
+        int maxA = state.Items.Any(i => i.PlaceType == ItemType.Accommodation) ? 1 : 0;
+        int maxE = state.Items.Any(i => i.PlaceType == ItemType.Entertainment) ? 2 : 0;
+        int maxT = state.Items.Any(i => i.PlaceType == ItemType.TourismArea) ? 1 : 0;
+
         // ترتيب الأنواع بناءً على الأولويات
         var priorityOrder = new List<(ItemType Type, int Priority)>();
         if (state.Priorities.HasValue)
@@ -138,4 +212,5 @@ public class KnapsackBacktracker : IKnapsackBacktracker
 
         return selectedItems;
     }
+    */
 }
