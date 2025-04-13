@@ -22,8 +22,14 @@ public class TripSuggesterMultipleController : AppControllerBase
     {
         _logger.LogInformation("Received multiple trip optimization request: {@Request}", requestDto);
 
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(ModelState);
+        }
+        
         var interestsQueue = new Queue<string>(requestDto.Interests);
         var request = new TripPlanRequest(
+            requestDto.GovernorateId,
             requestDto.ZoneId,
             requestDto.BudgetPerAdult,
             requestDto.NumberOfTravelers,

@@ -10,7 +10,10 @@ namespace TripMinder.API.Controllers;
 public record TripPlanRequestDto(
     [Required]
     [Range(1, int.MaxValue)]
-    int ZoneId, 
+    int GovernorateId,
+
+    [Range(1, int.MaxValue)]
+    int? ZoneId, // Nullable
     
     [Required]
     [Range(0, double.MaxValue)]
@@ -39,6 +42,7 @@ public record TripPlanRequestDto(
     [Range(0, int.MaxValue, ErrorMessage = "MaxTourismAreas must be non-negative")]
     int MaxTourismAreas);
 
+
 [ApiController]
 public class TripSuggesterController : AppControllerBase
 {
@@ -56,8 +60,15 @@ public class TripSuggesterController : AppControllerBase
     {
         _logger.LogInformation("Received trip optimization request: {@Request}", requestDto);
 
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(ModelState);
+        }
+        
+        
         var interestsQueue = new Queue<string>(requestDto.Interests);
         var request = new TripPlanRequest(
+            requestDto.GovernorateId,
             requestDto.ZoneId,
             requestDto.BudgetPerAdult,
             requestDto.NumberOfTravelers,
