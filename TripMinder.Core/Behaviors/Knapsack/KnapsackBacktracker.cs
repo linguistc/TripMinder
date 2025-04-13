@@ -6,10 +6,10 @@ public class KnapsackBacktracker : IKnapsackBacktracker
     {
         var stack = new Stack<KnapsackState>();
         stack.Push(state);
-        int maxR = state.Items.Any(i => i.PlaceType == ItemType.Restaurant) ? 4 : 0;
-        int maxA = state.Items.Any(i => i.PlaceType == ItemType.Accommodation) ? 1 : 0;
-        int maxE = state.Items.Any(i => i.PlaceType == ItemType.Entertainment) ? 2 : 0;
-        int maxT = state.Items.Any(i => i.PlaceType == ItemType.TourismArea) ? 1 : 0;
+        int maxR = state.Decision.GetLength(1) - 1;
+        int maxA = state.Decision.GetLength(2) - 1;
+        int maxE = state.Decision.GetLength(3) - 1;
+        int maxT = state.Decision.GetLength(4) - 1;
 
         var requiredTypes = new HashSet<ItemType>();
         if (state.Priorities.HasValue)
@@ -73,11 +73,12 @@ public class KnapsackBacktracker : IKnapsackBacktracker
         var currentE = 0;
         var currentT = 0;
         var usedItemIds = new HashSet<int>();
-        int maxR = state.Items.Any(i => i.PlaceType == ItemType.Restaurant) ? 4 : 0;
-        int maxA = state.Items.Any(i => i.PlaceType == ItemType.Accommodation) ? 1 : 0;
-        int maxE = state.Items.Any(i => i.PlaceType == ItemType.Entertainment) ? 2 : 0;
-        int maxT = state.Items.Any(i => i.PlaceType == ItemType.TourismArea) ? 1 : 0;
-
+        int maxR = state.Decision.GetLength(1) - 1;
+        int maxA = state.Decision.GetLength(2) - 1;
+        int maxE = state.Decision.GetLength(3) - 1;
+        int maxT = state.Decision.GetLength(4) - 1;
+        
+        
         var priorityOrder = new List<(ItemType Type, int Priority)>();
         if (state.Priorities.HasValue)
         {
@@ -89,13 +90,16 @@ public class KnapsackBacktracker : IKnapsackBacktracker
         priorityOrder = priorityOrder.OrderByDescending(p => p.Priority).ToList();
 
         // المرحلة الأولى: ضمان تغطية الـ Interests
-        foreach (var (type, _) in priorityOrder)
+        foreach (var (type, priority) in priorityOrder)
         {
-            var availableItems = state.Items.Where(i => i.PlaceType == type && i.AveragePricePerAdult <= currentBudget && !usedItemIds.Contains(i.Id))
-                .OrderByDescending(i => i.Score / i.AveragePricePerAdult).ToList();
+            var availableItems = state.Items
+                .Where(i => i.PlaceType == type && i.AveragePricePerAdult <= currentBudget && !usedItemIds.Contains(i.Id))
+                .OrderByDescending(i => i.Score) // ترتيب حسب السكور بدل Score/Price
+                .ToList();
             if (availableItems.Any())
             {
                 var bestItem = availableItems.First();
+                Console.WriteLine($"Selected Item (Priority Phase): {bestItem.Name}, Type: {bestItem.PlaceType}, Price: {bestItem.AveragePricePerAdult}, Score: {bestItem.Score}");
                 selectedItems.Add(bestItem);
                 usedItemIds.Add(bestItem.Id);
                 currentBudget -= (int)bestItem.AveragePricePerAdult;
@@ -104,35 +108,38 @@ public class KnapsackBacktracker : IKnapsackBacktracker
                 if (bestItem.PlaceType == ItemType.Entertainment) currentE++;
                 if (bestItem.PlaceType == ItemType.TourismArea) currentT++;
             }
-        }
-
-        // المرحلة الثانية: استخدام الـ DP لاستغلال الـ Budget المتبقي
-        for (int i = state.Items.Count - 1; i >= 0 && currentBudget > 0; i--)
-        {
-            if (state.Decision[currentBudget, currentR, currentA, currentE, currentT, i])
+            else
             {
-                var selectedItem = state.Items[i];
-                if (!usedItemIds.Contains(selectedItem.Id))
-                {
-                    int cost = (int)selectedItem.AveragePricePerAdult;
-                    if (cost <= currentBudget &&
-                        ((selectedItem.PlaceType == ItemType.Restaurant && currentR < maxR) ||
-                         (selectedItem.PlaceType == ItemType.Accommodation && currentA < maxA) ||
-                         (selectedItem.PlaceType == ItemType.Entertainment && currentE < maxE) ||
-                         (selectedItem.PlaceType == ItemType.TourismArea && currentT < maxT)))
-                    {
-                        selectedItems.Add(selectedItem);
-                        usedItemIds.Add(selectedItem.Id);
-                        currentBudget -= cost;
-                        currentR += selectedItem.PlaceType == ItemType.Restaurant ? 1 : 0;
-                        currentA += selectedItem.PlaceType == ItemType.Accommodation ? 1 : 0;
-                        currentE += selectedItem.PlaceType == ItemType.Entertainment ? 1 : 0;
-                        currentT += selectedItem.PlaceType == ItemType.TourismArea ? 1 : 0;
-                    }
-                }
+                Console.WriteLine($"No available items for type {type} in Priority Phase");
             }
         }
 
+        // المرحلة الثانية: استخدام الـ DP لاستغلال الـ Budget المتبقي
+        while (currentBudget > 0)
+        {
+            var availableItems = state.Items
+                .Where(i => i.AveragePricePerAdult <= currentBudget && !usedItemIds.Contains(i.Id))
+                .Where(i => (i.PlaceType == ItemType.Restaurant && currentR < maxR) ||
+                            (i.PlaceType == ItemType.Accommodation && currentA < maxA) ||
+                            (i.PlaceType == ItemType.Entertainment && currentE < maxE) ||
+                            (i.PlaceType == ItemType.TourismArea && currentT < maxT))
+                .OrderByDescending(i => i.Score)
+                .ToList();
+
+            if (!availableItems.Any())
+                break;
+
+            var bestItem = availableItems.First();
+            Console.WriteLine($"Selected Item (Budget Phase): {bestItem.Name}, Type: {bestItem.PlaceType}, Price: {bestItem.AveragePricePerAdult}, Score: {bestItem.Score}");
+            
+            selectedItems.Add(bestItem);
+            usedItemIds.Add(bestItem.Id);
+            currentBudget -= (int)bestItem.AveragePricePerAdult;
+            if (bestItem.PlaceType == ItemType.Restaurant) currentR++;
+            if (bestItem.PlaceType == ItemType.Accommodation) currentA++;
+            if (bestItem.PlaceType == ItemType.Entertainment) currentE++;
+            if (bestItem.PlaceType == ItemType.TourismArea) currentT++;
+        }        
         return selectedItems;
     }
     
