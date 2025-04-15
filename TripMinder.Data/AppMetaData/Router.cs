@@ -173,9 +173,15 @@
 
         #region TripSuggestionner Routing
         
-        public class TripSuggestionnerRouting
+        public class TripSuggesterRouting
         {
-            public const string Prefix = Rule + "tripsuggestionner/";
+            public const string Prefix = Rule + "tripsuggester/";
+            public const string OptimizeTrip = Prefix + "optimize/";
+        }
+        
+        public class TripSuggesterMultipleRouting
+        {
+            public const string Prefix = Rule + "tripsuggester/multiple/";
             public const string OptimizeTrip = Prefix + "optimize/";
         }
         

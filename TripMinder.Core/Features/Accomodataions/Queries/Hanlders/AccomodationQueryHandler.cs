@@ -62,7 +62,7 @@ namespace TripMinder.Core.Features.Accomodataions.Queries.Hanlders
         {
             var accomodationList = await this.service.GetAccomodationsListByZoneIdAsync(request.ZoneId, cancellationToken);
             
-            accomodationList.ForEach(a => a.Score = CalculateScoreBehavior.CalculateScore(a.Class.Type, request.Priority));
+            accomodationList.ForEach(a => a.Score = CalculateScoreBehavior.CalculateScore(a.Class.Type, request.Priority, a.AveragePricePerAdult));
 
             var accomodationMapper = this.mapper.Map<List<GetAccomodationsListResponse>>(accomodationList);
 
@@ -76,7 +76,7 @@ namespace TripMinder.Core.Features.Accomodataions.Queries.Hanlders
         {
             var accomodationList = await this.service.GetAccomodationsListByGovernorateIdAsync(request.GovernorateId, cancellationToken);
             
-            accomodationList.ForEach(a => a.Score = CalculateScoreBehavior.CalculateScore(a.Class.Type, request.Priority));
+            accomodationList.ForEach(a => a.Score = CalculateScoreBehavior.CalculateScore(a.Class.Type, request.Priority, a.AveragePricePerAdult));
             
             var accomodationMapper = this.mapper.Map<List<GetAccomodationsListResponse>>(accomodationList);
 

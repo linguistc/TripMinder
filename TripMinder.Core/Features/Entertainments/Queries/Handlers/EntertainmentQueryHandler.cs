@@ -66,7 +66,7 @@ namespace TripMinder.Core.Features.Entertainments.Queries.Handlers
         {
             var entertainmentsList = await this.service.GetEntertainmentsListByZoneIdAsync(request.ZoneId, cancellationToken);
 
-            entertainmentsList.ForEach(a => a.Score = CalculateScoreBehavior.CalculateScore(a.Class.Type, request.Priority));
+            entertainmentsList.ForEach(a => a.Score = CalculateScoreBehavior.CalculateScore(a.Class.Type, request.Priority, a.AveragePricePerAdult));
 
             var entertainmentMapper = this.mapper.Map<List<GetEntertainmentsListResponse>>(entertainmentsList);
 
@@ -82,7 +82,7 @@ namespace TripMinder.Core.Features.Entertainments.Queries.Handlers
         {
             var entertainmentsList = await this.service.GetEntertainmentsListByGovernorateIdAsync(request.GovernorateId, cancellationToken);
 
-            entertainmentsList.ForEach(a => a.Score = CalculateScoreBehavior.CalculateScore(a.Class.Type, request.Priority));
+            entertainmentsList.ForEach(a => a.Score = CalculateScoreBehavior.CalculateScore(a.Class.Type, request.Priority, a.AveragePricePerAdult));
 
             var entertainmentMapper = this.mapper.Map<List<GetEntertainmentsListResponse>>(entertainmentsList);
 

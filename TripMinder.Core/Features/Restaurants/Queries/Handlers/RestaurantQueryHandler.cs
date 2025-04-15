@@ -66,7 +66,7 @@ namespace TripMinder.Core.Features.Restaurants.Queries.Handlers
         {
             var restaurantsList = await this.restaurantService.GetRestaurantsListByZoneIdAsync(request.ZoneId, cancellationToken);
 
-            restaurantsList.ForEach(a => a.Score = CalculateScoreBehavior.CalculateScore(a.Class.Type, request.Priority));
+            restaurantsList.ForEach(a => a.Score = CalculateScoreBehavior.CalculateScore(a.Class.Type, request.Priority, a.AveragePricePerAdult));
 
             var restaurantMapper = this.mapper.Map<List<GetRestaurantsListResponse>>(restaurantsList);
 
@@ -81,7 +81,7 @@ namespace TripMinder.Core.Features.Restaurants.Queries.Handlers
         {
             var restaurantsList = await this.restaurantService.GetRestaurantsListByGovernorateIdAsync(request.GovernorateId, cancellationToken);
 
-            restaurantsList.ForEach(a => a.Score = CalculateScoreBehavior.CalculateScore(a.Class.Type, request.Priority));
+            restaurantsList.ForEach(a => a.Score = CalculateScoreBehavior.CalculateScore(a.Class.Type, request.Priority, a.AveragePricePerAdult));
 
             var restaurantMapper = this.mapper.Map<List<GetRestaurantsListResponse>>(restaurantsList);
 

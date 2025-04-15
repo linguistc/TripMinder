@@ -5,73 +5,89 @@ namespace TripMinder.Core.Behaviors.Knapsack;
 
 public class TripPlanOptimizer
 {
-    private readonly IMediator _mediator;
     private readonly IKnapsackSolver _solver;
     private readonly IItemFetcher _itemFetcher;
 
-    public TripPlanOptimizer(IMediator mediator, IKnapsackSolver solver, IItemFetcher itemFetcher)
+    public TripPlanOptimizer(IKnapsackSolver solver, IItemFetcher itemFetcher)
     {
-        this._mediator = mediator;
-        this._solver = solver;
-        this._itemFetcher = itemFetcher;
+        _solver = solver;
+        _itemFetcher = itemFetcher;
     }
 
     public async Task<Respond<TripPlanResponse>> OptimizePlan(TripPlanRequest request)
     {
         var priorities = CalculatePriorities(request.Interests);
-        var allItems = await _itemFetcher.FetchItems(request.ZoneId, priorities, _mediator);
-        var totalBudget = (int)(request.BudgetPerAdult * request.NumberOfTravelers);
+        var allItems = await _itemFetcher.FetchItems(request.GovernorateId ,request.ZoneId, priorities);
+        var totalBudget = (int)(request.BudgetPerAdult);
 
         var constraints = new UserDefinedKnapsackConstraints(
             request.MaxRestaurants,
             request.MaxAccommodations,
             request.MaxEntertainments,
             request.MaxTourismAreas);
-        
-        var (maxProfit, selectedItems) = _solver.GetMaxProfit(totalBudget, allItems, constraints);
 
-        var tripPlanResponse = new TripPlanResponse
-        {
-            Accommodation = selectedItems.FirstOrDefault(i => i.PlaceType == ItemType.Accommodation)?.ToResponse(),
-            Restaurants = selectedItems.Where(i => i.PlaceType == ItemType.Restaurant).Take(request.MaxRestaurants).Select(i => i.ToResponse()).ToList(),
-            Entertainments = selectedItems.Where(i => i.PlaceType == ItemType.Entertainment).Take(request.MaxEntertainments).Select(i => i.ToResponse()).ToList(),
-            TourismAreas = selectedItems.Where(i => i.PlaceType == ItemType.TourismArea).Take(request.MaxTourismAreas).Select(i => i.ToResponse()).ToList()
-        };
-
+        var (maxProfit, selectedItems) = _solver.GetMaxProfit(totalBudget, allItems, constraints, priorities);
+        var tripPlanResponse = BuildTripPlanResponse(selectedItems, request);
         return new Respond<TripPlanResponse>
         {
             Succeeded = true,
             Message = "Trip plan optimized successfully",
             Data = tripPlanResponse,
-            Meta = new { TotalItems = selectedItems.Count }
+            Meta = new { TotalItems = selectedItems.Count, TotalSolutions = 1 }
+        };
+    }
+
+    public async Task<Respond<List<TripPlanResponse>>> OptimizePlanMultiple(TripPlanRequest request)
+    {
+        var priorities = CalculatePriorities(request.Interests);
+        var allItems = await _itemFetcher.FetchItems(request.GovernorateId ,request.ZoneId, priorities);
+        var totalBudget = (int)(request.BudgetPerAdult);
+
+        var constraints = new UserDefinedKnapsackConstraints(
+            request.MaxRestaurants,
+            request.MaxAccommodations,
+            request.MaxEntertainments,
+            request.MaxTourismAreas);
+
+        var (maxProfit, allSolutions) = _solver.GetMaxProfitMultiple(totalBudget, allItems, constraints, priorities);
+        var tripPlans = allSolutions.Select(items => BuildTripPlanResponse(items, request)).ToList();
+
+        return new Respond<List<TripPlanResponse>>
+        {
+            Succeeded = true,
+            Message = "Trip plans optimized successfully",
+            Data = tripPlans,
+            Meta = new { TotalItems = tripPlans.Sum(p => p.Restaurants.Count + p.Entertainments.Count + p.TourismAreas.Count + (p.Accommodation != null ? 1 : 0)), TotalSolutions = allSolutions.Count }
+        };
+    }
+
+    private TripPlanResponse BuildTripPlanResponse(List<Item> selectedItems, TripPlanRequest request)
+    {
+        return new TripPlanResponse
+        {
+            Accommodation = selectedItems.FirstOrDefault(i => i.PlaceType == ItemType.Accommodation)?.ToResponse(),
+            Restaurants = selectedItems.Where(i => i.PlaceType == ItemType.Restaurant)
+                .Take(request.MaxRestaurants).Select(i => i.ToResponse()).ToList(),
+            Entertainments = selectedItems.Where(i => i.PlaceType == ItemType.Entertainment)
+                .Take(request.MaxEntertainments).Select(i => i.ToResponse()).ToList(),
+            TourismAreas = selectedItems.Where(i => i.PlaceType == ItemType.TourismArea)
+                .Take(request.MaxTourismAreas).Select(i => i.ToResponse()).ToList()
         };
     }
 
     private (int accommodation, int food, int entertainment, int tourism) CalculatePriorities(Queue<string> interests)
     {
-        int maxPriority = interests.Count; // أعلى أولوية هي عدد العناصر
-        int accommodationPriority = 0, foodPriority = 0, entertainmentPriority = 0, tourismPriority = 0;
-
+        int accommodationPriority = 1, foodPriority = 1, entertainmentPriority = 1, tourismPriority = 1;
+        int bonus = interests.Count; // بدل ما نستخدم الأولوية كرقم كبير، نعطي مكافأة صغيرة
         while (interests.Count > 0)
         {
             var interest = interests.Dequeue();
             switch (interest.ToLower())
             {
-                case "accommodation":
-                    accommodationPriority = maxPriority--;
-                    break;
-                case "restaurants":
-                case "food":
-                    foodPriority = maxPriority--;
-                    break;
-                case "entertainments":
-                case "entertainment":
-                    entertainmentPriority = maxPriority--;
-                    break;
-                case "tourismareas":
-                case "tourism":
-                    tourismPriority = maxPriority--;
-                    break;
+                case "accommodation": accommodationPriority += bonus--; break;
+                case "restaurants": case "food": foodPriority += bonus--; break;
+                case "entertainments": case "entertainment": entertainmentPriority += bonus--; break;
+                case "tourismareas": case "tourism": tourismPriority += bonus--; break;
             }
         }
 
@@ -82,7 +98,8 @@ public class TripPlanOptimizer
 
 // HELPER CLASSES
 public record TripPlanRequest(
-    int ZoneId, 
+    int GovernorateId,
+    int? ZoneId, 
     double BudgetPerAdult, 
     int NumberOfTravelers, 
     Queue<string> Interests, 

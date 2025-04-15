@@ -8,54 +8,265 @@ namespace TripMinder.Core.Behaviors.Knapsack;
 
 public class ItemFetcher : IItemFetcher
 {
-    public async Task<List<Item>> FetchItems(int zoneId, (int a, int f, int e, int t) priorities, IMediator mediator)
+    private static readonly Random _random = new Random(12345);
+    private readonly IMediator _mediator;
+    
+    public ItemFetcher(IMediator mediator)
+    {
+        this._mediator = mediator;
+    }
+
+    public async Task<List<Item>> FetchItems(int governorateId, int? zoneId, (int a, int f, int e, int t) priorities)
     {
         var allItems = new List<Item>();
+
+        if (zoneId.HasValue)
+        {
+            // ZoneId مش null، جيب العناصر بناءً على ZoneId
+            await FetchItemsByZoneId(zoneId.Value, priorities, allItems);
+        }
+        else
+        {
+            // ZoneId بـ null، جيب العناصر بناءً على GovernorateId
+            await FetchItemsByGovernorateId(governorateId, priorities, allItems);
+        }
         
-        var accommodationsResponse = await mediator.Send(new GetAccomodationsListByZoneIdQuery(zoneId, priorities.a));
+        Console.WriteLine($"Total Items Fetched: {allItems.Count}");
+        return allItems.OrderByDescending(item =>
+        {
+            int priority = item.PlaceType switch
+            {
+                ItemType.Accommodation => priorities.a,
+                ItemType.Restaurant => priorities.f,
+                ItemType.Entertainment => priorities.e,
+                ItemType.TourismArea => priorities.t,
+                _ => 0
+            };
+            return priority * item.Score;
+        }).ToList();
+    }
+
+    private async Task FetchItemsByZoneId(int zoneId, (int a, int f, int e, int t) priorities, List<Item> allItems)
+    {
+        var accommodationsResponse = await _mediator.Send(new GetAccomodationsListByZoneIdQuery(zoneId, priorities.a));
+        Console.WriteLine($"Accommodations Response: Succeeded={accommodationsResponse?.Succeeded}, Count={(accommodationsResponse?.Data?.Count() ?? 0)}");
         if (accommodationsResponse?.Succeeded == true && accommodationsResponse.Data != null)
-            allItems.AddRange(accommodationsResponse.Data.Select(a => new Item
+        {
+            allItems.AddRange(accommodationsResponse.Data.Select(a =>
             {
-                Id = a.Id,
-                Name = a.Name,
-                AveragePricePerAdult = (float)a.AveragePricePerAdult,
-                Score = a.Score,
-                PlaceType = ItemType.Accommodation
+                var item = new Item
+                {
+                    Id = a.Id,
+                    Name = a.Name,
+                    AveragePricePerAdult = a.AveragePricePerAdult <= 0
+                        ? GetRandomPrice(ItemType.Accommodation)
+                        : (float)a.AveragePricePerAdult,
+                    Score = CalculateScoreBehavior.CalculateScore(a.ClassType ?? "C", priorities.a, a.AveragePricePerAdult),
+                    PlaceType = ItemType.Accommodation
+                };
+                Console.WriteLine($"Item: {item.Name}, Type: {item.PlaceType}, Price: {item.AveragePricePerAdult}, Score: {item.Score}");
+                return item;
             }));
+        }
+        else
+        {
+            Console.WriteLine($"No Accommodations found for ZoneId: {zoneId}");
+        }
 
-        var restaurantsResponse = await mediator.Send(new GetRestaurantsListByZoneIdQuery(zoneId, priorities.f));
+        // جلب المطاعم
+        var restaurantsResponse = await _mediator.Send(new GetRestaurantsListByZoneIdQuery(zoneId, priorities.f));
+        Console.WriteLine($"Restaurants Response: Succeeded={restaurantsResponse?.Succeeded}, Count={(restaurantsResponse?.Data?.Count() ?? 0)}");
         if (restaurantsResponse?.Succeeded == true && restaurantsResponse.Data != null)
-            allItems.AddRange(restaurantsResponse.Data.Select(r => new Item
+        {
+            allItems.AddRange(restaurantsResponse.Data.Select(r =>
             {
-                Id = r.Id,
-                Name = r.Name,
-                AveragePricePerAdult = (float)r.AveragePricePerAdult,
-                Score = r.Score,
-                PlaceType = ItemType.Restaurant
+                var item = new Item
+                {
+                    Id = r.Id,
+                    Name = r.Name,
+                    AveragePricePerAdult = r.AveragePricePerAdult <= 0
+                        ? GetRandomPrice(ItemType.Restaurant)
+                        : (float)r.AveragePricePerAdult,
+                    Score = CalculateScoreBehavior.CalculateScore(r.ClassType ?? "C", priorities.f, r.AveragePricePerAdult),
+                    PlaceType = ItemType.Restaurant
+                };
+                Console.WriteLine($"Item: {item.Name}, Type: {item.PlaceType}, Price: {item.AveragePricePerAdult}, Score: {item.Score}");
+                return item;
             }));
-        
-        var entertainmentsResponse = await mediator.Send(new GetEntertainmentsListByZoneIdQuery(zoneId, priorities.e));
+        }
+        else
+        {
+            Console.WriteLine($"No Restaurants found for ZoneId: {zoneId}");
+        }
+
+        // جلب الترفيه
+        var entertainmentsResponse = await _mediator.Send(new GetEntertainmentsListByZoneIdQuery(zoneId, priorities.e));
+        Console.WriteLine($"Entertainments Response: Succeeded={entertainmentsResponse?.Succeeded}, Count={(entertainmentsResponse?.Data?.Count() ?? 0)}");
         if (entertainmentsResponse?.Succeeded == true && entertainmentsResponse.Data != null)
-            allItems.AddRange(entertainmentsResponse.Data.Select(e => new Item
+        {
+            allItems.AddRange(entertainmentsResponse.Data.Select(e =>
             {
-                Id = e.Id,
-                Name = e.Name,
-                AveragePricePerAdult = (float)e.AveragePricePerAdult,
-                Score = e.Score,
-                PlaceType = ItemType.Entertainment
+                var item = new Item
+                {
+                    Id = e.Id,
+                    Name = e.Name,
+                    AveragePricePerAdult = e.AveragePricePerAdult <= 0
+                        ? GetRandomPrice(ItemType.Entertainment)
+                        : (float)e.AveragePricePerAdult,
+                    Score = CalculateScoreBehavior.CalculateScore(e.ClassType ?? "C", priorities.e, e.AveragePricePerAdult),
+                    PlaceType = ItemType.Entertainment
+                };
+                Console.WriteLine($"Item: {item.Name}, Type: {item.PlaceType}, Price: {item.AveragePricePerAdult}, Score: {item.Score}");
+                return item;
             }));
+        }
+        else
+        {
+            Console.WriteLine($"No Entertainments found for ZoneId: {zoneId}");
+        }
 
-        var tourismAreasResponse = await mediator.Send(new GetTourismAreasListByZoneIdQuery(zoneId, priorities.t));
+        // جلب المناطق السياحية
+        var tourismAreasResponse = await _mediator.Send(new GetTourismAreasListByZoneIdQuery(zoneId, priorities.t));
+        Console.WriteLine($"TourismAreas Response: Succeeded={tourismAreasResponse?.Succeeded}, Count={(tourismAreasResponse?.Data?.Count() ?? 0)}");
         if (tourismAreasResponse?.Succeeded == true && tourismAreasResponse.Data != null)
-            allItems.AddRange(tourismAreasResponse.Data.Select(t => new Item
+        {
+            allItems.AddRange(tourismAreasResponse.Data.Select(t =>
             {
-                Id = t.Id,
-                Name = t.Name,
-                AveragePricePerAdult = (float)t.AveragePricePerAdult,
-                Score = t.Score,
-                PlaceType = ItemType.TourismArea
+                var item = new Item
+                {
+                    Id = t.Id,
+                    Name = t.Name,
+                    AveragePricePerAdult = t.AveragePricePerAdult <= 0
+                        ? GetRandomPrice(ItemType.TourismArea)
+                        : (float)t.AveragePricePerAdult,
+                    Score = CalculateScoreBehavior.CalculateScore(t.ClassType ?? "C", priorities.t, t.AveragePricePerAdult),
+                    PlaceType = ItemType.TourismArea
+                };
+                Console.WriteLine($"Item: {item.Name}, Type: {item.PlaceType}, Price: {item.AveragePricePerAdult}, Score: {item.Score}");
+                return item;
             }));
+        }
+        else
+        {
+            Console.WriteLine($"No TourismAreas found for ZoneId: {zoneId}");
+        }
+    }
 
-        return allItems;
+    private async Task FetchItemsByGovernorateId(int governorateId, (int a, int f, int e, int t) priorities, List<Item> allItems)
+    {
+        var accommodationsResponse = await _mediator.Send(new GetAccomodationsListByGovernorateIdQuery(governorateId, priorities.a));
+        Console.WriteLine($"Accommodations Response: Succeeded={accommodationsResponse?.Succeeded}, Count={(accommodationsResponse?.Data?.Count() ?? 0)}");
+        if (accommodationsResponse?.Succeeded == true && accommodationsResponse.Data != null)
+        {
+            allItems.AddRange(accommodationsResponse.Data.Select(a =>
+            {
+                var item = new Item
+                {
+                    Id = a.Id,
+                    Name = a.Name,
+                    AveragePricePerAdult = a.AveragePricePerAdult <= 0
+                        ? GetRandomPrice(ItemType.Accommodation)
+                        : (float)a.AveragePricePerAdult,
+                    Score = CalculateScoreBehavior.CalculateScore(a.ClassType ?? "C", priorities.a, a.AveragePricePerAdult),
+                    PlaceType = ItemType.Accommodation
+                };
+                Console.WriteLine($"Item: {item.Name}, Type: {item.PlaceType}, Price: {item.AveragePricePerAdult}, Score: {item.Score}");
+                return item;
+            }));
+        }
+        else
+        {
+            Console.WriteLine($"No Accommodations found for GovernorateId: {governorateId}");
+        }
+
+        // جلب المطاعم
+        var restaurantsResponse = await _mediator.Send(new GetRestaurantsListByGovernorateIdQuery(governorateId, priorities.f));
+        Console.WriteLine($"Restaurants Response: Succeeded={restaurantsResponse?.Succeeded}, Count={(restaurantsResponse?.Data?.Count() ?? 0)}");
+        if (restaurantsResponse?.Succeeded == true && restaurantsResponse.Data != null)
+        {
+            allItems.AddRange(restaurantsResponse.Data.Select(r =>
+            {
+                var item = new Item
+                {
+                    Id = r.Id,
+                    Name = r.Name,
+                    AveragePricePerAdult = r.AveragePricePerAdult <= 0
+                        ? GetRandomPrice(ItemType.Restaurant)
+                        : (float)r.AveragePricePerAdult,
+                    Score = CalculateScoreBehavior.CalculateScore(r.ClassType ?? "C", priorities.f, r.AveragePricePerAdult),
+                    PlaceType = ItemType.Restaurant
+                };
+                Console.WriteLine($"Item: {item.Name}, Type: {item.PlaceType}, Price: {item.AveragePricePerAdult}, Score: {item.Score}");
+                return item;
+            }));
+        }
+        else
+        {
+            Console.WriteLine($"No Restaurants found for GovernorateId: {governorateId}");
+        }
+
+        // جلب الترفيه
+        var entertainmentsResponse = await _mediator.Send(new GetEntertainmentsListByGovernorateIdQuery(governorateId, priorities.e));
+        Console.WriteLine($"Entertainments Response: Succeeded={entertainmentsResponse?.Succeeded}, Count={(entertainmentsResponse?.Data?.Count() ?? 0)}");
+        if (entertainmentsResponse?.Succeeded == true && entertainmentsResponse.Data != null)
+        {
+            allItems.AddRange(entertainmentsResponse.Data.Select(e =>
+            {
+                var item = new Item
+                {
+                    Id = e.Id,
+                    Name = e.Name,
+                    AveragePricePerAdult = e.AveragePricePerAdult <= 0
+                        ? GetRandomPrice(ItemType.Entertainment)
+                        : (float)e.AveragePricePerAdult,
+                    Score = CalculateScoreBehavior.CalculateScore(e.ClassType ?? "C", priorities.e, e.AveragePricePerAdult),
+                    PlaceType = ItemType.Entertainment
+                };
+                Console.WriteLine($"Item: {item.Name}, Type: {item.PlaceType}, Price: {item.AveragePricePerAdult}, Score: {item.Score}");
+                return item;
+            }));
+        }
+        else
+        {
+            Console.WriteLine($"No Entertainments found for GovernorateId: {governorateId}");
+        }
+
+        // جلب المناطق السياحية
+        var tourismAreasResponse = await _mediator.Send(new GetTourismAreasListByGovernorateIdQuery(governorateId, priorities.t));
+        Console.WriteLine($"TourismAreas Response: Succeeded={tourismAreasResponse?.Succeeded}, Count={(tourismAreasResponse?.Data?.Count() ?? 0)}");
+        if (tourismAreasResponse?.Succeeded == true && tourismAreasResponse.Data != null)
+        {
+            allItems.AddRange(tourismAreasResponse.Data.Select(t =>
+            {
+                var item = new Item
+                {
+                    Id = t.Id,
+                    Name = t.Name,
+                    AveragePricePerAdult = t.AveragePricePerAdult <= 0
+                        ? GetRandomPrice(ItemType.TourismArea)
+                        : (float)t.AveragePricePerAdult,
+                    Score = CalculateScoreBehavior.CalculateScore(t.ClassType ?? "C", priorities.t, t.AveragePricePerAdult),
+                    PlaceType = ItemType.TourismArea
+                };
+                Console.WriteLine($"Item: {item.Name}, Type: {item.PlaceType}, Price: {item.AveragePricePerAdult}, Score: {item.Score}");
+                return item;
+            }));
+        }
+        else
+        {
+            Console.WriteLine($"No TourismAreas found for GovernorateId: {governorateId}");
+        }
+    }
+
+    private float GetRandomPrice(ItemType type)
+    {
+        return type switch
+        {
+            ItemType.Accommodation => _random.Next(500, 2000),
+            ItemType.Restaurant => _random.Next(100, 800),
+            ItemType.Entertainment => _random.Next(50, 400),
+            ItemType.TourismArea => _random.Next(50, 300),
+            _ => _random.Next(50, 500)
+        };
     }
 }
