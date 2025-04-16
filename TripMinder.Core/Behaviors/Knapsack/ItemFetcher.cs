@@ -58,11 +58,14 @@ public class ItemFetcher : IItemFetcher
                 {
                     Id = a.Id,
                     Name = a.Name,
+                    ClassType = a.ClassType,
                     AveragePricePerAdult = a.AveragePricePerAdult <= 0
                         ? GetRandomPrice(ItemType.Accommodation)
                         : (float)a.AveragePricePerAdult,
                     Score = CalculateScoreBehavior.CalculateScore(a.ClassType ?? "C", priorities.a, a.AveragePricePerAdult),
-                    PlaceType = ItemType.Accommodation
+                    PlaceType = ItemType.Accommodation,
+                    Rating = a.Rating,
+                    ImageSource = a.ImageSource
                 };
                 Console.WriteLine($"Item: {item.Name}, Type: {item.PlaceType}, Price: {item.AveragePricePerAdult}, Score: {item.Score}");
                 return item;
@@ -84,11 +87,14 @@ public class ItemFetcher : IItemFetcher
                 {
                     Id = r.Id,
                     Name = r.Name,
+                    ClassType = r.ClassType,
                     AveragePricePerAdult = r.AveragePricePerAdult <= 0
                         ? GetRandomPrice(ItemType.Restaurant)
                         : (float)r.AveragePricePerAdult,
                     Score = CalculateScoreBehavior.CalculateScore(r.ClassType ?? "C", priorities.f, r.AveragePricePerAdult),
-                    PlaceType = ItemType.Restaurant
+                    PlaceType = ItemType.Restaurant,
+                    Rating = r.Rating,
+                    ImageSource = r.ImageSource
                 };
                 Console.WriteLine($"Item: {item.Name}, Type: {item.PlaceType}, Price: {item.AveragePricePerAdult}, Score: {item.Score}");
                 return item;
@@ -110,11 +116,14 @@ public class ItemFetcher : IItemFetcher
                 {
                     Id = e.Id,
                     Name = e.Name,
+                    ClassType = e.ClassType,
                     AveragePricePerAdult = e.AveragePricePerAdult <= 0
                         ? GetRandomPrice(ItemType.Entertainment)
                         : (float)e.AveragePricePerAdult,
                     Score = CalculateScoreBehavior.CalculateScore(e.ClassType ?? "C", priorities.e, e.AveragePricePerAdult),
-                    PlaceType = ItemType.Entertainment
+                    PlaceType = ItemType.Entertainment,
+                    Rating = e.Rating,
+                    ImageSource = e.ImageSource
                 };
                 Console.WriteLine($"Item: {item.Name}, Type: {item.PlaceType}, Price: {item.AveragePricePerAdult}, Score: {item.Score}");
                 return item;
@@ -136,11 +145,15 @@ public class ItemFetcher : IItemFetcher
                 {
                     Id = t.Id,
                     Name = t.Name,
+                    ClassType = t.ClassType,
                     AveragePricePerAdult = t.AveragePricePerAdult <= 0
                         ? GetRandomPrice(ItemType.TourismArea)
                         : (float)t.AveragePricePerAdult,
                     Score = CalculateScoreBehavior.CalculateScore(t.ClassType ?? "C", priorities.t, t.AveragePricePerAdult),
-                    PlaceType = ItemType.TourismArea
+                    PlaceType = ItemType.TourismArea,
+                    Rating = t.Rating,
+                    ImageSource = t.ImageSource
+                    
                 };
                 Console.WriteLine($"Item: {item.Name}, Type: {item.PlaceType}, Price: {item.AveragePricePerAdult}, Score: {item.Score}");
                 return item;
@@ -164,11 +177,15 @@ public class ItemFetcher : IItemFetcher
                 {
                     Id = a.Id,
                     Name = a.Name,
+                    ClassType = a.ClassType,
                     AveragePricePerAdult = a.AveragePricePerAdult <= 0
                         ? GetRandomPrice(ItemType.Accommodation)
                         : (float)a.AveragePricePerAdult,
                     Score = CalculateScoreBehavior.CalculateScore(a.ClassType ?? "C", priorities.a, a.AveragePricePerAdult),
-                    PlaceType = ItemType.Accommodation
+                    PlaceType = ItemType.Accommodation,
+                    Rating = a.Rating,
+                    ImageSource = a.ImageSource
+                    
                 };
                 Console.WriteLine($"Item: {item.Name}, Type: {item.PlaceType}, Price: {item.AveragePricePerAdult}, Score: {item.Score}");
                 return item;
@@ -190,11 +207,14 @@ public class ItemFetcher : IItemFetcher
                 {
                     Id = r.Id,
                     Name = r.Name,
+                    ClassType = r.ClassType,
                     AveragePricePerAdult = r.AveragePricePerAdult <= 0
                         ? GetRandomPrice(ItemType.Restaurant)
                         : (float)r.AveragePricePerAdult,
                     Score = CalculateScoreBehavior.CalculateScore(r.ClassType ?? "C", priorities.f, r.AveragePricePerAdult),
-                    PlaceType = ItemType.Restaurant
+                    PlaceType = ItemType.Restaurant,
+                    Rating = r.Rating,
+                    ImageSource = r.ImageSource
                 };
                 Console.WriteLine($"Item: {item.Name}, Type: {item.PlaceType}, Price: {item.AveragePricePerAdult}, Score: {item.Score}");
                 return item;
@@ -216,11 +236,14 @@ public class ItemFetcher : IItemFetcher
                 {
                     Id = e.Id,
                     Name = e.Name,
+                    ClassType = e.ClassType,
                     AveragePricePerAdult = e.AveragePricePerAdult <= 0
                         ? GetRandomPrice(ItemType.Entertainment)
                         : (float)e.AveragePricePerAdult,
                     Score = CalculateScoreBehavior.CalculateScore(e.ClassType ?? "C", priorities.e, e.AveragePricePerAdult),
-                    PlaceType = ItemType.Entertainment
+                    PlaceType = ItemType.Entertainment,
+                    Rating = e.Rating,
+                    ImageSource = e.ImageSource
                 };
                 Console.WriteLine($"Item: {item.Name}, Type: {item.PlaceType}, Price: {item.AveragePricePerAdult}, Score: {item.Score}");
                 return item;
@@ -242,11 +265,14 @@ public class ItemFetcher : IItemFetcher
                 {
                     Id = t.Id,
                     Name = t.Name,
+                    ClassType = t.ClassType,
                     AveragePricePerAdult = t.AveragePricePerAdult <= 0
                         ? GetRandomPrice(ItemType.TourismArea)
                         : (float)t.AveragePricePerAdult,
                     Score = CalculateScoreBehavior.CalculateScore(t.ClassType ?? "C", priorities.t, t.AveragePricePerAdult),
-                    PlaceType = ItemType.TourismArea
+                    PlaceType = ItemType.TourismArea,
+                    Rating = t.Rating,
+                    ImageSource = t.ImageSource
                 };
                 Console.WriteLine($"Item: {item.Name}, Type: {item.PlaceType}, Price: {item.AveragePricePerAdult}, Score: {item.Score}");
                 return item;

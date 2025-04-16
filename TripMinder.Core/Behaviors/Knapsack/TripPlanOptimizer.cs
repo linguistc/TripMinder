@@ -115,7 +115,7 @@ public record TripPlanResponse
     public List<ItemResponse> TourismAreas { get; init; }
 }
 
-public record ItemResponse(int Id, string Name, double AveragePricePerAdult, float Score, ItemType PlaceType);
+public record ItemResponse(int Id, string Name, string ClassType, double AveragePricePerAdult, float Score, ItemType PlaceType, double Rating, string ImageSource);
 
 public enum ItemType { Accommodation, Restaurant, Entertainment, TourismArea }
 
@@ -123,8 +123,11 @@ public class Item
 {
     public int Id { get; set; }
     public string Name { get; set; }
+    public string ClassType { get; set; }
     public double AveragePricePerAdult { get; set; }
     public float Score { get; set; }
     public ItemType PlaceType { get; set; }
-    public ItemResponse ToResponse() => new ItemResponse(Id, Name, AveragePricePerAdult, Score, PlaceType);
+    public double Rating { get; set; }
+    public string ImageSource { get; set; }
+    public ItemResponse ToResponse() => new ItemResponse(Id, Name, ClassType, AveragePricePerAdult, Score, PlaceType, Rating, ImageSource);
 }
