@@ -2,10 +2,11 @@ namespace TripMinder.Core.Behaviors.Knapsack;
 
 public class DynamicProgrammingCalculator : IDynamicProgrammingCalculator
 {
-    public (float[,,,,] dp, bool[,,,,,] decision) Calculate(int budget, List<Item> items, int maxR, int maxA, int maxE, int maxT)
+    public (float[,,,,] dp, bool[,,,,,] decision, int?[,,,,,] itemIds) Calculate(int budget, List<Item> items, int maxR, int maxA, int maxE, int maxT)
     {
         float[,,,,] dp = new float[budget + 1, maxR + 1, maxA + 1, maxE + 1, maxT + 1];
         bool[,,,,,] decision = new bool[budget + 1, maxR + 1, maxA + 1, maxE + 1, maxT + 1, items.Count];
+        int?[,,,,,] itemIds = new int?[budget + 1, maxR + 1, maxA + 1, maxE + 1, maxT + 1, items.Count];
 
         for (int i = 0; i < items.Count; i++)
         {
@@ -31,12 +32,13 @@ public class DynamicProgrammingCalculator : IDynamicProgrammingCalculator
                     {
                         dp[w, r, a, e, t] = profitWithItem;
                         decision[w, r, a, e, t, i] = true;
+                        itemIds[w, r, a, e, t, i] = item.Id;
                     }
                 }
             }
         }
 
         Console.WriteLine($"DP[{budget}, {maxR}, {maxA}, {maxE}, {maxT}] = {dp[budget, maxR, maxA, maxE, maxT]}");
-        return (dp, decision);
+        return (dp, decision, itemIds);
     }
 }
