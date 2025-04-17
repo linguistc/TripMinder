@@ -1,194 +1,670 @@
-﻿using TripMinder.Core.Behaviors.Knapsack;
+using System;
+using System.Collections.Generic;
+using TripMinder.Core.Behaviors;
+using TripMinder.Core.Behaviors.Knapsack;
+using Xunit;
+using Xunit.Abstractions;
 
-namespace TripMinder.Core.Tests;
+namespace TripMinder.Core.Tests.Behaviors.Knapsack;
 
 public class DynamicProgrammingCalculatorTests
 {
-    private readonly DynamicProgrammingCalculator _calculator = new DynamicProgrammingCalculator();
-    private readonly int _budget = 1500;
-    private readonly int _maxR = 2, _maxA = 1, _maxE = 2, _maxT = 1;
+    private readonly IDynamicProgrammingCalculator _calculator;
+    private readonly ITestOutputHelper _output;
 
-    private List<Item> GetTestItems()
+    public DynamicProgrammingCalculatorTests(ITestOutputHelper output)
+    {
+        _calculator = new DynamicProgrammingCalculator();
+        _output = output;
+    }
+
+    private List<Item> CreateStandardTestItems()
     {
         return new List<Item>
         {
-            new Item { Id = 1, Name = "A1", AveragePricePerAdult = 800, Score = 4, PlaceType = ItemType.Accommodation },
-            new Item { Id = 2, Name = "A2", AveragePricePerAdult = 1000, Score = 5, PlaceType = ItemType.Accommodation },
-            new Item { Id = 3, Name = "R1", AveragePricePerAdult = 200, Score = 2, PlaceType = ItemType.Restaurant },
-            new Item { Id = 4, Name = "R2", AveragePricePerAdult = 300, Score = 3, PlaceType = ItemType.Restaurant },
-            new Item { Id = 5, Name = "R3", AveragePricePerAdult = 100, Score = 1, PlaceType = ItemType.Restaurant },
-            new Item { Id = 6, Name = "E1", AveragePricePerAdult = 400, Score = 3, PlaceType = ItemType.Entertainment },
-            new Item { Id = 7, Name = "E2", AveragePricePerAdult = 150, Score = 2, PlaceType = ItemType.Entertainment },
-            new Item { Id = 8, Name = "E3", AveragePricePerAdult = 500, Score = 4, PlaceType = ItemType.Entertainment },
-            new Item { Id = 9, Name = "T1", AveragePricePerAdult = 250, Score = 3, PlaceType = ItemType.TourismArea },
-            new Item { Id = 10, Name = "T2", AveragePricePerAdult = 600, Score = 4, PlaceType = ItemType.TourismArea }
+            new Item { Id = 1, Name = "Restaurant1", PlaceType = ItemType.Restaurant, AveragePricePerAdult = 200, Score = CalculateScoreBehavior.CalculateScore("A", 5, 200), ClassType = "A", Rating = 4.5, ImageSource = "img1" },
+            new Item { Id = 2, Name = "Accommodation1", PlaceType = ItemType.Accommodation, AveragePricePerAdult = 500, Score = CalculateScoreBehavior.CalculateScore("B", 5, 500), ClassType = "B", Rating = 4.8, ImageSource = "img2" },
+            new Item { Id = 3, Name = "Entertainment1", PlaceType = ItemType.Entertainment, AveragePricePerAdult = 150, Score = CalculateScoreBehavior.CalculateScore("C", 5, 150), ClassType = "C", Rating = 4.0, ImageSource = "img3" },
+            new Item { Id = 4, Name = "TourismArea1", PlaceType = ItemType.TourismArea, AveragePricePerAdult = 100, Score = CalculateScoreBehavior.CalculateScore("A", 5, 100), ClassType = "A", Rating = 4.2, ImageSource = "img4" },
+            new Item { Id = 5, Name = "Restaurant2", PlaceType = ItemType.Restaurant, AveragePricePerAdult = 300, Score = CalculateScoreBehavior.CalculateScore("B", 5, 300), ClassType = "B", Rating = 4.3, ImageSource = "img5" }
         };
     }
 
-    [Fact]
-    public void Calculate_WithDiverseItems_ReturnsValidMaxProfit()
+    private List<Item> CreateLargeTestItems(int count = 100)
     {
-        // Arrange
-        var items = GetTestItems();
-
-        // Act
-        var (dp, _) = _calculator.Calculate(_budget, items, _maxR, _maxA, _maxE, _maxT);
-        float maxProfit = dp[_budget, _maxR, _maxA, _maxE, _maxT];
-
-        // Assert
-        Assert.True(maxProfit > 0, "Maximum profit should be greater than 0 with valid items and budget.");
-        float maxPossibleScore = items.Sum(i => i.Score); // 31
-        Assert.True(maxProfit <= maxPossibleScore, "Maximum profit should not exceed total available score.");
-        Assert.True(maxProfit >= 10, "Maximum profit should be reasonable (e.g., >= 10) given the item scores.");
+        var items = new List<Item>();
+        for (int i = 0; i < count; i++)
+        {
+            string classType = i % 3 == 0 ? "A" : i % 3 == 1 ? "B" : "C";
+            items.Add(new Item
+            {
+                Id = i + 1,
+                Name = $"Item{i + 1}",
+                PlaceType = (ItemType)(i % 4),
+                AveragePricePerAdult = 100 + (i % 10) * 50,
+                Score = CalculateScoreBehavior.CalculateScore(classType, 5, 100 + (i % 10) * 50),
+                ClassType = classType,
+                Rating = 4.0 + (i % 5) * 0.1,
+                ImageSource = $"img{i + 1}"
+            });
+        }
+        return items;
     }
 
-    [Fact]
-    public void Calculate_WithDiverseItems_RespectsBudgetAndConstraints()
+    private List<Item> CreateItemsForHighBudget()
     {
-        // Arrange
-        var items = GetTestItems();
-
-        // Act
-        var (dp, decision) = _calculator.Calculate(_budget, items, _maxR, _maxA, _maxE, _maxT);
-        var selectedItems = BacktrackItems(_budget, _maxR, _maxA, _maxE, _maxT, items, decision);
-
-        // Assert
-        int totalCost = selectedItems.Sum(i => (int)i.AveragePricePerAdult);
-        Assert.True(totalCost <= _budget, $"Total cost ({totalCost}) should not exceed budget ({_budget}).");
-
-        int rCount = selectedItems.Count(i => i.PlaceType == ItemType.Restaurant);
-        int aCount = selectedItems.Count(i => i.PlaceType == ItemType.Accommodation);
-        int eCount = selectedItems.Count(i => i.PlaceType == ItemType.Entertainment);
-        int tCount = selectedItems.Count(i => i.PlaceType == ItemType.TourismArea);
-        Assert.True(rCount <= _maxR, $"Selected Restaurants ({rCount}) should not exceed {_maxR}.");
-        Assert.True(aCount <= _maxA, $"Selected Accommodations ({aCount}) should not exceed {_maxA}.");
-        Assert.True(eCount <= _maxE, $"Selected Entertainments ({eCount}) should not exceed {_maxE}.");
-        Assert.True(tCount <= _maxT, $"Selected Tourism Areas ({tCount}) should not exceed {_maxT}.");
-    }
-
-    [Fact]
-    public void Calculate_WithInsufficientBudget_ReturnsZeroProfit()
-    {
-        // Arrange
-        var items = GetTestItems();
-        int lowBudget = 50;
-
-        // Act
-        var (dp, _) = _calculator.Calculate(lowBudget, items, _maxR, _maxA, _maxE, _maxT);
-
-        // Assert
-        Assert.True(dp[lowBudget, _maxR, _maxA, _maxE, _maxT] == 0f, "Profit should be 0 when budget is too low.");
-    }
-
-    [Fact]
-    public void Calculate_WithZeroCostItem_IncludesItemInProfit()
-    {
-        // Arrange
-        var items = GetTestItems();
-        items.Add(new Item { Id = 11, Name = "R4", AveragePricePerAdult = 0, Score = 1, PlaceType = ItemType.Restaurant });
-
-        // Act
-        var (dp, _) = _calculator.Calculate(_budget, items, _maxR, _maxA, _maxE, _maxT);
-        float profitWithZero = dp[_budget, _maxR, _maxA, _maxE, _maxT];
-        var (dpWithoutZero, _) = _calculator.Calculate(_budget, GetTestItems(), _maxR, _maxA, _maxE, _maxT);
-        float profitWithoutZero = dpWithoutZero[_budget, _maxR, _maxA, _maxE, _maxT];
-
-        // Assert
-        Assert.True(profitWithZero >= profitWithoutZero, "Profit should include zero-cost item if it fits constraints.");
-    }
-    
-    
-    [Fact]
-    public void Calculate_WithDiverseItemCostsAndScores_ReturnsOptimalProfitAndDecision()
-    {
-        // Arrange
-        var calculator = new DynamicProgrammingCalculator();
-        int budget = 1500;
-        int maxR = 2, maxA = 1, maxE = 2, maxT = 1;
-
-        var items = new List<Item>
+        return new List<Item>
         {
             // Accommodations
-            new Item { Id = 1, Name = "A1", AveragePricePerAdult = 800, Score = 4, PlaceType = ItemType.Accommodation },
-            new Item
-            {
-                Id = 2, Name = "A2", AveragePricePerAdult = 1000, Score = 5, PlaceType = ItemType.Accommodation
-            },
+            new Item { Id = 1, Name = "Luxury Hotel", PlaceType = ItemType.Accommodation, AveragePricePerAdult = 2000, Score = CalculateScoreBehavior.CalculateScore("A", 5, 2000), ClassType = "A", Rating = 4.9, ImageSource = "img1" },
+            new Item { Id = 2, Name = "Budget Hotel", PlaceType = ItemType.Accommodation, AveragePricePerAdult = 500, Score = CalculateScoreBehavior.CalculateScore("C", 5, 500), ClassType = "C", Rating = 4.0, ImageSource = "img2" },
             // Restaurants
-            new Item { Id = 3, Name = "R1", AveragePricePerAdult = 200, Score = 2, PlaceType = ItemType.Restaurant },
-            new Item { Id = 4, Name = "R2", AveragePricePerAdult = 300, Score = 3, PlaceType = ItemType.Restaurant },
-            new Item { Id = 5, Name = "R3", AveragePricePerAdult = 100, Score = 1, PlaceType = ItemType.Restaurant },
+            new Item { Id = 3, Name = "Fine Dining", PlaceType = ItemType.Restaurant, AveragePricePerAdult = 300, Score = CalculateScoreBehavior.CalculateScore("A", 5, 300), ClassType = "A", Rating = 4.7, ImageSource = "img3" },
+            new Item { Id = 4, Name = "Local Cafe", PlaceType = ItemType.Restaurant, AveragePricePerAdult = 100, Score = CalculateScoreBehavior.CalculateScore("C", 5, 100), ClassType = "C", Rating = 4.2, ImageSource = "img4" },
             // Entertainments
-            new Item { Id = 6, Name = "E1", AveragePricePerAdult = 400, Score = 3, PlaceType = ItemType.Entertainment },
-            new Item { Id = 7, Name = "E2", AveragePricePerAdult = 150, Score = 2, PlaceType = ItemType.Entertainment },
-            new Item { Id = 8, Name = "E3", AveragePricePerAdult = 500, Score = 4, PlaceType = ItemType.Entertainment },
+            new Item { Id = 5, Name = "Theme Park", PlaceType = ItemType.Entertainment, AveragePricePerAdult = 400, Score = CalculateScoreBehavior.CalculateScore("B", 5, 400), ClassType = "B", Rating = 4.5, ImageSource = "img5" },
+            new Item { Id = 6, Name = "Museum", PlaceType = ItemType.Entertainment, AveragePricePerAdult = 50, Score = CalculateScoreBehavior.CalculateScore("C", 5, 50), ClassType = "C", Rating = 4.1, ImageSource = "img6" },
             // Tourism Areas
-            new Item { Id = 9, Name = "T1", AveragePricePerAdult = 250, Score = 3, PlaceType = ItemType.TourismArea },
-            new Item { Id = 10, Name = "T2", AveragePricePerAdult = 600, Score = 4, PlaceType = ItemType.TourismArea }
+            new Item { Id = 7, Name = "Historical Site", PlaceType = ItemType.TourismArea, AveragePricePerAdult = 200, Score = CalculateScoreBehavior.CalculateScore("A", 5, 200), ClassType = "A", Rating = 4.8, ImageSource = "img7" },
+            new Item { Id = 8, Name = "Beach", PlaceType = ItemType.TourismArea, AveragePricePerAdult = 50, Score = CalculateScoreBehavior.CalculateScore("C", 5, 50), ClassType = "C", Rating = 4.3, ImageSource = "img8" }
         };
+    }
+
+    private List<Item> CreateMixedItemsForBudget1500()
+    {
+        return new List<Item>
+        {
+            new Item { Id = 1, Name = "Hotel A", PlaceType = ItemType.Accommodation, AveragePricePerAdult = 600, Score = CalculateScoreBehavior.CalculateScore("B", 5, 600), ClassType = "B", Rating = 4.5, ImageSource = "img1" },
+            new Item { Id = 2, Name = "Hotel B", PlaceType = ItemType.Accommodation, AveragePricePerAdult = 400, Score = CalculateScoreBehavior.CalculateScore("C", 5, 400), ClassType = "C", Rating = 4.0, ImageSource = "img2" },
+            new Item { Id = 3, Name = "Restaurant A", PlaceType = ItemType.Restaurant, AveragePricePerAdult = 200, Score = CalculateScoreBehavior.CalculateScore("A", 5, 200), ClassType = "A", Rating = 4.7, ImageSource = "img3" },
+            new Item { Id = 4, Name = "Restaurant B", PlaceType = ItemType.Restaurant, AveragePricePerAdult = 150, Score = CalculateScoreBehavior.CalculateScore("C", 5, 150), ClassType = "C", Rating = 4.2, ImageSource = "img4" },
+            new Item { Id = 5, Name = "Theme Park", PlaceType = ItemType.Entertainment, AveragePricePerAdult = 300, Score = CalculateScoreBehavior.CalculateScore("B", 5, 300), ClassType = "B", Rating = 4.6, ImageSource = "img5" },
+            new Item { Id = 6, Name = "Cinema", PlaceType = ItemType.Entertainment, AveragePricePerAdult = 100, Score = CalculateScoreBehavior.CalculateScore("C", 5, 100), ClassType = "C", Rating = 4.1, ImageSource = "img6" },
+            new Item { Id = 7, Name = "Monument", PlaceType = ItemType.TourismArea, AveragePricePerAdult = 100, Score = CalculateScoreBehavior.CalculateScore("A", 5, 100), ClassType = "A", Rating = 4.8, ImageSource = "img7" },
+            new Item { Id = 8, Name = "Park", PlaceType = ItemType.TourismArea, AveragePricePerAdult = 50, Score = CalculateScoreBehavior.CalculateScore("C", 5, 50), ClassType = "C", Rating = 4.3, ImageSource = "img8" },
+            new Item { Id = 9, Name = "Restaurant C", PlaceType = ItemType.Restaurant, AveragePricePerAdult = 250, Score = CalculateScoreBehavior.CalculateScore("B", 5, 250), ClassType = "B", Rating = 4.4, ImageSource = "img9" },
+            new Item { Id = 10, Name = "Zoo", PlaceType = ItemType.Entertainment, AveragePricePerAdult = 200, Score = CalculateScoreBehavior.CalculateScore("B", 5, 200), ClassType = "B", Rating = 4.5, ImageSource = "img10" }
+        };
+    }
+
+    [Fact]
+    public void Calculate_GivenBudget1000AndMixedItems_ReturnsMaxProfit18WithRestaurant1Accommodation1Entertainment1TourismArea1()
+    {
+        // Arrange
+        int budget = 1000;
+        int maxR = 2, maxA = 1, maxE = 2, maxT = 1;
+        var items = CreateStandardTestItems();
+        float expectedProfit = 115 + 85 + 55 + 115; // Restaurant1 (A: 115), Accommodation1 (B: 85), Entertainment1 (C: 55), TourismArea1 (A: 115)
 
         // Act
-        var (dp, decision) = calculator.Calculate(budget, items, maxR, maxA, maxE, maxT);
+        var (dp, decision, itemIds) = _calculator.Calculate(budget, items, maxR, maxA, maxE, maxT);
 
         // Assert
-        // 1. Check if DP table reflects a valid maximum profit
-        float maxProfit = dp[budget, maxR, maxA, maxE, maxT];
-        Assert.True(maxProfit > 0, "Maximum profit should be greater than 0 with valid items and budget.");
+        Assert.Equal(expectedProfit, dp[budget, maxR, maxA, maxE, maxT]);
 
-        // 2. Validate profit is achievable and reasonable (e.g., between min and max possible scores)
-        float maxPossibleScore = items.Sum(i => i.Score); // 31 in this case
-        Assert.True(maxProfit <= maxPossibleScore, "Maximum profit should not exceed total available score.");
-        Assert.True(maxProfit >= 10, "Maximum profit should be reasonable (e.g., >= 10) given the item scores.");
+        // Verify selected items
+        Assert.True(decision[200, 1, 0, 0, 0, 0]);
+        Assert.True(decision[700, 1, 1, 0, 0, 1]);
+        Assert.True(decision[850, 1, 1, 1, 0, 2]);
+        Assert.True(decision[950, 1, 1, 1, 1, 3]);
+        Assert.Equal(1, itemIds[200, 1, 0, 0, 0, 0].GetValueOrDefault());
+        Assert.Equal(2, itemIds[700, 1, 1, 0, 0, 1].GetValueOrDefault());
+        Assert.Equal(3, itemIds[850, 1, 1, 1, 0, 2].GetValueOrDefault());
+        Assert.Equal(4, itemIds[950, 1, 1, 1, 1, 3].GetValueOrDefault());
 
-        // 3. Backtrack to verify selected items respect budget and constraints
-        var selectedItems = BacktrackItems(budget, maxR, maxA, maxE, maxT, items, decision);
-        int totalCost = selectedItems.Sum(i => (int)i.AveragePricePerAdult);
-        Assert.True(totalCost <= budget, $"Total cost ({totalCost}) should not exceed budget ({budget}).");
 
-        int rCount = selectedItems.Count(i => i.PlaceType == ItemType.Restaurant);
-        int aCount = selectedItems.Count(i => i.PlaceType == ItemType.Accommodation);
-        int eCount = selectedItems.Count(i => i.PlaceType == ItemType.Entertainment);
-        int tCount = selectedItems.Count(i => i.PlaceType == ItemType.TourismArea);
-        Assert.True(rCount <= maxR, $"Selected Restaurants ({rCount}) should not exceed {maxR}.");
-        Assert.True(aCount <= maxA, $"Selected Accommodations ({aCount}) should not exceed {maxA}.");
-        Assert.True(eCount <= maxE, $"Selected Entertainments ({eCount}) should not exceed {maxE}.");
-        Assert.True(tCount <= maxT, $"Selected Tourism Areas ({tCount}) should not exceed {maxT}.");
-
-        // 4. Edge Case: Check with insufficient budget (e.g., 50)
-        var (dpLowBudget, decisionLowBudget) = calculator.Calculate(50, items, maxR, maxA, maxE, maxT);
-        Assert.Equal(0f, dpLowBudget[50, maxR, maxA, maxE, maxT]);
-        
-        Assert.True(dpLowBudget[50, maxR, maxA, maxE, maxT] == 0f, "Profit should be 0 when budget is too low.");
-        // 5. Edge Case: Item with zero cost
-        items.Add(new Item
-            { Id = 11, Name = "R4", AveragePricePerAdult = 0, Score = 1, PlaceType = ItemType.Restaurant });
-        var (dpWithZero, decisionWithZero) = calculator.Calculate(budget, items, maxR, maxA, maxE, maxT);
-        float profitWithZero = dpWithZero[budget, maxR, maxA, maxE, maxT];
-        Assert.True(profitWithZero >= maxProfit, "Profit should include zero-cost item if it fits constraints.");
-    }
-
-    // Helper method to backtrack selected items from decision array
-    private List<Item> BacktrackItems(int budget, int maxR, int maxA, int maxE, int maxT, List<Item> items, bool[,,,,,] decision)
-    {
-        var selectedItems = new List<Item>();
-        int currentBudget = budget;
-        int r = maxR, a = maxA, e = maxE, t = maxT;
-
+        _output.WriteLine($"Final Profit: {dp[budget, maxR, maxA, maxE, maxT]}");
+        _output.WriteLine("Selected Items:");
+        int currentW = budget, currentR = maxR, currentA = maxA, currentE = maxE, currentT = maxT;
+        int totalCost = 0, totalScore = 0;
         for (int i = items.Count - 1; i >= 0; i--)
         {
-            if (decision[currentBudget, r, a, e, t, i])
+            if (decision[currentW, currentR, currentA, currentE, currentT, i])
             {
                 var item = items[i];
-                selectedItems.Add(item);
-                currentBudget -= (int)item.AveragePricePerAdult;
-                r -= item.PlaceType == ItemType.Restaurant ? 1 : 0;
-                a -= item.PlaceType == ItemType.Accommodation ? 1 : 0;
-                e -= item.PlaceType == ItemType.Entertainment ? 1 : 0;
-                t -= item.PlaceType == ItemType.TourismArea ? 1 : 0;
+                _output.WriteLine($"Item: {item.Name}, Type: {item.PlaceType}, Cost: {item.AveragePricePerAdult}, Score: {item.Score}, ID: {itemIds[currentW, currentR, currentA, currentE, currentT, i]}");
+                totalCost += (int)item.AveragePricePerAdult;
+                totalScore += (int)item.Score;
+                currentW -= (int)item.AveragePricePerAdult;
+                switch (item.PlaceType)
+                {
+                    case ItemType.Restaurant: currentR--; break;
+                    case ItemType.Accommodation: currentA--; break;
+                    case ItemType.Entertainment: currentE--; break;
+                    case ItemType.TourismArea: currentT--; break;
+                }
             }
         }
+        _output.WriteLine($"Total Cost: {totalCost}, Total Score: {totalScore}");
+        _output.WriteLine($"DP[{budget}, {maxR}, {maxA}, {maxE}, {maxT}] = {dp[budget, maxR, maxA, maxE, maxT]}");
+    }
 
-        return selectedItems;
+    [Fact]
+    public void Calculate_GivenZeroBudget_ReturnsZeroProfitAndNoItemsSelected()
+    {
+        // Arrange
+        int budget = 0;
+        int maxR = 2, maxA = 1, maxE = 2, maxT = 1;
+        var items = CreateStandardTestItems();
+
+        // Act
+        var (dp, decision, itemIds) = _calculator.Calculate(budget, items, maxR, maxA, maxE, maxT);
+
+        // Assert
+        Assert.Equal(0f, dp[budget, maxR, maxA, maxE, maxT]);
+        for (int r = 0; r <= maxR; r++)
+        for (int a = 0; a <= maxA; a++)
+        for (int e = 0; e <= maxE; e++)
+        for (int t = 0; t <= maxT; t++)
+        for (int i = 0; i < items.Count; i++)
+        {
+            Assert.False(decision[budget, r, a, e, t, i], $"No items should be selected at state [{budget}, {r}, {a}, {e}, {t}]");
+            Assert.Null(itemIds[budget, r, a, e, t, i]);
+        }
+        _output.WriteLine($"DP[{budget}, {maxR}, {maxA}, {maxE}, {maxT}] = {dp[budget, maxR, maxA, maxE, maxT]}");
+    }
+
+    [Fact]
+    public void Calculate_GivenEmptyItemList_ReturnsZeroProfitAndEmptyArrays()
+    {
+        // Arrange
+        int budget = 1000;
+        int maxR = 2, maxA = 1, maxE = 2, maxT = 1;
+        var items = new List<Item>();
+
+        // Act
+        var (dp, decision, itemIds) = _calculator.Calculate(budget, items, maxR, maxA, maxE, maxT);
+
+        // Assert
+        Assert.Equal(0f, dp[budget, maxR, maxA, maxE, maxT]);
+        for (int w = 0; w <= budget; w++)
+        for (int r = 0; r <= maxR; r++)
+        for (int a = 0; a <= maxA; a++)
+        for (int e = 0; e <= maxE; e++)
+        for (int t = 0; t <= maxT; t++)
+        {
+            Assert.Equal(0f, dp[w, r, a, e, t]);
+        }
+        Assert.Equal(0, decision.GetLength(5));
+        Assert.Equal(0, itemIds.GetLength(5));
+        _output.WriteLine($"DP[{budget}, {maxR}, {maxA}, {maxE}, {maxT}] = {dp[budget, maxR, maxA, maxE, maxT]}");
+    }
+
+    [Fact]
+    public void Calculate_GivenBudget50BelowMinCost100_ReturnsZeroProfitAndNoItemsSelected()
+    {
+        // Arrange
+        int budget = 50;
+        int maxR = 2, maxA = 1, maxE = 2, maxT = 1;
+        var items = CreateStandardTestItems();
+
+        // Act
+        var (dp, decision, itemIds) = _calculator.Calculate(budget, items, maxR, maxA, maxE, maxT);
+
+        // Assert
+        Assert.Equal(0f, dp[budget, maxR, maxA, maxE, maxT]);
+        for (int r = 0; r <= maxR; r++)
+        for (int a = 0; a <= maxA; a++)
+        for (int e = 0; e <= maxE; e++)
+        for (int t = 0; t <= maxT; t++)
+        for (int i = 0; i < items.Count; i++)
+        {
+            Assert.False(decision[budget, r, a, e, t, i], $"No items should be selected at state [{budget}, {r}, {a}, {e}, {t}]");
+            Assert.Null(itemIds[budget, r, a, e, t, i]);
+        }
+        _output.WriteLine($"DP[{budget}, {maxR}, {maxA}, {maxE}, {maxT}] = {dp[budget, maxR, maxA, maxE, maxT]}");
+    }
+
+    [Fact]
+    public void Calculate_GivenOnlyRestaurantItemsAndBudget1000_ReturnsMaxProfit9WithBothRestaurants()
+    {
+        // Arrange
+        int budget = 1000;
+        int maxR = 2, maxA = 0, maxE = 0, maxT = 0;
+        var items = new List<Item>
+        {
+            new Item { Id = 1, Name = "Restaurant1", PlaceType = ItemType.Restaurant, AveragePricePerAdult = 200, Score = CalculateScoreBehavior.CalculateScore("A", 5, 200), ClassType = "A", Rating = 4.5, ImageSource = "img1" },
+            new Item { Id = 2, Name = "Restaurant2", PlaceType = ItemType.Restaurant, AveragePricePerAdult = 300, Score = CalculateScoreBehavior.CalculateScore("B", 5, 300), ClassType = "B", Rating = 4.3, ImageSource = "img2" }
+        };
+        float expectedProfit = 115 + 85; // Restaurant1 (A: 115) + Restaurant2 (B: 85)
+
+        // Act
+        var (dp, decision, itemIds) = _calculator.Calculate(budget, items, maxR, maxA, maxE, maxT);
+
+        // Assert
+        Assert.Equal(expectedProfit, dp[budget, maxR, maxA, maxE, maxT]);
+        Assert.True(decision[500, 1, 0, 0, 0, 0], "Restaurant1 should be selected at state [500, 1, 0, 0, 0]");
+        Assert.True(decision[budget, 2, 0, 0, 0, 1], "Restaurant2 should be selected at state [1000, 2, 0, 0, 0]");
+        Assert.Equal(1, itemIds[500, 1, 0, 0, 0, 0].GetValueOrDefault());
+        Assert.Equal(2, itemIds[budget, 2, 0, 0, 0, 1].GetValueOrDefault());
+        _output.WriteLine($"DP[{budget}, {maxR}, {maxA}, {maxE}, {maxT}] = {dp[budget, maxR, maxA, maxE, maxT]}");
+    }
+
+    [Fact]
+    public void Calculate_GivenAllZeroConstraints_ReturnsZeroProfitAndNoItemsSelected()
+    {
+        // Arrange
+        int budget = 1000;
+        int maxR = 0, maxA = 0, maxE = 0, maxT = 0;
+        var items = CreateStandardTestItems();
+
+        // Act
+        var (dp, decision, itemIds) = _calculator.Calculate(budget, items, maxR, maxA, maxE, maxT);
+
+        // Assert
+        Assert.Equal(0f, dp[budget, maxR, maxA, maxE, maxT]);
+        for (int w = 0; w <= budget; w++)
+        {
+            Assert.Equal(0f, dp[w, maxR, maxA, maxE, maxT]);
+        }
+        for (int w = 0; w <= budget; w++)
+        for (int i = 0; i < items.Count; i++)
+        {
+            Assert.False(decision[w, maxR, maxA, maxE, maxT, i], $"No items should be selected at state [{w}, {maxR}, {maxA}, {maxE}, {maxT}]");
+            Assert.Null(itemIds[w, maxR, maxA, maxE, maxT, i]);
+        }
+        _output.WriteLine($"DP[{budget}, {maxR}, {maxA}, {maxE}, {maxT}] = {dp[budget, maxR, maxA, maxE, maxT]}");
+    }
+
+    [Fact]
+    public void Calculate_GivenNegativeBudget_ThrowsIndexOutOfRangeException()
+    {
+        // Arrange
+        int budget = -1;
+        int maxR = 2, maxA = 1, maxE = 2, maxT = 1;
+        var items = CreateStandardTestItems();
+
+        // Act & Assert
+        Assert.Throws<IndexOutOfRangeException>(() => _calculator.Calculate(budget, items, maxR, maxA, maxE, maxT));
+    }
+
+    [Fact]
+    public void Calculate_Given100ItemsAndBudget5000_ReturnsNonZeroProfitWithValidSelections()
+    {
+        // Arrange
+        int budget = 5000;
+        int maxR = 4, maxA = 1, maxE = 2, maxT = 1;
+        var items = CreateLargeTestItems(100);
+
+        // Act
+        var (dp, decision, itemIds) = _calculator.Calculate(budget, items, maxR, maxA, maxE, maxT);
+
+        // Assert
+        Assert.True(dp[budget, maxR, maxA, maxE, maxT] > 0, "Profit should be non-zero with sufficient budget and items");
+        bool hasSelections = false;
+        for (int w = 0; w <= budget; w++)
+        for (int r = 0; r <= maxR; r++)
+        for (int a = 0; a <= maxA; a++)
+        for (int e = 0; e <= maxE; e++)
+        for (int t = 0; t <= maxT; t++)
+        for (int i = 0; i < items.Count; i++)
+        {
+            if (decision[w, r, a, e, t, i])
+            {
+                hasSelections = true;
+                Assert.NotNull(itemIds[w, r, a, e, t, i]);
+            }
+        }
+        Assert.True(hasSelections, "At least some items should be selected within constraints");
+        _output.WriteLine($"DP[{budget}, {maxR}, {maxA}, {maxE}, {maxT}] = {dp[budget, maxR, maxA, maxE, maxT]}");
+    }
+
+    [Fact]
+    public void Calculate_GivenBudget10000AndSingleItemConstraints_ReturnsMaxProfit345WithLuxuryHotelFineDiningThemeParkHistoricalSite()
+    {
+        // Arrange
+        int budget = 10000;
+        int maxR = 1, maxA = 1, maxE = 1, maxT = 1;
+        var items = CreateItemsForHighBudget();
+        float expectedProfit = 115 + 115 + 85 + 115; // Luxury Hotel (A: 115), Fine Dining (A: 115), Theme Park (B: 85), Historical Site (A: 115)
+
+        // Act
+        var (dp, decision, itemIds) = _calculator.Calculate(budget, items, maxR, maxA, maxE, maxT);
+
+        // Assert
+        Assert.Equal(expectedProfit, dp[budget, maxR, maxA, maxE, maxT]);
+
+        // Verify selected items
+        Assert.True(decision[2000, 0, 1, 0, 0, 0], "Luxury Hotel should be selected");
+        Assert.True(decision[2300, 1, 1, 0, 0, 2], "Fine Dining should be selected");
+        Assert.True(decision[2700, 1, 1, 1, 0, 4], "Theme Park should be selected");
+        Assert.True(decision[2900, 1, 1, 1, 1, 6], "Historical Site should be selected");
+        Assert.Equal(1, itemIds[2000, 0, 1, 0, 0, 0].GetValueOrDefault());
+        Assert.Equal(3, itemIds[2300, 1, 1, 0, 0, 2].GetValueOrDefault());
+        Assert.Equal(5, itemIds[2700, 1, 1, 1, 0, 4].GetValueOrDefault());
+        Assert.Equal(7, itemIds[2900, 1, 1, 1, 1, 6].GetValueOrDefault());
+
+        // Debug: Print selected items
+        _output.WriteLine($"Final Profit: {dp[budget, maxR, maxA, maxE, maxT]}");
+        _output.WriteLine("Selected Items:");
+        int currentW = budget, currentR = maxR, currentA = maxA, currentE = maxE, currentT = maxT;
+        int totalCost = 0, totalScore = 0;
+        for (int i = items.Count - 1; i >= 0; i--)
+        {
+            if (decision[currentW, currentR, currentA, currentE, currentT, i])
+            {
+                var item = items[i];
+                _output.WriteLine($"Item: {item.Name}, Type: {item.PlaceType}, Cost: {item.AveragePricePerAdult}, Score: {item.Score}, ID: {itemIds[currentW, currentR, currentA, currentE, currentT, i]}");
+                totalCost += (int)item.AveragePricePerAdult;
+                totalScore += (int)item.Score;
+                currentW -= (int)item.AveragePricePerAdult;
+                switch (item.PlaceType)
+                {
+                    case ItemType.Restaurant: currentR--; break;
+                    case ItemType.Accommodation: currentA--; break;
+                    case ItemType.Entertainment: currentE--; break;
+                    case ItemType.TourismArea: currentT--; break;
+                }
+            }
+        }
+        _output.WriteLine($"Total Cost: {totalCost}, Total Score: {totalScore}");
+        _output.WriteLine($"DP[{budget}, {maxR}, {maxA}, {maxE}, {maxT}] = {dp[budget, maxR, maxA, maxE, maxT]}");
+    }
+
+    [Fact]
+    public void Calculate_GivenBudget1500And10MixedItems_ReturnsMaxProfit510WithRestaurantAMonumentRestaurantCZoo()
+    {
+        // Arrange
+        int budget = 1500;
+        int maxR = 10, maxA = 10, maxE = 10, maxT = 10;
+        var items = CreateMixedItemsForBudget1500();
+        float expectedProfit = 115 + 115 + 85 + 85; // Restaurant A (A: 115), Monument (A: 115), Restaurant C (B: 85), Zoo (B: 85)
+
+        // Act
+        var (dp, decision, itemIds) = _calculator.Calculate(budget, items, maxR, maxA, maxE, maxT);
+
+        // Assert
+        Assert.Equal(expectedProfit, dp[budget, maxR, maxA, maxE, maxT]);
+
+        // Verify selected items
+        Assert.True(decision[200, 1, 0, 0, 0, 2], "Restaurant A should be selected");
+        Assert.True(decision[300, 1, 0, 0, 1, 6], "Monument should be selected");
+        Assert.True(decision[550, 2, 0, 0, 1, 8], "Restaurant C should be selected");
+        Assert.True(decision[750, 2, 0, 1, 1, 9], "Zoo should be selected");
+        Assert.Equal(3, itemIds[200, 1, 0, 0, 0, 2].GetValueOrDefault());
+        Assert.Equal(7, itemIds[300, 1, 0, 0, 1, 6].GetValueOrDefault());
+        Assert.Equal(9, itemIds[550, 2, 0, 0, 1, 8].GetValueOrDefault());
+        Assert.Equal(10, itemIds[750, 2, 0, 1, 1, 9].GetValueOrDefault());
+
+        // Debug: Print selected items
+        _output.WriteLine($"Final Profit: {dp[budget, maxR, maxA, maxE, maxT]}");
+        _output.WriteLine("Selected Items:");
+        int currentW = budget, currentR = maxR, currentA = maxA, currentE = maxE, currentT = maxT;
+        int totalCost = 0, totalScore = 0;
+        for (int i = items.Count - 1; i >= 0; i--)
+        {
+            if (decision[currentW, currentR, currentA, currentE, currentT, i])
+            {
+                var item = items[i];
+                _output.WriteLine($"Item: {item.Name}, Type: {item.PlaceType}, Cost: {item.AveragePricePerAdult}, Score: {item.Score}, ID: {itemIds[currentW, currentR, currentA, currentE, currentT, i]}");
+                totalCost += (int)item.AveragePricePerAdult;
+                totalScore += (int)item.Score;
+                currentW -= (int)item.AveragePricePerAdult;
+                switch (item.PlaceType)
+                {
+                    case ItemType.Restaurant: currentR--; break;
+                    case ItemType.Accommodation: currentA--; break;
+                    case ItemType.Entertainment: currentE--; break;
+                    case ItemType.TourismArea: currentT--; break;
+                }
+            }
+        }
+        _output.WriteLine($"Total Cost: {totalCost}, Total Score: {totalScore}");
+        _output.WriteLine($"DP[{budget}, {maxR}, {maxA}, {maxE}, {maxT}] = {dp[budget, maxR, maxA, maxE, maxT]}");
     }
 }
+
+
+
+/*
+ *Fluent Assertion
+ using System;
+using System.Collections.Generic;
+using FluentAssertions;
+using TripMinder.Core.Behaviors.Knapsack;
+using Xunit;
+using Xunit.Abstractions;
+
+namespace TripMinder.Core.Tests.Behaviors.Knapsack
+{
+    public class DynamicProgrammingCalculatorTests
+    {
+        private readonly IDynamicProgrammingCalculator _calculator;
+        private readonly ITestOutputHelper _output;
+
+        public DynamicProgrammingCalculatorTests(ITestOutputHelper output)
+        {
+            _calculator = new DynamicProgrammingCalculator();
+            _output = output;
+        }
+
+        // Helper method to create a standard set of test items
+        private List<Item> CreateStandardTestItems()
+        {
+            return new List<Item>
+            {
+                new Item { Id = 1, Name = "Restaurant1", PlaceType = ItemType.Restaurant, AveragePricePerAdult = 200, Score = 5, ClassType = "A", Rating = 4.5, ImageSource = "img1" },
+                new Item { Id = 2, Name = "Accommodation1", PlaceType = ItemType.Accommodation, AveragePricePerAdult = 500, Score = 8, ClassType = "B", Rating = 4.8, ImageSource = "img2" },
+                new Item { Id = 3, Name = "Entertainment1", PlaceType = ItemType.Entertainment, AveragePricePerAdult = 150, Score = 3, ClassType = "C", Rating = 4.0, ImageSource = "img3" },
+                new Item { Id = 4, Name = "TourismArea1", PlaceType = ItemType.TourismArea, AveragePricePerAdult = 100, Score = 2, ClassType = "A", Rating = 4.2, ImageSource = "img4" },
+                new Item { Id = 5, Name = "Restaurant2", PlaceType = ItemType.Restaurant, AveragePricePerAdult = 300, Score = 4, ClassType = "B", Rating = 4.3, ImageSource = "img5" }
+            };
+        }
+
+        // Helper method to create a large set of test items
+        private List<Item> CreateLargeTestItems(int count = 100)
+        {
+            var items = new List<Item>();
+            for (int i = 0; i < count; i++)
+            {
+                items.Add(new Item
+                {
+                    Id = i + 1,
+                    Name = $"Item{i + 1}",
+                    PlaceType = (ItemType)(i % 4), // Cycles through Restaurant, Accommodation, Entertainment, TourismArea
+                    AveragePricePerAdult = 100 + (i % 10) * 50, // Costs: 100, 150, 200, ..., 550
+                    Score = 1 + (i % 5), // Scores: 1, 2, 3, 4, 5
+                    ClassType = "A",
+                    Rating = 4.0 + (i % 5) * 0.1,
+                    ImageSource = $"img{i + 1}"
+                });
+            }
+            return items;
+        }
+
+        [Fact]
+        public void Calculate_GivenBudget1000AndMixedItems_ReturnsMaxProfit13WithRestaurant1AndAccommodation1()
+        {
+            // Arrange
+            int budget = 1000;
+            int maxR = 2, maxA = 1, maxE = 2, maxT = 1;
+            var items = CreateStandardTestItems();
+            float expectedProfit = 13; // Restaurant1 (5) + Accommodation1 (8)
+
+            // Act
+            var (dp, decision, itemIds) = _calculator.Calculate(budget, items, maxR, maxA, maxE, maxT);
+
+            // Assert
+            dp[budget, maxR, maxA, maxE, maxT].Should().Be(expectedProfit, $"Expected profit {expectedProfit} at state [{budget}, {maxR}, {maxA}, {maxE}, {maxT}]");
+            decision[700, 1, 0, 0, 0, 0].Should().BeTrue("Restaurant1 should be selected at state [700, 1, 0, 0, 0]");
+            decision[budget, 1, 1, 0, 0, 1].Should().BeTrue("Accommodation1 should be selected at state [1000, 1, 1, 0, 0]");
+            itemIds[700, 1, 0, 0, 0, 0].Should().Be(1, "Restaurant1 ID should be recorded at state [700, 1, 0, 0, 0]");
+            itemIds[budget, 1, 1, 0, 0, 1].Should().Be(2, "Accommodation1 ID should be recorded at state [1000, 1, 1, 0, 0]");
+            _output.WriteLine($"DP[{budget}, {maxR}, {maxA}, {maxE}, {maxT}] = {dp[budget, maxR, maxA, maxE, maxT]}");
+        }
+
+        [Fact]
+        public void Calculate_GivenZeroBudget_ReturnsZeroProfitAndNoItemsSelected()
+        {
+            // Arrange
+            int budget = 0;
+            int maxR = 2, maxA = 1, maxE = 2, maxT = 1;
+            var items = CreateStandardTestItems();
+
+            // Act
+            var (dp, decision, itemIds) = _calculator.Calculate(budget, items, maxR, maxA, maxE, maxT);
+
+            // Assert
+            dp[budget, maxR, maxA, maxE, maxT].Should().Be(0, $"Profit should be 0 at state [{budget}, {maxR}, {maxA}, {maxE}, {maxT}]");
+            for (int r = 0; r <= maxR; r++)
+            for (int a = 0; a <= maxA; a++)
+            for (int e = 0; e <= maxE; e++)
+            for (int t = 0; t <= maxT; t++)
+            for (int i = 0; i < items.Count; i++)
+            {
+                decision[budget, r, a, e, t, i].Should().BeFalse($"No items should be selected at state [{budget}, {r}, {a}, {e}, {t}]");
+                itemIds[budget, r, a, e, t, i].Should().BeNull($"Item IDs should be null at state [{budget}, {r}, {a}, {e}, {t}]");
+            }
+            _output.WriteLine($"DP[{budget}, {maxR}, {maxA}, {maxE}, {maxT}] = {dp[budget, maxR, maxA, maxE, maxT]}");
+        }
+
+        [Fact]
+        public void Calculate_GivenEmptyItemList_ReturnsZeroProfitAndEmptyArrays()
+        {
+            // Arrange
+            int budget = 1000;
+            int maxR = 2, maxA = 1, maxE = 2, maxT = 1;
+            var items = new List<Item>();
+
+            // Act
+            var (dp, decision, itemIds) = _calculator.Calculate(budget, items, maxR, maxA, maxE, maxT);
+
+            // Assert
+            dp[budget, maxR, maxA, maxE, maxT].Should().Be(0, $"Profit should be 0 at state [{budget}, {maxR}, {maxA}, {maxE}, {maxT}]");
+            for (int w = 0; w <= budget; w++)
+            for (int r = 0; r <= maxR; r++)
+            for (int a = 0; a <= maxA; a++)
+            for (int e = 0; e <= maxE; e++)
+            for (int t = 0; t <= maxT; t++)
+            {
+                dp[w, r, a, e, t].Should().Be(0, $"DP table should be zero at state [{w}, {r}, {a}, {e}, {t}]");
+            }
+            decision.GetLength(5).Should().Be(0, "Decision array should have zero item dimension");
+            itemIds.GetLength(5).Should().Be(0, "ItemIds array should have zero item dimension");
+            _output.WriteLine($"DP[{budget}, {maxR}, {maxA}, {maxE}, {maxT}] = {dp[budget, maxR, maxA, maxE, maxT]}");
+        }
+
+        [Fact]
+        public void Calculate_GivenBudget50BelowMinCost100_ReturnsZeroProfitAndNoItemsSelected()
+        {
+            // Arrange
+            int budget = 50;
+            int maxR = 2, maxA = 1, maxE = 2, maxT = 1;
+            var items = CreateStandardTestItems(); // Min cost = 100
+
+            // Act
+            var (dp, decision, itemIds) = _calculator.Calculate(budget, items, maxR, maxA, maxE, maxT);
+
+            // Assert
+            dp[budget, maxR, maxA, maxE, maxT].Should().Be(0, $"Profit should be 0 at state [{budget}, {maxR}, {maxA}, {maxE}, {maxT}]");
+            for (int r = 0; r <= maxR; r++)
+            for (int a = 0; a <= maxA; a++)
+            for (int e = 0; e <= maxE; e++)
+            for (int t = 0; t <= maxT; t++)
+            for (int i = 0; i < items.Count; i++)
+            {
+                decision[budget, r, a, e, t, i].Should().BeFalse($"No items should be selected at state [{budget}, {r}, {a}, {e}, {t}]");
+                itemIds[budget, r, a, e, t, i].Should().BeNull($"Item IDs should be null at state [{budget}, {r}, {a}, {e}, {t}]");
+            }
+            _output.WriteLine($"DP[{budget}, {maxR}, {maxA}, {maxE}, {maxT}] = {dp[budget, maxR, maxA, maxE, maxT]}");
+        }
+
+        [Fact]
+        public void Calculate_GivenOnlyRestaurantItemsAndBudget1000_ReturnsMaxProfit9WithBothRestaurants()
+        {
+            // Arrange
+            int budget = 1000;
+            int maxR = 2, maxA = 0, maxE = 0, maxT = 0;
+            var items = new List<Item>
+            {
+                new Item { Id = 1, Name = "Restaurant1", PlaceType = ItemType.Restaurant, AveragePricePerAdult = 200, Score = 5, ClassType = "A", Rating = 4.5, ImageSource = "img1" },
+                new Item { Id = 2, Name = "Restaurant2", PlaceType = ItemType.Restaurant, AveragePricePerAdult = 300, Score = 4, ClassType = "B", Rating = 4.3, ImageSource = "img2" }
+            };
+            float expectedProfit = 9; // Restaurant1 (5) + Restaurant2 (4)
+
+            // Act
+            var (dp, decision, itemIds) = _calculator.Calculate(budget, items, maxR, maxA, maxE, maxT);
+
+            // Assert
+            dp[budget, maxR, maxA, maxE, maxT].Should().Be(expectedProfit, $"Expected profit {expectedProfit} at state [{budget}, {maxR}, {maxA}, {maxE}, {maxT}]");
+            decision[500, 1, 0, 0, 0, 0].Should().BeTrue("Restaurant1 should be selected at state [500, 1, 0, 0, 0]");
+            decision[budget, 2, 0, 0, 0, 1].Should().BeTrue("Restaurant2 should be selected at state [1000, 2, 0, 0, 0]");
+            itemIds[500, 1, 0, 0, 0, 0].Should().Be(1, "Restaurant1 ID should be recorded at state [500, 1, 0, 0, 0]");
+            itemIds[budget, 2, 0, 0, 0, 1].Should().Be(2, "Restaurant2 ID should be recorded at state [1000, 2, 0, 0, 0]");
+            _output.WriteLine($"DP[{budget}, {maxR}, {maxA}, {maxE}, {maxT}] = {dp[budget, maxR, maxA, maxE, maxT]}");
+        }
+
+        [Fact]
+        public void Calculate_GivenAllZeroConstraints_ReturnsZeroProfitAndNoItemsSelected()
+        {
+            // Arrange
+            int budget = 1000;
+            int maxR = 0, maxA = 0, maxE = 0, maxT = 0;
+            var items = CreateStandardTestItems();
+
+            // Act
+            var (dp, decision, itemIds) = _calculator.Calculate(budget, items, maxR, maxA, maxE, maxT);
+
+            // Assert
+            dp[budget, maxR, maxA, maxE, maxT].Should().Be(0, $"Profit should be 0 at state [{budget}, {maxR}, {maxA}, {maxE}, {maxT}]");
+            for (int w = 0; w <= budget; w++)
+            {
+                dp[w, maxR, maxA, maxE, maxT].Should().Be(0, $"DP table should be zero at state [{w}, {maxR}, {maxA}, {maxE}, {maxT}]");
+            }
+            for (int w = 0; w <= budget; w++)
+            for (int i = 0; i < items.Count; i++)
+            {
+                decision[w, maxR, maxA, maxE, maxT, i].Should().BeFalse($"No items should be selected at state [{w}, {maxR}, {maxA}, {maxE}, {maxT}]");
+                itemIds[w, maxR, maxA, maxE, maxT, i].Should().BeNull($"Item IDs should be null at state [{w}, {maxR}, {maxA}, {maxE}, {maxT}]");
+            }
+            _output.WriteLine($"DP[{budget}, {maxR}, {maxA}, {maxE}, {maxT}] = {dp[budget, maxR, maxA, maxE, maxT]}");
+        }
+
+        [Fact]
+        public void Calculate_GivenNegativeBudget_ThrowsIndexOutOfRangeException()
+        {
+            // Arrange
+            int budget = -1;
+            int maxR = 2, maxA = 1, maxE = 2, maxT = 1;
+            var items = CreateStandardTestItems();
+
+            // Act & Assert
+            Action act = () => _calculator.Calculate(budget, items, maxR, maxA, maxE, maxT);
+            act.Should().Throw<IndexOutOfRangeException>("Negative budget should cause invalid array initialization");
+        }
+
+        [Fact]
+        public void Calculate_Given100ItemsAndBudget5000_ReturnsNonZeroProfitWithValidSelections()
+        {
+            // Arrange
+            int budget = 5000;
+            int maxR = 4, maxA = 1, maxE = 2, maxT = 1;
+            var items = CreateLargeTestItems(100);
+
+            // Act
+            var (dp, decision, itemIds) = _calculator.Calculate(budget, items, maxR, maxA, maxE, maxT);
+
+            // Assert
+            dp[budget, maxR, maxA, maxE, maxT].Should().BeGreaterThan(0, $"Profit should be non-zero at state [{budget}, {maxR}, {maxA}, {maxE}, {maxT}]");
+            bool hasSelections = false;
+            for (int w = 0; w <= budget; w++)
+            for (int r = 0; r <= maxR; r++)
+            for (int a = 0; a <= maxA; a++)
+            for (int e = 0; e <= maxE; e++)
+            for (int t = 0; t <= maxT; t++)
+            for (int i = 0; i < items.Count; i++)
+            {
+                if (decision[w, r, a, e, t, i])
+                {
+                    hasSelections = true;
+                    itemIds[w, r, a, e, t, i].Should().NotBeNull($"Selected item at state [{w}, {r}, {a}, {e}, {t}] should have a valid ID");
+                }
+            }
+            hasSelections.Should().BeTrue("At least some items should be selected within constraints");
+            _output.WriteLine($"DP[{budget}, {maxR}, {maxA}, {maxE}, {maxT}] = {dp[budget, maxR, maxA, maxE, maxT]}");
+        }
+    }
+}
+ * 
+ */
 

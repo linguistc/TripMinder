@@ -7,13 +7,13 @@ public class KnapsackDP : IKnapsackDP
     
     public KnapsackDP(IDynamicProgrammingCalculator calculator, IKnapsackConstraints constraints)
     {
-        this._calculator = calculator;
-        this._constraints = constraints;
+        _calculator = calculator;
+        _constraints = constraints;
     }
     
-    public (float[,,,,] dp, bool[,,,,,] decision) CalculateDP(int budget, List<Item> items)
+    public (float[,,,,] dp, bool[,,,,,] decision, int?[,,,,,] itemIds) CalculateDP(int budget, List<Item> items)
     {
-        return this._calculator.Calculate(budget, items, this._constraints.MaxRestaurants, this._constraints.MaxAccommodations, 
-            this._constraints.MaxEntertainments, this._constraints.MaxTourismAreas);
+        return _calculator.Calculate(budget, items, _constraints.MaxRestaurants, _constraints.MaxAccommodations, 
+            _constraints.MaxEntertainments, _constraints.MaxTourismAreas);
     }
 }

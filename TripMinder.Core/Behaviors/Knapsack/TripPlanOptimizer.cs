@@ -2,7 +2,6 @@ using MediatR;
 using TripMinder.Core.Bases;
 
 namespace TripMinder.Core.Behaviors.Knapsack;
-
 public class TripPlanOptimizer
 {
     private readonly IKnapsackSolver _solver;
@@ -17,7 +16,7 @@ public class TripPlanOptimizer
     public async Task<Respond<TripPlanResponse>> OptimizePlan(TripPlanRequest request)
     {
         var priorities = CalculatePriorities(request.Interests);
-        var allItems = await _itemFetcher.FetchItems(request.GovernorateId ,request.ZoneId, priorities);
+        var allItems = await _itemFetcher.FetchItems(request.GovernorateId, request.ZoneId, priorities);
         var totalBudget = (int)(request.BudgetPerAdult);
 
         var constraints = new UserDefinedKnapsackConstraints(
@@ -28,19 +27,30 @@ public class TripPlanOptimizer
 
         var (maxProfit, selectedItems) = _solver.GetMaxProfit(totalBudget, allItems, constraints, priorities);
         var tripPlanResponse = BuildTripPlanResponse(selectedItems, request);
+
+        if (selectedItems.Any())
+        {
+            return new Respond<TripPlanResponse>
+            {
+                Succeeded = true,
+                Message = "Trip plan optimized successfully",
+                Data = tripPlanResponse,
+                Meta = new { TotalItems = selectedItems.Count, TotalSolutions = 1 }
+            };
+        }
+
         return new Respond<TripPlanResponse>
         {
-            Succeeded = true,
-            Message = "Trip plan optimized successfully",
-            Data = tripPlanResponse,
-            Meta = new { TotalItems = selectedItems.Count, TotalSolutions = 1 }
+            Succeeded = false,
+            Message = "No valid trip plan found",
+            Errors = new List<string> { "Unable to generate a solution within constraints" }
         };
     }
 
     public async Task<Respond<List<TripPlanResponse>>> OptimizePlanMultiple(TripPlanRequest request)
     {
         var priorities = CalculatePriorities(request.Interests);
-        var allItems = await _itemFetcher.FetchItems(request.GovernorateId ,request.ZoneId, priorities);
+        var allItems = await _itemFetcher.FetchItems(request.GovernorateId, request.ZoneId, priorities);
         var totalBudget = (int)(request.BudgetPerAdult);
 
         var constraints = new UserDefinedKnapsackConstraints(
@@ -52,12 +62,24 @@ public class TripPlanOptimizer
         var (maxProfit, allSolutions) = _solver.GetMaxProfitMultiple(totalBudget, allItems, constraints, priorities);
         var tripPlans = allSolutions.Select(items => BuildTripPlanResponse(items, request)).ToList();
 
+        if (tripPlans.Any())
+        {
+            Console.WriteLine($"Generated {tripPlans.Count} trip plans with total items: {tripPlans.Sum(p => p.Restaurants.Count + p.Entertainments.Count + p.TourismAreas.Count + (p.Accommodation != null ? 1 : 0))}");
+            return new Respond<List<TripPlanResponse>>
+            {
+                Succeeded = true,
+                Message = "Trip plans optimized successfully",
+                Data = tripPlans,
+                Meta = new { TotalItems = tripPlans.Sum(p => p.Restaurants.Count + p.Entertainments.Count + p.TourismAreas.Count + (p.Accommodation != null ? 1 : 0)), TotalSolutions = allSolutions.Count }
+            };
+        }
+
+        Console.WriteLine("No valid trip plans generated.");
         return new Respond<List<TripPlanResponse>>
         {
-            Succeeded = true,
-            Message = "Trip plans optimized successfully",
-            Data = tripPlans,
-            Meta = new { TotalItems = tripPlans.Sum(p => p.Restaurants.Count + p.Entertainments.Count + p.TourismAreas.Count + (p.Accommodation != null ? 1 : 0)), TotalSolutions = allSolutions.Count }
+            Succeeded = false,
+            Message = "No valid trip plans found",
+            Errors = new List<string> { "Unable to generate solutions within constraints" }
         };
     }
 
@@ -78,7 +100,7 @@ public class TripPlanOptimizer
     private (int accommodation, int food, int entertainment, int tourism) CalculatePriorities(Queue<string> interests)
     {
         int accommodationPriority = 1, foodPriority = 1, entertainmentPriority = 1, tourismPriority = 1;
-        int bonus = interests.Count; // بدل ما نستخدم الأولوية كرقم كبير، نعطي مكافأة صغيرة
+        int bonus = interests.Count;
         while (interests.Count > 0)
         {
             var interest = interests.Dequeue();
@@ -94,7 +116,6 @@ public class TripPlanOptimizer
         return (accommodationPriority, foodPriority, entertainmentPriority, tourismPriority);
     }
 }
-
 
 // HELPER CLASSES
 public record TripPlanRequest(
@@ -115,7 +136,7 @@ public record TripPlanResponse
     public List<ItemResponse> TourismAreas { get; init; }
 }
 
-public record ItemResponse(int Id, string Name, double AveragePricePerAdult, float Score, ItemType PlaceType);
+public record ItemResponse(int Id, string Name, string ClassType, double AveragePricePerAdult, float Score, ItemType PlaceType, double Rating, string ImageSource);
 
 public enum ItemType { Accommodation, Restaurant, Entertainment, TourismArea }
 
@@ -123,8 +144,11 @@ public class Item
 {
     public int Id { get; set; }
     public string Name { get; set; }
+    public string ClassType { get; set; }
     public double AveragePricePerAdult { get; set; }
     public float Score { get; set; }
     public ItemType PlaceType { get; set; }
-    public ItemResponse ToResponse() => new ItemResponse(Id, Name, AveragePricePerAdult, Score, PlaceType);
+    public double Rating { get; set; }
+    public string ImageSource { get; set; }
+    public ItemResponse ToResponse() => new ItemResponse(Id, Name, ClassType, AveragePricePerAdult, Score, PlaceType, Rating, ImageSource);
 }

@@ -186,6 +186,12 @@
         }
         
 
+        public class ItemDetailsRouting
+        {
+            public const string Prefix = Rule + "itemdetails/";
+            public const string GetItemByIdAndPlaceType = Prefix + SingleRouter;
+            
+        }
         #endregion
     }
 }

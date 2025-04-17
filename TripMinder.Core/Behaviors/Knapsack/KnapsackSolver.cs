@@ -15,9 +15,8 @@ public class KnapsackSolver : IKnapsackSolver
 
     public (float maxProfit, List<Item> selectedItems) GetMaxProfit(int budget, List<Item> items, IKnapsackConstraints constraints, (int a, int f, int e, int t)? priorities = null)
     {
-        var (dp, decision) = _dpCalculator.CalculateDP(budget, items);
+        var (dp, decision, itemIds) = _dpCalculator.CalculateDP(budget, items);
         var (maxProfit, finalR, finalA, finalE, finalT) = _profitFinder.FindMaxProfit(dp, budget);
-        // تمرير الـ priorities مباشرة للـ KnapsackState
         var state = new KnapsackState(budget, 0, 0, 0, 0, items.Count - 1, items, decision, new List<Item>(), null, priorities);
         var selectedItems = _backtracker.BacktrackSingleSolution(state);
 
@@ -27,14 +26,11 @@ public class KnapsackSolver : IKnapsackSolver
 
     public (float maxProfit, List<List<Item>> allSelectedItems) GetMaxProfitMultiple(int budget, List<Item> items, IKnapsackConstraints constraints, (int a, int f, int e, int t)? priorities = null)
     {
-        var (dp, decision) = _dpCalculator.CalculateDP(budget, items);
+        var (dp, decision, itemIds) = _dpCalculator.CalculateDP(budget, items);
         var (maxProfit, finalR, finalA, finalE, finalT) = _profitFinder.FindMaxProfit(dp, budget);
-        var optimizer = new SolutionOptimizer(10);
-        // تمرير الـ priorities مباشرة للـ KnapsackState
-        var state = new KnapsackState(budget, 0, 0, 0, 0, items.Count - 1, items, decision, new List<Item>(), optimizer, priorities);
-        _backtracker.BacktrackAllSolutions(state);
+        var state = new KnapsackState(budget, 0, 0, 0, 0, items.Count - 1, items, decision, new List<Item>(), null, priorities);
+        var allSolutions = _backtracker.BacktrackTopSolutions(state, 10);
 
-        var allSolutions = optimizer.GetTopSolutions();
         Console.WriteLine($"Total Solutions Found: {allSolutions.Count}");
         return (maxProfit, allSolutions);
     }
