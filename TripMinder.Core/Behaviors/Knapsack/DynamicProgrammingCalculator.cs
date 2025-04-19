@@ -2,7 +2,7 @@ namespace TripMinder.Core.Behaviors.Knapsack;
 
 public class DynamicProgrammingCalculator : IDynamicProgrammingCalculator
 {
-    public (float[,,,,] dp, bool[,,,,,] decision, int?[,,,,,] itemIds) Calculate(int budget, List<Item> items, int maxR, int maxA, int maxE, int maxT)
+    public (float[,,,,] dp, bool[,,,,,] decision, int?[,,,,,] itemIds) Calculate(int budget, List<Item> items, int maxR = 3, int maxA = 1, int maxE = 3, int maxT = 3)
     {
         float[,,,,] dp = new float[budget + 1, maxR + 1, maxA + 1, maxE + 1, maxT + 1];
         bool[,,,,,] decision = new bool[budget + 1, maxR + 1, maxA + 1, maxE + 1, maxT + 1, items.Count];

@@ -99,7 +99,7 @@ public class TripPlanOptimizer
 
     private (int accommodation, int food, int entertainment, int tourism) CalculatePriorities(Queue<string> interests)
     {
-        int accommodationPriority = 1, foodPriority = 1, entertainmentPriority = 1, tourismPriority = 1;
+        int accommodationPriority = 0, foodPriority = 0, entertainmentPriority = 0, tourismPriority = 0;
         int bonus = interests.Count;
         while (interests.Count > 0)
         {

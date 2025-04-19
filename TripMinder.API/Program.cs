@@ -53,8 +53,22 @@ namespace TripMinder.API
                 opt.SupportedUICultures = supportedCultures;
             });
             #endregion
-            
+
+            #region ngrok config
+            builder.Services.AddCors(options =>
+            {
+                options.AddPolicy("AllowAll", builder =>
+                {
+                    builder.AllowAnyOrigin()
+                        .AllowAnyMethod()
+                        .AllowAnyHeader();
+                });
+            });
+            #endregion
+
             var app = builder.Build();
+            
+            app.UseCors("AllowAll");
 
             // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())

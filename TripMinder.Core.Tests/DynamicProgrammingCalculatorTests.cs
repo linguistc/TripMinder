@@ -368,7 +368,7 @@ public class DynamicProgrammingCalculatorTests
         int budget = 1500;
         int maxR = 10, maxA = 10, maxE = 10, maxT = 10;
         var items = CreateMixedItemsForBudget1500();
-        float expectedProfit = 115 + 115 + 85 + 85; // Restaurant A (A: 115), Monument (A: 115), Restaurant C (B: 85), Zoo (B: 85)
+        float expectedProfit = 115 + 115 + 85 + 85; // 400
 
         // Act
         var (dp, decision, itemIds) = _calculator.Calculate(budget, items, maxR, maxA, maxE, maxT);
@@ -386,7 +386,7 @@ public class DynamicProgrammingCalculatorTests
         Assert.Equal(9, itemIds[550, 2, 0, 0, 1, 8].GetValueOrDefault());
         Assert.Equal(10, itemIds[750, 2, 0, 1, 1, 9].GetValueOrDefault());
 
-        // Debug: Print selected items
+
         _output.WriteLine($"Final Profit: {dp[budget, maxR, maxA, maxE, maxT]}");
         _output.WriteLine("Selected Items:");
         int currentW = budget, currentR = maxR, currentA = maxA, currentE = maxE, currentT = maxT;
