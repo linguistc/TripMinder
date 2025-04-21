@@ -3,7 +3,7 @@ using TripMinder.API.Bases;
 using TripMinder.Core.Behaviors.Knapsack;
 using TripMinder.Data.AppMetaData;
 using System.ComponentModel.DataAnnotations;
-using Microsoft.Extensions.Logging; // لو عايز Logging
+using Microsoft.Extensions.Logging;
 
 namespace TripMinder.API.Controllers;
 
@@ -13,7 +13,7 @@ public record TripPlanRequestDto(
     int GovernorateId,
 
     [Range(1, int.MaxValue)]
-    int? ZoneId, // Nullable
+    int? ZoneId,
     
     [Required]
     [Range(0, double.MaxValue)]
@@ -42,12 +42,11 @@ public record TripPlanRequestDto(
     [Range(0, int.MaxValue, ErrorMessage = "MaxTourismAreas must be non-negative")]
     int MaxTourismAreas);
 
-
 [ApiController]
 public class TripSuggesterController : AppControllerBase
 {
     private readonly TripPlanOptimizer _optimizer;
-    private readonly ILogger<TripSuggesterController> _logger; // إضافة Logger
+    private readonly ILogger<TripSuggesterController> _logger;
 
     public TripSuggesterController(TripPlanOptimizer optimizer, ILogger<TripSuggesterController> logger)
     {
@@ -58,14 +57,18 @@ public class TripSuggesterController : AppControllerBase
     [HttpPost(Router.TripSuggesterRouting.OptimizeTrip)]
     public async Task<IActionResult> OptimizeTrip([FromBody] TripPlanRequestDto requestDto)
     {
-        _logger.LogInformation("Received trip optimization request: {@Request}", requestDto);
+        _logger.LogInformation("Received trip optimization request: GovernorateId={GovernorateId}, ZoneId={ZoneId}, BudgetPerAdult={BudgetPerAdult}, NumberOfTravelers={NumberOfTravelers}, MaxRestaurants={MaxRestaurants}, Interests={Interests}",
+            requestDto.GovernorateId, requestDto.ZoneId, requestDto.BudgetPerAdult, requestDto.NumberOfTravelers, requestDto.MaxRestaurants, string.Join(", ", requestDto.Interests));
 
         if (!ModelState.IsValid)
         {
+            _logger.LogWarning("Invalid model state: {@ModelState}", ModelState);
             return BadRequest(ModelState);
         }
         
-        
+        var totalBudget = (int)(requestDto.BudgetPerAdult * requestDto.NumberOfTravelers);
+        _logger.LogInformation("Calculated Total Budget: {TotalBudget}", totalBudget);
+
         var interestsQueue = new Queue<string>(requestDto.Interests);
         var request = new TripPlanRequest(
             requestDto.GovernorateId,
@@ -83,7 +86,6 @@ public class TripSuggesterController : AppControllerBase
 
         if (response.Succeeded)
         {
-            // تحقق إضافي لو عايز تتاكد إن الـ Response فيه بيانات كافية
             if (response.Data.Accommodation == null || 
                 !response.Data.Restaurants.Any() || 
                 !response.Data.Entertainments.Any() || 
@@ -91,6 +93,8 @@ public class TripSuggesterController : AppControllerBase
             {
                 _logger.LogWarning("Response is incomplete: {@Response}", response);
             }
+            _logger.LogInformation("Optimization succeeded: Restaurants={RestaurantsCount}, TotalCost={TotalCost}",
+                response.Data.Restaurants.Count, response.Data.Restaurants.Sum(r => r.AveragePricePerAdult));
             return Ok(response);
         }
 

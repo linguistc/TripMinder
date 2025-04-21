@@ -22,16 +22,14 @@ public class ItemFetcher : IItemFetcher
 
         if (zoneId.HasValue)
         {
-            // ZoneId مش null، جيب العناصر بناءً على ZoneId
             await FetchItemsByZoneId(zoneId.Value, priorities, allItems);
         }
         else
         {
-            // ZoneId بـ null، جيب العناصر بناءً على GovernorateId
             await FetchItemsByGovernorateId(governorateId, priorities, allItems);
         }
         
-        Console.WriteLine($"Total Items Fetched: {allItems.Count}");
+        Console.WriteLine($"Total Items Fetched: {allItems.Count}, Restaurants: {allItems.Count(i => i.PlaceType == ItemType.Restaurant)}");
         return allItems.OrderByDescending(item =>
         {
             int priority = item.PlaceType switch
@@ -42,7 +40,7 @@ public class ItemFetcher : IItemFetcher
                 ItemType.TourismArea => priorities.t,
                 _ => 0
             };
-            return priority * item.Score;
+            return priority == 0 ? 0 : priority * item.Score;
         }).ToList();
     }
 
@@ -57,6 +55,7 @@ public class ItemFetcher : IItemFetcher
                 var item = new Item
                 {
                     Id = a.Id,
+                    GlobalId = $"{ItemType.Accommodation}_{a.Id}",
                     Name = a.Name,
                     ClassType = a.ClassType,
                     AveragePricePerAdult = a.AveragePricePerAdult <= 0
@@ -67,7 +66,7 @@ public class ItemFetcher : IItemFetcher
                     Rating = a.Rating,
                     ImageSource = a.ImageSource
                 };
-                Console.WriteLine($"Item: {item.Name}, Type: {item.PlaceType}, Price: {item.AveragePricePerAdult}, Score: {item.Score}");
+                Console.WriteLine($"Item: {item.Name}, GlobalId: {item.GlobalId}, Type: {item.PlaceType}, Price: {item.AveragePricePerAdult}, Score: {item.Score}");
                 return item;
             }));
         }
@@ -76,16 +75,16 @@ public class ItemFetcher : IItemFetcher
             Console.WriteLine($"No Accommodations found for ZoneId: {zoneId}");
         }
 
-        // جلب المطاعم
         var restaurantsResponse = await _mediator.Send(new GetRestaurantsListByZoneIdQuery(zoneId, priorities.f));
         Console.WriteLine($"Restaurants Response: Succeeded={restaurantsResponse?.Succeeded}, Count={(restaurantsResponse?.Data?.Count() ?? 0)}");
         if (restaurantsResponse?.Succeeded == true && restaurantsResponse.Data != null)
         {
-            allItems.AddRange(restaurantsResponse.Data.Select(r =>
+            var restaurantItems = restaurantsResponse.Data.Select(r =>
             {
                 var item = new Item
                 {
                     Id = r.Id,
+                    GlobalId = $"{ItemType.Restaurant}_{r.Id}",
                     Name = r.Name,
                     ClassType = r.ClassType,
                     AveragePricePerAdult = r.AveragePricePerAdult <= 0
@@ -96,16 +95,17 @@ public class ItemFetcher : IItemFetcher
                     Rating = r.Rating,
                     ImageSource = r.ImageSource
                 };
-                Console.WriteLine($"Item: {item.Name}, Type: {item.PlaceType}, Price: {item.AveragePricePerAdult}, Score: {item.Score}");
+                Console.WriteLine($"Item: {item.Name}, GlobalId: {item.GlobalId}, Type: {item.PlaceType}, Price: {item.AveragePricePerAdult}, Score: {item.Score}");
                 return item;
-            }));
+            }).ToList();
+            allItems.AddRange(restaurantItems);
+            Console.WriteLine($"Restaurants Added: {restaurantItems.Count}");
         }
         else
         {
             Console.WriteLine($"No Restaurants found for ZoneId: {zoneId}");
         }
 
-        // جلب الترفيه
         var entertainmentsResponse = await _mediator.Send(new GetEntertainmentsListByZoneIdQuery(zoneId, priorities.e));
         Console.WriteLine($"Entertainments Response: Succeeded={entertainmentsResponse?.Succeeded}, Count={(entertainmentsResponse?.Data?.Count() ?? 0)}");
         if (entertainmentsResponse?.Succeeded == true && entertainmentsResponse.Data != null)
@@ -115,6 +115,7 @@ public class ItemFetcher : IItemFetcher
                 var item = new Item
                 {
                     Id = e.Id,
+                    GlobalId = $"{ItemType.Entertainment}_{e.Id}",
                     Name = e.Name,
                     ClassType = e.ClassType,
                     AveragePricePerAdult = e.AveragePricePerAdult <= 0
@@ -125,7 +126,7 @@ public class ItemFetcher : IItemFetcher
                     Rating = e.Rating,
                     ImageSource = e.ImageSource
                 };
-                Console.WriteLine($"Item: {item.Name}, Type: {item.PlaceType}, Price: {item.AveragePricePerAdult}, Score: {item.Score}");
+                Console.WriteLine($"Item: {item.Name}, GlobalId: {item.GlobalId}, Type: {item.PlaceType}, Price: {item.AveragePricePerAdult}, Score: {item.Score}");
                 return item;
             }));
         }
@@ -134,7 +135,6 @@ public class ItemFetcher : IItemFetcher
             Console.WriteLine($"No Entertainments found for ZoneId: {zoneId}");
         }
 
-        // جلب المناطق السياحية
         var tourismAreasResponse = await _mediator.Send(new GetTourismAreasListByZoneIdQuery(zoneId, priorities.t));
         Console.WriteLine($"TourismAreas Response: Succeeded={tourismAreasResponse?.Succeeded}, Count={(tourismAreasResponse?.Data?.Count() ?? 0)}");
         if (tourismAreasResponse?.Succeeded == true && tourismAreasResponse.Data != null)
@@ -144,6 +144,7 @@ public class ItemFetcher : IItemFetcher
                 var item = new Item
                 {
                     Id = t.Id,
+                    GlobalId = $"{ItemType.TourismArea}_{t.Id}",
                     Name = t.Name,
                     ClassType = t.ClassType,
                     AveragePricePerAdult = t.AveragePricePerAdult <= 0
@@ -153,9 +154,8 @@ public class ItemFetcher : IItemFetcher
                     PlaceType = ItemType.TourismArea,
                     Rating = t.Rating,
                     ImageSource = t.ImageSource
-                    
                 };
-                Console.WriteLine($"Item: {item.Name}, Type: {item.PlaceType}, Price: {item.AveragePricePerAdult}, Score: {item.Score}");
+                Console.WriteLine($"Item: {item.Name}, GlobalId: {item.GlobalId}, Type: {item.PlaceType}, Price: {item.AveragePricePerAdult}, Score: {item.Score}");
                 return item;
             }));
         }
@@ -176,6 +176,7 @@ public class ItemFetcher : IItemFetcher
                 var item = new Item
                 {
                     Id = a.Id,
+                    GlobalId = $"{ItemType.Accommodation}_{a.Id}",
                     Name = a.Name,
                     ClassType = a.ClassType,
                     AveragePricePerAdult = a.AveragePricePerAdult <= 0
@@ -185,9 +186,8 @@ public class ItemFetcher : IItemFetcher
                     PlaceType = ItemType.Accommodation,
                     Rating = a.Rating,
                     ImageSource = a.ImageSource
-                    
                 };
-                Console.WriteLine($"Item: {item.Name}, Type: {item.PlaceType}, Price: {item.AveragePricePerAdult}, Score: {item.Score}");
+                Console.WriteLine($"Item: {item.Name}, GlobalId: {item.GlobalId}, Type: {item.PlaceType}, Price: {item.AveragePricePerAdult}, Score: {item.Score}");
                 return item;
             }));
         }
@@ -196,16 +196,16 @@ public class ItemFetcher : IItemFetcher
             Console.WriteLine($"No Accommodations found for GovernorateId: {governorateId}");
         }
 
-        // جلب المطاعم
         var restaurantsResponse = await _mediator.Send(new GetRestaurantsListByGovernorateIdQuery(governorateId, priorities.f));
         Console.WriteLine($"Restaurants Response: Succeeded={restaurantsResponse?.Succeeded}, Count={(restaurantsResponse?.Data?.Count() ?? 0)}");
         if (restaurantsResponse?.Succeeded == true && restaurantsResponse.Data != null)
         {
-            allItems.AddRange(restaurantsResponse.Data.Select(r =>
+            var restaurantItems = restaurantsResponse.Data.Select(r =>
             {
                 var item = new Item
                 {
                     Id = r.Id,
+                    GlobalId = $"{ItemType.Restaurant}_{r.Id}",
                     Name = r.Name,
                     ClassType = r.ClassType,
                     AveragePricePerAdult = r.AveragePricePerAdult <= 0
@@ -216,16 +216,17 @@ public class ItemFetcher : IItemFetcher
                     Rating = r.Rating,
                     ImageSource = r.ImageSource
                 };
-                Console.WriteLine($"Item: {item.Name}, Type: {item.PlaceType}, Price: {item.AveragePricePerAdult}, Score: {item.Score}");
+                Console.WriteLine($"Item: {item.Name}, GlobalId: {item.GlobalId}, Type: {item.PlaceType}, Price: {item.AveragePricePerAdult}, Score: {item.Score}");
                 return item;
-            }));
+            }).ToList();
+            allItems.AddRange(restaurantItems);
+            Console.WriteLine($"Restaurants Added: {restaurantItems.Count}");
         }
         else
         {
             Console.WriteLine($"No Restaurants found for GovernorateId: {governorateId}");
         }
 
-        // جلب الترفيه
         var entertainmentsResponse = await _mediator.Send(new GetEntertainmentsListByGovernorateIdQuery(governorateId, priorities.e));
         Console.WriteLine($"Entertainments Response: Succeeded={entertainmentsResponse?.Succeeded}, Count={(entertainmentsResponse?.Data?.Count() ?? 0)}");
         if (entertainmentsResponse?.Succeeded == true && entertainmentsResponse.Data != null)
@@ -235,6 +236,7 @@ public class ItemFetcher : IItemFetcher
                 var item = new Item
                 {
                     Id = e.Id,
+                    GlobalId = $"{ItemType.Entertainment}_{e.Id}",
                     Name = e.Name,
                     ClassType = e.ClassType,
                     AveragePricePerAdult = e.AveragePricePerAdult <= 0
@@ -245,7 +247,7 @@ public class ItemFetcher : IItemFetcher
                     Rating = e.Rating,
                     ImageSource = e.ImageSource
                 };
-                Console.WriteLine($"Item: {item.Name}, Type: {item.PlaceType}, Price: {item.AveragePricePerAdult}, Score: {item.Score}");
+                Console.WriteLine($"Item: {item.Name}, GlobalId: {item.GlobalId}, Type: {item.PlaceType}, Price: {item.AveragePricePerAdult}, Score: {item.Score}");
                 return item;
             }));
         }
@@ -254,7 +256,6 @@ public class ItemFetcher : IItemFetcher
             Console.WriteLine($"No Entertainments found for GovernorateId: {governorateId}");
         }
 
-        // جلب المناطق السياحية
         var tourismAreasResponse = await _mediator.Send(new GetTourismAreasListByGovernorateIdQuery(governorateId, priorities.t));
         Console.WriteLine($"TourismAreas Response: Succeeded={tourismAreasResponse?.Succeeded}, Count={(tourismAreasResponse?.Data?.Count() ?? 0)}");
         if (tourismAreasResponse?.Succeeded == true && tourismAreasResponse.Data != null)
@@ -264,6 +265,7 @@ public class ItemFetcher : IItemFetcher
                 var item = new Item
                 {
                     Id = t.Id,
+                    GlobalId = $"{ItemType.TourismArea}_{t.Id}",
                     Name = t.Name,
                     ClassType = t.ClassType,
                     AveragePricePerAdult = t.AveragePricePerAdult <= 0
@@ -274,7 +276,7 @@ public class ItemFetcher : IItemFetcher
                     Rating = t.Rating,
                     ImageSource = t.ImageSource
                 };
-                Console.WriteLine($"Item: {item.Name}, Type: {item.PlaceType}, Price: {item.AveragePricePerAdult}, Score: {item.Score}");
+                Console.WriteLine($"Item: {item.Name}, GlobalId: {item.GlobalId}, Type: {item.PlaceType}, Price: {item.AveragePricePerAdult}, Score: {item.Score}");
                 return item;
             }));
         }

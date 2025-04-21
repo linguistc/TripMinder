@@ -30,19 +30,19 @@ namespace TripMinder.API.Controllers
             return NewResult(response);
         }
         
-        [HttpPut(Router.RestaurantRouting.Update)]
-        public async Task<IActionResult> Update(UpdateRestaurantCommand command)
-        {
-            var response = await Mediator.Send(command);
-            return NewResult(response);
-        }
-        
-        [HttpDelete(Router.RestaurantRouting.Delete)]
-        public async Task<IActionResult> Delete(int id)
-        {
-            var response = await Mediator.Send(new DeleteRestaurantCommand(id));
-            return NewResult(response);
-        }
+        // [HttpPut(Router.RestaurantRouting.Update)]
+        // public async Task<IActionResult> Update(UpdateRestaurantCommand command)
+        // {
+        //     var response = await Mediator.Send(command);
+        //     return NewResult(response);
+        // }
+        //
+        // [HttpDelete(Router.RestaurantRouting.Delete)]
+        // public async Task<IActionResult> Delete(int id)
+        // {
+        //     var response = await Mediator.Send(new DeleteRestaurantCommand(id));
+        //     return NewResult(response);
+        // }
 
     }
 }

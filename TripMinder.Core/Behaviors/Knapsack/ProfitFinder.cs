@@ -2,47 +2,48 @@ namespace TripMinder.Core.Behaviors.Knapsack;
 
 public class ProfitFinder : IProfitFinder
 {
-    private readonly IKnapsackConstraints _constraints;
-
-    public ProfitFinder(IKnapsackConstraints constraints)
+    public (float maxProfit, int usedBudget, int r, int a, int e, int t) FindMaxProfit(
+        float[,,,,] dp, 
+        int budget, 
+        IKnapsackConstraints constraints)
     {
-        _constraints = constraints;
-    }
+        float maxProfit = float.MinValue;
+        int bestW = 0, bestR = 0, bestA = 0, bestE = 0, bestT = 0;
 
-    public (float maxProfit, int r, int a, int e, int t) FindMaxProfit(float[,,,,] dp, int budget)
-    {
-        var combinations = from r in Enumerable.Range(0, _constraints.MaxRestaurants + 1)
-            from a in Enumerable.Range(0, _constraints.MaxAccommodations + 1)
-            from e in Enumerable.Range(0, _constraints.MaxEntertainments + 1)
-            from t in Enumerable.Range(0, _constraints.MaxTourismAreas + 1)
-            select (r, a, e, t, profit: dp[budget, r, a, e, t]);
+        for (int w = 0; w <= budget; w++)
+        for (int r = 0; r <= constraints.MaxRestaurants; r++)
+        for (int a = 0; a <= constraints.MaxAccommodations; a++)
+        for (int e = 0; e <= constraints.MaxEntertainments; e++)
+        for (int t = 0; t <= constraints.MaxTourismAreas; t++)
+        {
+            float profit = dp[w, r, a, e, t];
+            // Only consider states with at least one restaurant if maxRestaurants > 0
+            if (profit != float.MinValue && (constraints.MaxRestaurants == 0 || r > 0))
+            {
+                if (profit > maxProfit || maxProfit == float.MinValue)
+                {
+                    maxProfit = profit;
+                    bestW = w;
+                    bestR = r;
+                    bestA = a;
+                    bestE = e;
+                    bestT = t;
+                    Console.WriteLine($"Found better profit: Profit={profit}, Budget={w}, Restaurants={r}, Accommodations={a}, Entertainments={e}, TourismAreas={t}");
+                }
+            }
+        }
 
-        var best = combinations.OrderByDescending(x => x.profit).First();
-        return (best.profit, best.r, best.a, best.e, best.t);
-    }
+        if (maxProfit == float.MinValue)
+        {
+            Console.WriteLine("No valid profit found, returning base case.");
+            maxProfit = 0;
+            bestW = 0;
+            bestR = 0;
+            bestA = 0;
+            bestE = 0;
+            bestT = 0;
+        }
+
+        Console.WriteLine($"Max Profit: {maxProfit}, Used Budget: {bestW}, Restaurants: {bestR}, Accommodations: {bestA}, Entertainments: {bestE}, TourismAreas: {bestT}");
+        return (maxProfit, bestW, bestR, bestA, bestE, bestT);    }
 }
-
-// Using LINQ but low performance bcz of Overhead
-/*
-public class ProfitFinder : IProfitFinder
-{
-    private readonly IKnapsackConstraints _constraints;
-
-    public ProfitFinder(IKnapsackConstraints constraints)
-    {
-        _constraints = constraints;
-    }
-
-    public (float maxProfit, int r, int a, int e, int t) FindMaxProfit(float[,,,,] dp, int budget)
-    {
-        var combinations = from r in Enumerable.Range(0, _constraints.MaxRestaurants + 1)
-                          from a in Enumerable.Range(0, _constraints.MaxAccommodations + 1)
-                          from e in Enumerable.Range(0, _constraints.MaxEntertainments + 1)
-                          from t in Enumerable.Range(0, _constraints.MaxTourismAreas + 1)
-                          select (r, a, e, t, profit: dp[budget, r, a, e, t]);
-
-        var best = combinations.OrderByDescending(x => x.profit).First();
-        return (best.profit, best.r, best.a, best.e, best.t);
-    }
-} 
-*/

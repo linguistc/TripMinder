@@ -16,24 +16,12 @@ public class KnapsackBacktracker : IKnapsackBacktracker
 
     public List<List<Item>> BacktrackTopSolutions(KnapsackState state, int maxSolutions = 10)
     {
-        // Check for duplicate IDs
-        var duplicateIds = state.Items
-            .GroupBy(i => i.Id)
-            .Where(g => g.Count() > 1)
-            .Select(g => g.Key)
-            .ToList();
-
-        if (duplicateIds.Any())
-        {
-            throw new InvalidOperationException($"Duplicate item IDs found: {string.Join(", ", duplicateIds)}");
-        }
-        
         var solutions = new List<(List<Item> Solution, double Score)>();
-        var usedItemsPerSolution = new List<HashSet<int>>();
-        var originalScores = state.Items.ToDictionary(i => i.Id, i => i.Score);
+        var usedItemsPerSolution = new List<HashSet<string>>();
+        var originalScores = state.Items.ToDictionary(i => i.GlobalId, i => i.Score);
 
-        var stack = new Stack<(KnapsackState State, HashSet<int> UsedItems, double CurrentScore)>();
-        stack.Push((state with { CurrentSelection = new List<Item>() }, new HashSet<int>(), 0));
+        var stack = new Stack<(KnapsackState State, HashSet<string> UsedItems, double CurrentScore)>();
+        stack.Push((state with { CurrentSelection = new List<Item>() }, new HashSet<string>(), 0));
 
         int maxR = state.Decision.GetLength(1) - 1;
         int maxA = state.Decision.GetLength(2) - 1;
@@ -64,7 +52,7 @@ public class KnapsackBacktracker : IKnapsackBacktracker
                     bool isUnique = true;
                     foreach (var existingSolution in usedItemsPerSolution)
                     {
-                        var intersection = existingSolution.Intersect(solution.Select(i => i.Id)).Count();
+                        var intersection = existingSolution.Intersect(solution.Select(i => i.GlobalId)).Count();
                         if (intersection > solution.Count / 2)
                         {
                             isUnique = false;
@@ -75,7 +63,7 @@ public class KnapsackBacktracker : IKnapsackBacktracker
                     if (isUnique)
                     {
                         solutions.Add((solution, score));
-                        usedItemsPerSolution.Add(new HashSet<int>(solution.Select(i => i.Id)));
+                        usedItemsPerSolution.Add(new HashSet<string>(solution.Select(i => i.GlobalId)));
 
                         if (solutions.Count > maxSolutions)
                         {
@@ -100,11 +88,11 @@ public class KnapsackBacktracker : IKnapsackBacktracker
 
             if (newR <= maxR && newA <= maxA && newE <= maxE && newT <= maxT && newBudget >= 0)
             {
-                int usageCount = usedItemsPerSolution.Count(s => s.Contains(selectedItem.Id));
+                int usageCount = usedItemsPerSolution.Count(s => s.Contains(selectedItem.GlobalId));
                 if (usageCount < 2)
                 {
                     var newSelection = new List<Item>(currentState.CurrentSelection) { selectedItem };
-                    var newUsedItems = new HashSet<int>(currentUsedItems) { selectedItem.Id };
+                    var newUsedItems = new HashSet<string>(currentUsedItems) { selectedItem.GlobalId };
                     var newState = currentState with
                     {
                         Budget = newBudget,
@@ -124,7 +112,7 @@ public class KnapsackBacktracker : IKnapsackBacktracker
 
         foreach (var item in state.Items)
         {
-            item.Score = originalScores[item.Id];
+            item.Score = originalScores[item.GlobalId];
         }
 
         return solutions
@@ -137,72 +125,58 @@ public class KnapsackBacktracker : IKnapsackBacktracker
     public List<Item> BacktrackSingleSolution(KnapsackState state)
     {
         var selectedItems = new List<Item>();
-        var currentBudget = state.Budget;
-        var currentR = 0;
-        var currentA = 0;
-        var currentE = 0;
-        var currentT = 0;
-        var usedItemIds = new HashSet<int>();
-        int maxR = state.Decision.GetLength(1) - 1;
-        int maxA = state.Decision.GetLength(2) - 1;
-        int maxE = state.Decision.GetLength(3) - 1;
-        int maxT = state.Decision.GetLength(4) - 1;
+        int currentW = state.Budget;
+        int currentR = state.Restaurants;
+        int currentA = state.Accommodations;
+        int currentE = state.Entertainments;
+        int currentT = state.TourismAreas;
+        var usedItemIds = new HashSet<string>();
 
-        var priorityOrder = new List<(ItemType Type, int Priority)>();
+        var requiredTypes = new HashSet<ItemType>();
         if (state.Priorities.HasValue)
         {
-            if (state.Priorities.Value.a > 0) priorityOrder.Add((ItemType.Accommodation, state.Priorities.Value.a));
-            if (state.Priorities.Value.f > 0) priorityOrder.Add((ItemType.Restaurant, state.Priorities.Value.f));
-            if (state.Priorities.Value.e > 0) priorityOrder.Add((ItemType.Entertainment, state.Priorities.Value.e));
-            if (state.Priorities.Value.t > 0) priorityOrder.Add((ItemType.TourismArea, state.Priorities.Value.t));
+            if (state.Priorities.Value.a > 0) requiredTypes.Add(ItemType.Accommodation);
+            if (state.Priorities.Value.f > 0) requiredTypes.Add(ItemType.Restaurant);
+            if (state.Priorities.Value.e > 0) requiredTypes.Add(ItemType.Entertainment);
+            if (state.Priorities.Value.t > 0) requiredTypes.Add(ItemType.TourismArea);
         }
-        priorityOrder = priorityOrder.OrderByDescending(p => p.Priority).ToList();
 
-        foreach (var (type, priority) in priorityOrder)
+        Console.WriteLine($"Starting Backtracking: Budget={currentW}, Restaurants={currentR}, Accommodations={currentA}, Entertainments={currentE}, TourismAreas={currentT}");
+
+        for (int i = state.Items.Count - 1; i >= 0; i--)
         {
-            var availableItems = state.Items
-                .Where(i => i.PlaceType == type && i.AveragePricePerAdult <= currentBudget && !usedItemIds.Contains(i.Id))
-                .OrderByDescending(i => i.Score)
-                .ToList();
-            if (availableItems.Any())
+            var item = state.Items[i];
+            Console.WriteLine($"Checking Item: {item.Name}, GlobalId: {item.GlobalId}, Type: {item.PlaceType}, Price: {item.AveragePricePerAdult}, Decision[{currentW},{currentR},{currentA},{currentE},{currentT},{i}]={(state.Decision[currentW, currentR, currentA, currentE, currentT, i] ? "True" : "False")}");
+
+            if (currentW < 0 || currentR < 0 || currentA < 0 || currentE < 0 || currentT < 0)
             {
-                var bestItem = availableItems.First();
-                Console.WriteLine($"Selected Item (Priority Phase): {bestItem.Name}, Type: {bestItem.PlaceType}, Price: {bestItem.AveragePricePerAdult}, Score: {bestItem.Score}");
-                selectedItems.Add(bestItem);
-                usedItemIds.Add(bestItem.Id);
-                currentBudget -= (int)bestItem.AveragePricePerAdult;
-                if (bestItem.PlaceType == ItemType.Restaurant) currentR++;
-                if (bestItem.PlaceType == ItemType.Accommodation) currentA++;
-                if (bestItem.PlaceType == ItemType.Entertainment) currentE++;
-                if (bestItem.PlaceType == ItemType.TourismArea) currentT++;
+                Console.WriteLine($"Invalid state reached: Budget={currentW}, Restaurants={currentR}, Accommodations={currentA}, Entertainments={currentE}, TourismAreas={currentT}");
+                break;
+            }
+
+            if (state.Decision[currentW, currentR, currentA, currentE, currentT, i])
+            {
+                if (!usedItemIds.Contains(item.GlobalId))
+                {
+                    selectedItems.Add(item);
+                    usedItemIds.Add(item.GlobalId);
+                    currentW -= (int)item.AveragePricePerAdult;
+                    if (item.PlaceType == ItemType.Restaurant) currentR--;
+                    if (item.PlaceType == ItemType.Accommodation) currentA--;
+                    if (item.PlaceType == ItemType.Entertainment) currentE--;
+                    if (item.PlaceType == ItemType.TourismArea) currentT--;
+                    Console.WriteLine($"Selected Item: {item.Name}, GlobalId: {item.GlobalId}, Type: {item.PlaceType}, Price: {item.AveragePricePerAdult}, Score: {item.Score}, New Budget={currentW}, New Restaurants={currentR}");
+                }
             }
         }
 
-        while (currentBudget > 0)
+        var selectedTypes = selectedItems.Select(i => i.PlaceType).ToHashSet();
+        if (!requiredTypes.All(t => selectedTypes.Contains(t)))
         {
-            var availableItems = state.Items
-                .Where(i => i.AveragePricePerAdult <= currentBudget && !usedItemIds.Contains(i.Id))
-                .Where(i => (i.PlaceType == ItemType.Restaurant && currentR < maxR) ||
-                            (i.PlaceType == ItemType.Accommodation && currentA < maxA) ||
-                            (i.PlaceType == ItemType.Entertainment && currentE < maxE) ||
-                            (i.PlaceType == ItemType.TourismArea && currentT < maxT))
-                .OrderByDescending(i => i.Score)
-                .ToList();
-
-            if (!availableItems.Any())
-                break;
-
-            var bestItem = availableItems.First();
-            Console.WriteLine($"Selected Item (Budget Phase): {bestItem.Name}, Type: {bestItem.PlaceType}, Price: {bestItem.AveragePricePerAdult}, Score: {bestItem.Score}");
-            selectedItems.Add(bestItem);
-            usedItemIds.Add(bestItem.Id);
-            currentBudget -= (int)bestItem.AveragePricePerAdult;
-            if (bestItem.PlaceType == ItemType.Restaurant) currentR++;
-            if (bestItem.PlaceType == ItemType.Accommodation) currentA++;
-            if (bestItem.PlaceType == ItemType.Entertainment) currentE++;
-            if (bestItem.PlaceType == ItemType.TourismArea) currentT++;
+            Console.WriteLine("Warning: Solution does not meet all priority requirements.");
         }
 
+        Console.WriteLine($"Backtracking Complete: Selected {selectedItems.Count(i => i.PlaceType == ItemType.Restaurant)} Restaurants, Total Items={selectedItems.Count}");
         return selectedItems;
     }
 }

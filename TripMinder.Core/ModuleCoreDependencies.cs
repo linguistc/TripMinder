@@ -29,6 +29,7 @@ namespace TripMinder.Core
             services.AddScoped<IDynamicProgrammingCalculator, DynamicProgrammingCalculator>();
             services.AddScoped<IItemFetcher, ItemFetcher>();
             services.AddScoped<IKnapsackConstraints>(sp => new UserDefinedKnapsackConstraints(3, 1, 3, 3));
+            // services.AddScoped<IKnapsackConstraints, UserDefinedKnapsackConstraints>();
             services.AddScoped<TripPlanOptimizer>();
             
             //

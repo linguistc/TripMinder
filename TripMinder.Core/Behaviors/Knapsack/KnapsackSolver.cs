@@ -13,22 +13,34 @@ public class KnapsackSolver : IKnapsackSolver
         _profitFinder = profitFinder;
     }
 
-    public (float maxProfit, List<Item> selectedItems) GetMaxProfit(int budget, List<Item> items, IKnapsackConstraints constraints, (int a, int f, int e, int t)? priorities = null)
+    public (float maxProfit, List<Item> selectedItems) GetMaxProfit(
+        int budget, 
+        List<Item> items,
+        IKnapsackConstraints constraints, 
+        (int a, int f, int e, int t)? priorities = null)
     {
-        var (dp, decision, itemIds) = _dpCalculator.CalculateDP(budget, items);
-        var (maxProfit, finalR, finalA, finalE, finalT) = _profitFinder.FindMaxProfit(dp, budget);
-        var state = new KnapsackState(budget, 0, 0, 0, 0, items.Count - 1, items, decision, new List<Item>(), null, priorities);
+        var (dp, decision, itemIds) = _dpCalculator.CalculateDP(budget, items, constraints);
+        var (maxProfit, usedBudget, finalR, finalA, finalE, finalT) = _profitFinder.FindMaxProfit(dp, budget, constraints);
+        Console.WriteLine($"Max Profit: {maxProfit}, Final State: Restaurants={finalR}, Accommodations={finalA}, Entertainments={finalE}, TourismAreas={finalT}, Used Budget={usedBudget}, Max Restaurants={constraints.MaxRestaurants}");
+
+        var state = new KnapsackState(usedBudget, finalR, finalA, finalE, finalT, items.Count - 1, items, decision, new List<Item>(), null, priorities);
         var selectedItems = _backtracker.BacktrackSingleSolution(state);
 
-        Console.WriteLine($"Selected Items Count: {selectedItems.Count}, Total Cost: {selectedItems.Sum(i => i.AveragePricePerAdult)}");
+        Console.WriteLine($"Selected Items Count: {selectedItems.Count}, Total Cost: {selectedItems.Sum(i => i.AveragePricePerAdult)}, Restaurants Selected: {selectedItems.Count(i => i.PlaceType == ItemType.Restaurant)}");
         return (maxProfit, selectedItems);
     }
 
-    public (float maxProfit, List<List<Item>> allSelectedItems) GetMaxProfitMultiple(int budget, List<Item> items, IKnapsackConstraints constraints, (int a, int f, int e, int t)? priorities = null)
+    public (float maxProfit, List<List<Item>> allSelectedItems) GetMaxProfitMultiple(
+        int budget, 
+        List<Item> items, 
+        IKnapsackConstraints constraints, 
+        (int a, int f, int e, int t)? priorities = null)
     {
-        var (dp, decision, itemIds) = _dpCalculator.CalculateDP(budget, items);
-        var (maxProfit, finalR, finalA, finalE, finalT) = _profitFinder.FindMaxProfit(dp, budget);
-        var state = new KnapsackState(budget, 0, 0, 0, 0, items.Count - 1, items, decision, new List<Item>(), null, priorities);
+        var (dp, decision, itemIds) = _dpCalculator.CalculateDP(budget, items, constraints);
+        var (maxProfit, usedBudget, finalR, finalA, finalE, finalT) = _profitFinder.FindMaxProfit(dp, budget, constraints);
+        Console.WriteLine($"Max Profit: {maxProfit}, Final State: Restaurants={finalR}, Accommodations={finalA}, Entertainments={finalE}, TourismAreas={finalT}, Used Budget={usedBudget}, Max Restaurants={constraints.MaxRestaurants}");
+
+        var state = new KnapsackState(usedBudget, finalR, finalA, finalE, finalT, items.Count - 1, items, decision, new List<Item>(), null, priorities);
         var allSolutions = _backtracker.BacktrackTopSolutions(state, 10);
 
         Console.WriteLine($"Total Solutions Found: {allSolutions.Count}");

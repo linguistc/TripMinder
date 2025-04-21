@@ -1,7 +1,7 @@
-using MediatR;
 using TripMinder.Core.Bases;
 
 namespace TripMinder.Core.Behaviors.Knapsack;
+
 public class TripPlanOptimizer
 {
     private readonly IKnapsackSolver _solver;
@@ -16,7 +16,20 @@ public class TripPlanOptimizer
     public async Task<Respond<TripPlanResponse>> OptimizePlan(TripPlanRequest request)
     {
         var priorities = CalculatePriorities(request.Interests);
+        Console.WriteLine($"Calculated Priorities: Accommodation={priorities.accommodation}, Food={priorities.food}, Entertainment={priorities.entertainment}, Tourism={priorities.tourism}");
+
         var allItems = await _itemFetcher.FetchItems(request.GovernorateId, request.ZoneId, priorities);
+        Console.WriteLine($"Fetched Items: Total={allItems.Count}, Restaurants={allItems.Count(i => i.PlaceType == ItemType.Restaurant)}, GlobalIds={string.Join(", ", allItems.Select(i => i.GlobalId))}");
+
+        // Filter items based on interests
+        var desiredTypes = new HashSet<ItemType>();
+        if (priorities.accommodation > 0) desiredTypes.Add(ItemType.Accommodation);
+        if (priorities.food > 0) desiredTypes.Add(ItemType.Restaurant);
+        if (priorities.entertainment > 0) desiredTypes.Add(ItemType.Entertainment);
+        if (priorities.tourism > 0) desiredTypes.Add(ItemType.TourismArea);
+        var filteredItems = allItems.Where(i => desiredTypes.Contains(i.PlaceType)).ToList();
+        Console.WriteLine($"Filtered Items: Total={filteredItems.Count}, Restaurants={filteredItems.Count(i => i.PlaceType == ItemType.Restaurant)}, GlobalIds={string.Join(", ", filteredItems.Select(i => i.GlobalId))}");
+
         var totalBudget = (int)(request.BudgetPerAdult);
 
         var constraints = new UserDefinedKnapsackConstraints(
@@ -25,7 +38,7 @@ public class TripPlanOptimizer
             request.MaxEntertainments,
             request.MaxTourismAreas);
 
-        var (maxProfit, selectedItems) = _solver.GetMaxProfit(totalBudget, allItems, constraints, priorities);
+        var (maxProfit, selectedItems) = _solver.GetMaxProfit(totalBudget, filteredItems, constraints, priorities);
         var tripPlanResponse = BuildTripPlanResponse(selectedItems, request);
 
         if (selectedItems.Any())
@@ -50,7 +63,20 @@ public class TripPlanOptimizer
     public async Task<Respond<List<TripPlanResponse>>> OptimizePlanMultiple(TripPlanRequest request)
     {
         var priorities = CalculatePriorities(request.Interests);
+        Console.WriteLine($"Calculated Priorities: Accommodation={priorities.accommodation}, Food={priorities.food}, Entertainment={priorities.entertainment}, Tourism={priorities.tourism}");
+
         var allItems = await _itemFetcher.FetchItems(request.GovernorateId, request.ZoneId, priorities);
+        Console.WriteLine($"Fetched Items: Total={allItems.Count}, Restaurants={allItems.Count(i => i.PlaceType == ItemType.Restaurant)}, GlobalIds={string.Join(", ", allItems.Select(i => i.GlobalId))}");
+
+        // Filter items based on interests
+        var desiredTypes = new HashSet<ItemType>();
+        if (priorities.accommodation > 0) desiredTypes.Add(ItemType.Accommodation);
+        if (priorities.food > 0) desiredTypes.Add(ItemType.Restaurant);
+        if (priorities.entertainment > 0) desiredTypes.Add(ItemType.Entertainment);
+        if (priorities.tourism > 0) desiredTypes.Add(ItemType.TourismArea);
+        var filteredItems = allItems.Where(i => desiredTypes.Contains(i.PlaceType)).ToList();
+        Console.WriteLine($"Filtered Items: Total={filteredItems.Count}, Restaurants={filteredItems.Count(i => i.PlaceType == ItemType.Restaurant)}, GlobalIds={string.Join(", ", filteredItems.Select(i => i.GlobalId))}");
+
         var totalBudget = (int)(request.BudgetPerAdult);
 
         var constraints = new UserDefinedKnapsackConstraints(
@@ -59,7 +85,7 @@ public class TripPlanOptimizer
             request.MaxEntertainments,
             request.MaxTourismAreas);
 
-        var (maxProfit, allSolutions) = _solver.GetMaxProfitMultiple(totalBudget, allItems, constraints, priorities);
+        var (maxProfit, allSolutions) = _solver.GetMaxProfitMultiple(totalBudget, filteredItems, constraints, priorities);
         var tripPlans = allSolutions.Select(items => BuildTripPlanResponse(items, request)).ToList();
 
         if (tripPlans.Any())
@@ -117,6 +143,7 @@ public class TripPlanOptimizer
     }
 }
 
+
 // HELPER CLASSES
 public record TripPlanRequest(
     int GovernorateId,
@@ -143,6 +170,7 @@ public enum ItemType { Accommodation, Restaurant, Entertainment, TourismArea }
 public class Item
 {
     public int Id { get; set; }
+    public string GlobalId { get; set; }
     public string Name { get; set; }
     public string ClassType { get; set; }
     public double AveragePricePerAdult { get; set; }
