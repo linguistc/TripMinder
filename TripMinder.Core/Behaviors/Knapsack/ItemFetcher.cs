@@ -10,7 +10,7 @@ public class ItemFetcher : IItemFetcher
 {
     private static readonly Random _random = new Random(12345);
     private readonly IMediator _mediator;
-    
+
     public ItemFetcher(IMediator mediator)
     {
         this._mediator = mediator;
@@ -28,20 +28,50 @@ public class ItemFetcher : IItemFetcher
         {
             await FetchItemsByGovernorateId(governorateId, priorities, allItems);
         }
-        
-        Console.WriteLine($"Total Items Fetched: {allItems.Count}, Restaurants: {allItems.Count(i => i.PlaceType == ItemType.Restaurant)}");
-        return allItems.OrderByDescending(item =>
-        {
-            int priority = item.PlaceType switch
+
+        Console.WriteLine($"Fetched Items: Total={allItems.Count}, Restaurants={allItems.Count(i => i.PlaceType == ItemType.Restaurant)}, Accommodations={allItems.Count(i => i.PlaceType == ItemType.Accommodation)}, Entertainments={allItems.Count(i => i.PlaceType == ItemType.Entertainment)}, TourismAreas={allItems.Count(i => i.PlaceType == ItemType.TourismArea)}, GlobalIds={string.Join(", ", allItems.Select(i => $"{i.GlobalId} (Score={i.Score}, Price={i.AveragePricePerAdult})"))}");
+
+        var filteredItems = allItems
+            .Where(item =>
             {
-                ItemType.Accommodation => priorities.a,
-                ItemType.Restaurant => priorities.f,
-                ItemType.Entertainment => priorities.e,
-                ItemType.TourismArea => priorities.t,
-                _ => 0
-            };
-            return priority == 0 ? 0 : priority * item.Score;
-        }).ToList();
+                int priority = item.PlaceType switch
+                {
+                    ItemType.Accommodation => priorities.a,
+                    ItemType.Restaurant => priorities.f,
+                    ItemType.Entertainment => priorities.e,
+                    ItemType.TourismArea => priorities.t,
+                    _ => 0
+                };
+                return priority > 0;
+            })
+            .Select(item => { item.Score = Math.Max(item.Score, 0.01f); return item; })
+            .OrderByDescending(item =>
+            {
+                int priority = item.PlaceType switch
+                {
+                    ItemType.Accommodation => priorities.a,
+                    ItemType.Restaurant => priorities.f,
+                    ItemType.Entertainment => priorities.e,
+                    ItemType.TourismArea => priorities.t,
+                    _ => 0
+                };
+                return priority == 0 ? 0 : priority * item.Score;
+            })
+            .ToList();
+
+        // Fallback to all items if filteredItems is empty
+        if (!filteredItems.Any() && allItems.Any())
+        {
+            Console.WriteLine("No items matched priorities, returning all items");
+            filteredItems = allItems
+                .Select(item => { item.Score = Math.Max(item.Score, 0.01f); return item; })
+                .OrderByDescending(item => item.Score)
+                .ToList();
+        }
+
+        Console.WriteLine($"Filtered Items: Total={filteredItems.Count}, Restaurants={filteredItems.Count(i => i.PlaceType == ItemType.Restaurant)}, Accommodations={filteredItems.Count(i => i.PlaceType == ItemType.Accommodation)}, Entertainments={filteredItems.Count(i => i.PlaceType == ItemType.Entertainment)}, TourismAreas={filteredItems.Count(i => i.PlaceType == ItemType.TourismArea)}, GlobalIds={string.Join(", ", filteredItems.Select(i => $"{i.GlobalId} (Score={i.Score}, Price={i.AveragePricePerAdult})"))}");
+
+        return filteredItems;
     }
 
     private async Task FetchItemsByZoneId(int zoneId, (int a, int f, int e, int t) priorities, List<Item> allItems)

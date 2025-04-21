@@ -19,7 +19,7 @@ public class TripPlanOptimizer
         Console.WriteLine($"Calculated Priorities: Accommodation={priorities.accommodation}, Food={priorities.food}, Entertainment={priorities.entertainment}, Tourism={priorities.tourism}");
 
         var allItems = await _itemFetcher.FetchItems(request.GovernorateId, request.ZoneId, priorities);
-        Console.WriteLine($"Fetched Items: Total={allItems.Count}, Restaurants={allItems.Count(i => i.PlaceType == ItemType.Restaurant)}, GlobalIds={string.Join(", ", allItems.Select(i => i.GlobalId))}");
+        Console.WriteLine($"Fetched Items: Total={allItems.Count}, Restaurants={allItems.Count(i => i.PlaceType == ItemType.Restaurant)}, Accommodations={allItems.Count(i => i.PlaceType == ItemType.Accommodation)}, Entertainments={allItems.Count(i => i.PlaceType == ItemType.Entertainment)}, TourismAreas={allItems.Count(i => i.PlaceType == ItemType.TourismArea)}, GlobalIds={string.Join(", ", allItems.Select(i => $"{i.GlobalId} (Score={i.Score}, Price={i.AveragePricePerAdult})"))}");
 
         // Filter items based on interests
         var desiredTypes = new HashSet<ItemType>();
@@ -28,7 +28,7 @@ public class TripPlanOptimizer
         if (priorities.entertainment > 0) desiredTypes.Add(ItemType.Entertainment);
         if (priorities.tourism > 0) desiredTypes.Add(ItemType.TourismArea);
         var filteredItems = allItems.Where(i => desiredTypes.Contains(i.PlaceType)).ToList();
-        Console.WriteLine($"Filtered Items: Total={filteredItems.Count}, Restaurants={filteredItems.Count(i => i.PlaceType == ItemType.Restaurant)}, GlobalIds={string.Join(", ", filteredItems.Select(i => i.GlobalId))}");
+        Console.WriteLine($"Filtered Items: Total={filteredItems.Count}, Restaurants={filteredItems.Count(i => i.PlaceType == ItemType.Restaurant)}, Accommodations={filteredItems.Count(i => i.PlaceType == ItemType.Accommodation)}, Entertainments={filteredItems.Count(i => i.PlaceType == ItemType.Entertainment)}, TourismAreas={filteredItems.Count(i => i.PlaceType == ItemType.TourismArea)}, GlobalIds={string.Join(", ", filteredItems.Select(i => $"{i.GlobalId} (Score={i.Score}, Price={i.AveragePricePerAdult})"))}");
 
         var totalBudget = (int)(request.BudgetPerAdult);
 
@@ -66,7 +66,7 @@ public class TripPlanOptimizer
         Console.WriteLine($"Calculated Priorities: Accommodation={priorities.accommodation}, Food={priorities.food}, Entertainment={priorities.entertainment}, Tourism={priorities.tourism}");
 
         var allItems = await _itemFetcher.FetchItems(request.GovernorateId, request.ZoneId, priorities);
-        Console.WriteLine($"Fetched Items: Total={allItems.Count}, Restaurants={allItems.Count(i => i.PlaceType == ItemType.Restaurant)}, GlobalIds={string.Join(", ", allItems.Select(i => i.GlobalId))}");
+        Console.WriteLine($"Fetched Items: Total={allItems.Count}, Restaurants={allItems.Count(i => i.PlaceType == ItemType.Restaurant)}, Accommodations={allItems.Count(i => i.PlaceType == ItemType.Accommodation)}, Entertainments={allItems.Count(i => i.PlaceType == ItemType.Entertainment)}, TourismAreas={allItems.Count(i => i.PlaceType == ItemType.TourismArea)}, GlobalIds={string.Join(", ", allItems.Select(i => $"{i.GlobalId} (Score={i.Score}, Price={i.AveragePricePerAdult})"))}");
 
         // Filter items based on interests
         var desiredTypes = new HashSet<ItemType>();
@@ -75,7 +75,7 @@ public class TripPlanOptimizer
         if (priorities.entertainment > 0) desiredTypes.Add(ItemType.Entertainment);
         if (priorities.tourism > 0) desiredTypes.Add(ItemType.TourismArea);
         var filteredItems = allItems.Where(i => desiredTypes.Contains(i.PlaceType)).ToList();
-        Console.WriteLine($"Filtered Items: Total={filteredItems.Count}, Restaurants={filteredItems.Count(i => i.PlaceType == ItemType.Restaurant)}, GlobalIds={string.Join(", ", filteredItems.Select(i => i.GlobalId))}");
+        Console.WriteLine($"Filtered Items: Total={filteredItems.Count}, Restaurants={filteredItems.Count(i => i.PlaceType == ItemType.Restaurant)}, Accommodations={filteredItems.Count(i => i.PlaceType == ItemType.Accommodation)}, Entertainments={filteredItems.Count(i => i.PlaceType == ItemType.Entertainment)}, TourismAreas={filteredItems.Count(i => i.PlaceType == ItemType.TourismArea)}, GlobalIds={string.Join(", ", filteredItems.Select(i => $"{i.GlobalId} (Score={i.Score}, Price={i.AveragePricePerAdult})"))}");
 
         var totalBudget = (int)(request.BudgetPerAdult);
 
@@ -126,23 +126,51 @@ public class TripPlanOptimizer
     private (int accommodation, int food, int entertainment, int tourism) CalculatePriorities(Queue<string> interests)
     {
         int accommodationPriority = 0, foodPriority = 0, entertainmentPriority = 0, tourismPriority = 0;
-        int bonus = interests.Count;
-        while (interests.Count > 0)
+        int bonus = interests?.Count ?? 0;
+
+        Console.WriteLine($"Calculating priorities for interests: {string.Join(", ", interests ?? new Queue<string>())}");
+
+        if (interests != null)
         {
-            var interest = interests.Dequeue();
-            switch (interest.ToLower())
+            foreach (var interest in interests)
             {
-                case "accommodation": accommodationPriority += bonus--; break;
-                case "restaurants": case "food": foodPriority += bonus--; break;
-                case "entertainments": case "entertainment": entertainmentPriority += bonus--; break;
-                case "tourismareas": case "tourism": tourismPriority += bonus--; break;
+                var normalizedInterest = interest?.Trim().ToLowerInvariant();
+                Console.WriteLine($"Processing interest: {normalizedInterest}");
+                switch (normalizedInterest)
+                {
+                    case "accommodation":
+                        accommodationPriority += bonus--;
+                        break;
+                    case "restaurants":
+                    case "food":
+                        foodPriority += bonus--;
+                        break;
+                    case "entertainments":
+                    case "entertainment":
+                        entertainmentPriority += bonus--;
+                        break;
+                    case "tourismareas":
+                    case "tourism":
+                        tourismPriority += bonus--;
+                        break;
+                    default:
+                        Console.WriteLine($"Unrecognized interest: {normalizedInterest}");
+                        break;
+                }
             }
         }
 
+        // Fallback if no priorities are set
+        if ((interests?.Any() ?? false) && accommodationPriority == 0 && foodPriority == 0 && entertainmentPriority == 0 && tourismPriority == 0)
+        {
+            Console.WriteLine("No valid priorities set, defaulting to all priorities");
+            accommodationPriority = foodPriority = entertainmentPriority = tourismPriority = 1;
+        }
+
+        Console.WriteLine($"Calculated Priorities: Accommodation={accommodationPriority}, Food={foodPriority}, Entertainment={entertainmentPriority}, Tourism={tourismPriority}");
         return (accommodationPriority, foodPriority, entertainmentPriority, tourismPriority);
     }
 }
-
 
 // HELPER CLASSES
 public record TripPlanRequest(
