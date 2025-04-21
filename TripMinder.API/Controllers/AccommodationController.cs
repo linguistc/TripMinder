@@ -11,23 +11,34 @@ namespace TripMinder.API.Controllers
         [HttpGet(Router.AccomodationRouting.List)]
         public async Task<IActionResult> GetAccommodationListAsync()
         {
-            var response = await Mediator.Send(new GetAccomodationsListQuery());
+            var response = await this.Mediator.Send(new GetAccomodationsListQuery());
             return Ok(response);
         }
         
-        [HttpGet(Router.AccomodationRouting.ListByZoneId)]
-        public async Task<IActionResult> GetAccommodationListByZoneIdAsync([FromRoute]int zoneId, [FromQuery]int? priority = 0)
-        {
-            var query = new GetAccomodationsListByZoneIdQuery(zoneId, priority ?? 0);
-            var response = await Mediator.Send(query);
-            return Ok(response);
-        }
-
         [HttpGet(Router.AccomodationRouting.GetById)]
         public async Task<IActionResult> GetAccommodationById(int id)
         {
-            var response = await Mediator.Send(new GetAccomodationByIdQuery(id));
+            var response = await this.Mediator.Send(new GetAccomodationByIdQuery(id));
             return NewResult(response);
+        }
+        
+        [HttpGet(Router.AccomodationRouting.ListByZoneId)]
+        public async Task<IActionResult> GetAccommodationListByZoneIdAsync([FromRoute]int zoneId, [FromQuery]int? priority = 1)
+        {
+            var query = new GetAccomodationsListByZoneIdQuery(zoneId, priority ?? 1);
+            var response = await this.Mediator.Send(query);
+            return Ok(response);
+        }
+
+        
+        [HttpGet(Router.AccomodationRouting.ListByGovernorateId)]
+        public async Task<IActionResult> GetAccommodationListByGovernorateIdAsync([FromRoute]int governorateId, [FromQuery]int? priority = 1)
+        {
+            var query = new GetAccomodationsListByGovernorateIdQuery(governorateId, priority ?? 1);
+            
+            var response = await this.Mediator.Send(query);
+
+            return Ok(response);
         }
     }
 }

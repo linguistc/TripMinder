@@ -8,8 +8,12 @@ namespace TripMinder.API.Bases
     [ApiController]
     public class AppControllerBase : ControllerBase
     {
-        private IMediator _mediatorInstance;
-        protected IMediator Mediator => _mediatorInstance ??= HttpContext.RequestServices.GetService<IMediator>();
+        private IMediator? _mediatorInstance;
+
+        protected IMediator Mediator => _mediatorInstance ??= HttpContext.RequestServices.GetService<IMediator>() ??
+                                                              throw new InvalidOperationException(
+                                                                  "Mediator is not registered");
+        
 
         #region Actions
         public ObjectResult NewResult<T>(Respond<T> response)
