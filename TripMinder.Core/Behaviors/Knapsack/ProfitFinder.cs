@@ -17,19 +17,21 @@ public class ProfitFinder : IProfitFinder
         for (int t = 0; t <= constraints.MaxTourismAreas; t++)
         {
             float profit = dp[w, r, a, e, t];
-            // Only consider states with at least one restaurant if maxRestaurants > 0
-            if (profit != float.MinValue && (constraints.MaxRestaurants == 0 || r > 0))
+            bool valid = profit != float.MinValue
+                && (constraints.MaxRestaurants == 0 || r > 0)
+                && (constraints.MaxAccommodations == 0 || a > 0)
+                && (constraints.MaxEntertainments == 0 || e > 0)
+                && (constraints.MaxTourismAreas == 0 || t > 0);
+
+            if (valid && (profit > maxProfit || (profit == maxProfit && w < bestW)))
             {
-                if (profit > maxProfit || maxProfit == float.MinValue)
-                {
-                    maxProfit = profit;
-                    bestW = w;
-                    bestR = r;
-                    bestA = a;
-                    bestE = e;
-                    bestT = t;
-                    Console.WriteLine($"Found better profit: Profit={profit}, Budget={w}, Restaurants={r}, Accommodations={a}, Entertainments={e}, TourismAreas={t}");
-                }
+                maxProfit = profit;
+                bestW = w;
+                bestR = r;
+                bestA = a;
+                bestE = e;
+                bestT = t;
+                Console.WriteLine($"Found better profit: Profit={profit}, Budget={w}, Restaurants={r}, Accommodations={a}, Entertainments={e}, TourismAreas={t}");
             }
         }
 
@@ -45,5 +47,6 @@ public class ProfitFinder : IProfitFinder
         }
 
         Console.WriteLine($"Max Profit: {maxProfit}, Used Budget: {bestW}, Restaurants: {bestR}, Accommodations: {bestA}, Entertainments: {bestE}, TourismAreas: {bestT}");
-        return (maxProfit, bestW, bestR, bestA, bestE, bestT);    }
+        return (maxProfit, bestW, bestR, bestA, bestE, bestT);
+    }
 }

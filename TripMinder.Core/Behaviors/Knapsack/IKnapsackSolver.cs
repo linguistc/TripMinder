@@ -14,5 +14,4 @@ public interface IKnapsackSolver
         List<Item> items,
         IKnapsackConstraints constraints,
         (int a, int f, int e, int t)? priorities = null);
-    
 }
