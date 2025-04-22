@@ -16,6 +16,9 @@
             public const string List = Prefix + "list/";
             public const string GetById = Prefix + SingleRouter;
 
+            public const string ListByZoneId = Prefix + "zone/{zoneId}/";
+            public const string ListByGovernorateId = Prefix + "governorate/{governorateId}/";
+            
             public const string Create = Prefix + "create/";
             public const string Update = Prefix + "Update/";
             public const string Delete = Prefix + SingleRouter;
@@ -28,7 +31,10 @@
             public const string Prefix = Rule + "accommodation/";
             public const string List = Prefix + "list/";
             public const string GetById = Prefix + SingleRouter;
+            
             public const string ListByZoneId = Prefix + "zone/{zoneId}/";
+            public const string ListByGovernorateId = Prefix + "governorate/{governorateId}/";
+            
             public const string Create = Prefix + "create/";
             public const string Update = Prefix + "Update/";
             public const string Delete = Prefix + SingleRouter;
@@ -40,6 +46,10 @@
             public const string Prefix = Rule + "entertainment/";
             public const string List = Prefix + "list/";
             public const string GetById = Prefix + SingleRouter;
+            
+            public const string ListByZoneId = Prefix + "zone/{zoneId}/";
+            public const string ListByGovernorateId = Prefix + "governorate/{governorateId}/";
+            
             public const string Create = Prefix + "create/";
             public const string Update = Prefix + "Update/";
             public const string Delete = Prefix + SingleRouter;
@@ -51,6 +61,10 @@
             public const string Prefix = Rule + "tourismarea/";
             public const string List = Prefix + "list/";
             public const string GetById = Prefix + SingleRouter;
+            
+            public const string ListByZoneId = Prefix + "zone/{zoneId}/";
+            public const string ListByGovernorateId = Prefix + "governorate/{governorateId}/";
+            
             public const string Create = Prefix + "create/";
             public const string Update = Prefix + "Update/";
             public const string Delete = Prefix + SingleRouter;

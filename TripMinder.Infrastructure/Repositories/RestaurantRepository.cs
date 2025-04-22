@@ -31,7 +31,8 @@ namespace TripMinder.Infrastructure.Repositories
         public async Task<List<Restaurant>> GetRestaurantsListAsync()
         {
             var result = await this.restaurants.Include(r => r.FoodCategory)
-                                         .Include(r => r.Zone)
+                                         .Include(r => r.Zone).AsNoTracking()
+                                         .Include(r => r.Zone.Governorate).AsNoTracking()
                                          .Include(r => r.Class)
                                          .Include(r => r.PlaceType)
                                          .ToListAsync();
@@ -43,7 +44,8 @@ namespace TripMinder.Infrastructure.Repositories
         {
             return await this.restaurants
                 .Include(r => r.FoodCategory)
-                .Include(r => r.Zone)
+                .Include(r => r.Zone).AsNoTracking()
+                .Include(r => r.Zone.Governorate).AsNoTracking()
                 .Include(r => r.Class)
                 .Include(r => r.PlaceType)
                 .Where(r => r.ZoneId == zoneId)
@@ -54,7 +56,8 @@ namespace TripMinder.Infrastructure.Repositories
         {
             return await this.restaurants
                 .Include(r => r.FoodCategory)
-                .Include(r => r.Zone)
+                .Include(r => r.Zone).AsNoTracking()
+                .Include(r => r.Zone.Governorate).AsNoTracking()
                 .Include(r => r.Class)
                 .Include(r => r.PlaceType)                
                 .Where(r => r.Zone.GovernorateId == governorateId)

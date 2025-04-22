@@ -26,10 +26,10 @@ namespace TripMinder.Data.Entities
         
         public double Rating { get; set; }
         
-        [ForeignKey("Governorate")]
-        public int GovernorateId { get; set; }
-        
-        public Governorate Governorate { get; set; }
+        // [ForeignKey("Governorate")]
+        // public int GovernorateId { get; set; }
+        //
+        // public Governorate Governorate { get; set; }
 
         public string? Description { get; set; }
         

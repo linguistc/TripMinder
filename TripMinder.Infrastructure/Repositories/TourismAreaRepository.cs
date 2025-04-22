@@ -27,7 +27,8 @@ namespace TripMinder.Infrastructure.Repositories
         {
 
             var result = await this.tourismAreas.Include(r => r.TourismType)
-                                         .Include(r => r.Zone)
+                                         .Include(r => r.Zone).AsNoTracking()
+                                         .Include(r => r.Zone.Governorate).AsNoTracking()
                                          .Include(r => r.Class)
                                          .Include(r => r.PlaceType)
                                          .ToListAsync();
@@ -40,7 +41,8 @@ namespace TripMinder.Infrastructure.Repositories
         {
             return await this.tourismAreas
                 .Include(r => r.TourismType)
-                .Include(r => r.Zone)
+                .Include(r => r.Zone).AsNoTracking()
+                .Include(r => r.Zone.Governorate).AsNoTracking()
                 .Include(r => r.Class)
                 .Include(r => r.PlaceType)
                 .Where(r => r.ZoneId == zoneId)
@@ -52,7 +54,8 @@ namespace TripMinder.Infrastructure.Repositories
         {
             return await this.tourismAreas
                 .Include(r => r.TourismType)
-                .Include(r => r.Zone)
+                .Include(r => r.Zone).AsNoTracking()
+                .Include(r => r.Zone.Governorate).AsNoTracking()
                 .Include(r => r.Class)
                 .Include(r => r.PlaceType)
                 .Where(r => r.Zone.GovernorateId == governorateId)
