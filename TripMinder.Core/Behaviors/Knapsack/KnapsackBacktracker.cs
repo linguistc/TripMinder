@@ -164,30 +164,42 @@ public class KnapsackBacktracker : IKnapsackBacktracker
             if (state.Priorities.Value.t > 0) requiredTypes.Add(ItemType.TourismArea);
         }
 
+        Console.WriteLine($"Starting Backtracking: Budget={currentW}, Restaurants={currentR}, Accommodations={currentA}, Entertainments={currentE}, TourismAreas={currentT}");
+
         for (int i = state.Items.Count - 1; i >= 0; i--)
         {
             var item = state.Items[i];
-            if (currentW < 0 || currentR < 0 || currentA < 0 || currentE < 0 || currentT < 0) break;
+            if (currentW < 0 || currentR < 0 || currentA < 0 || currentE < 0 || currentT < 0)
+            {
+                Console.WriteLine($"Invalid state reached: Budget={currentW}, Restaurants={currentR}, Accommodations={currentA}, Entertainments={currentE}, TourismAreas={currentT}");
+                break;
+            }
 
             if (state.Decision[currentW, currentR, currentA, currentE, currentT, i] && !usedItemIds.Contains(item.GlobalId))
             {
-                selectedItems.Add(item);
-                usedItemIds.Add(item.GlobalId);
-                currentW -= (int)item.AveragePricePerAdult;
-                if (item.PlaceType == ItemType.Restaurant) currentR--;
-                if (item.PlaceType == ItemType.Accommodation) currentA--;
-                if (item.PlaceType == ItemType.Entertainment) currentE--;
-                if (item.PlaceType == ItemType.TourismArea) currentT--;
-                Console.WriteLine($"Selected Item: {item.Name}, Type: {item.PlaceType}, Price: {item.AveragePricePerAdult}, Score: {item.Score}, New Budget={currentW}");
+                // تحقق إن النوع مطلوب
+                if (requiredTypes.Contains(item.PlaceType))
+                {
+                    selectedItems.Add(item);
+                    usedItemIds.Add(item.GlobalId);
+                    currentW -= (int)item.AveragePricePerAdult;
+                    if (item.PlaceType == ItemType.Restaurant) currentR--;
+                    if (item.PlaceType == ItemType.Accommodation) currentA--;
+                    if (item.PlaceType == ItemType.Entertainment) currentE--;
+                    if (item.PlaceType == ItemType.TourismArea) currentT--;
+                    Console.WriteLine($"Selected Item: {item.Name}, GlobalId: {item.GlobalId}, Type: {item.PlaceType}, Price: {item.AveragePricePerAdult}, Score: {item.Score}, New Budget={currentW}, New Restaurants={currentR}");
+                }
             }
         }
 
         var selectedTypes = selectedItems.Select(i => i.PlaceType).ToHashSet();
         if (!requiredTypes.All(t => selectedTypes.Contains(t)))
         {
-            Console.WriteLine($"Warning: Missing types: {string.Join(", ", requiredTypes.Except(selectedTypes))}");
+            Console.WriteLine($"Warning: Solution does not meet all priority requirements. Missing types: {string.Join(", ", requiredTypes.Except(selectedTypes))}");
         }
 
+        Console.WriteLine($"Backtracking Complete: Selected {selectedItems.Count(i => i.PlaceType == ItemType.Restaurant)} Restaurants, Total Items={selectedItems.Count}");
         return selectedItems;
-    }    
+    }
+    
 }
