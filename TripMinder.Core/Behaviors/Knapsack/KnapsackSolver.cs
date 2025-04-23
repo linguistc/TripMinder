@@ -17,7 +17,7 @@ public class KnapsackSolver : IKnapsackSolver
         int budget, 
         List<Item> items,
         IKnapsackConstraints constraints, 
-        (int a, int f, int e, int t)? priorities = null)
+        (int a, int f, int e, int t)? priorities = null, bool requireExact = false)
     {
         var (dp, decision, itemIds) = _dpCalculator.Calculate(
             budget, items, 
@@ -25,8 +25,8 @@ public class KnapsackSolver : IKnapsackSolver
             constraints.MaxAccommodations, 
             constraints.MaxEntertainments, 
             constraints.MaxTourismAreas);
-        var (maxProfit, usedBudget, finalR, finalA, finalE, finalT) = _profitFinder.FindMaxProfit(dp, budget, constraints);
-        Console.WriteLine($"Max Profit: {maxProfit}, Final State: Restaurants={finalR}, Accommodations={finalA}, Entertainments={finalE}, TourismAreas={finalT}, Used Budget={usedBudget}, Max Restaurants={constraints.MaxRestaurants}");
+        var (maxProfit, usedBudget, finalR, finalA, finalE, finalT) = _profitFinder.FindMaxProfit(dp, budget, constraints, requireExact);
+        Console.WriteLine($"Max Profit: {maxProfit}, Final State: Restaurants={finalR}, Accommodations={finalA}, Entertainments={finalE}, TourismAreas={finalT}, Used Budget={usedBudget}");
 
         var state = new KnapsackState(
             usedBudget, 
@@ -50,7 +50,7 @@ public class KnapsackSolver : IKnapsackSolver
         int budget, 
         List<Item> items, 
         IKnapsackConstraints constraints, 
-        (int a, int f, int e, int t)? priorities = null)
+        (int a, int f, int e, int t)? priorities = null, bool requireExact = false)
     {
         var (dp, decision, itemIds) = _dpCalculator.Calculate(
             budget, items, 
@@ -58,8 +58,8 @@ public class KnapsackSolver : IKnapsackSolver
             constraints.MaxAccommodations, 
             constraints.MaxEntertainments, 
             constraints.MaxTourismAreas);
-        var (maxProfit, usedBudget, finalR, finalA, finalE, finalT) = _profitFinder.FindMaxProfit(dp, budget, constraints);
-        Console.WriteLine($"Max Profit: {maxProfit}, Final State: Restaurants={finalR}, Accommodations={finalA}, Entertainments={finalE}, TourismAreas={finalT}, Used Budget={usedBudget}, Max Restaurants={constraints.MaxRestaurants}");
+        var (maxProfit, usedBudget, finalR, finalA, finalE, finalT) = _profitFinder.FindMaxProfit(dp, budget, constraints, requireExact);
+        Console.WriteLine($"Max Profit: {maxProfit}, Final State: Restaurants={finalR}, Accommodations={finalA}, Entertainments={finalE}, TourismAreas={finalT}, Used Budget={usedBudget}");
 
         var state = new KnapsackState(usedBudget, finalR, finalA, finalE, finalT, items.Count - 1, items, decision, new List<Item>(), null, priorities);
         var allSolutions = _backtracker.BacktrackTopSolutions(state, 10);

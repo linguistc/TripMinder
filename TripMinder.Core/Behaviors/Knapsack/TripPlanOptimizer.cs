@@ -1,9 +1,6 @@
 using TripMinder.Core.Bases;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace TripMinder.Core.Behaviors.Knapsack;
-
 public partial class TripPlanOptimizer
 {
     private readonly IKnapsackSolver _solver;
@@ -15,7 +12,7 @@ public partial class TripPlanOptimizer
         _itemFetcher = itemFetcher;
     }
 
-     public async Task<Respond<TripPlanResponse>> OptimizePlan(TripPlanRequest request)
+    public async Task<Respond<TripPlanResponse>> OptimizePlan(TripPlanRequest request)
     {
         // 1. Calculate priorities
         var priorities = CalculatePriorities(request.Interests);
@@ -31,41 +28,130 @@ public partial class TripPlanOptimizer
         var filteredItems = allItems.Where(i => desiredTypes.Contains(i.PlaceType)).ToList();
         Console.WriteLine($"Filtered Items: Total={filteredItems.Count}, Restaurants={filteredItems.Count(i => i.PlaceType == ItemType.Restaurant)}, Accommodations={filteredItems.Count(i => i.PlaceType == ItemType.Accommodation)}, Entertainments={filteredItems.Count(i => i.PlaceType == ItemType.Entertainment)}, TourismAreas={filteredItems.Count(i => i.PlaceType == ItemType.TourismArea)}");
 
-        // 3. Select baseline items
-        int budget = (int)request.BudgetPerAdult; // Use full budget
+        // 3. Staged approach
+        int remainingBudget = (int)request.BudgetPerAdult;
         var constraints = new UserDefinedKnapsackConstraints(
             request.MaxRestaurants,
             request.MaxAccommodations,
             request.MaxEntertainments,
             request.MaxTourismAreas);
-        var baselineItems = PickBaselineItems(filteredItems, priorities, ref budget, ref constraints);
-        Console.WriteLine($"Baseline Items Selected: {baselineItems.Count}, Items={string.Join(", ", baselineItems.Select(i => $"{i.Name} (Type={i.PlaceType}, Price={i.AveragePricePerAdult})"))}, Remaining Budget={budget}");
+        var selectedItems = new List<Item>();
+        var currentCounts = new Dictionary<ItemType, int>
+        {
+            { ItemType.Restaurant, 0 },
+            { ItemType.Accommodation, 0 },
+            { ItemType.Entertainment, 0 },
+            { ItemType.TourismArea, 0 }
+        };
 
-        // 4. Run DP on all items with full budget
-        var (maxProfit, dpItems) = _solver.GetMaxProfit((int)request.BudgetPerAdult, allItems, constraints, priorities);
-        Console.WriteLine($"DP Items Selected: {dpItems.Count}, Items={string.Join(", ", dpItems.Select(i => $"{i.Name} (Type={i.PlaceType}, Price={i.AveragePricePerAdult})"))}, Total Profit={maxProfit}");
+        // Order interests by priority
+        var orderedInterests = request.Interests.Select((interest, index) => (interest, priority: priorities.accommodation + priorities.food + priorities.entertainment + priorities.tourism - index))
+            .OrderByDescending(x => x.priority)
+            .Select(x => x.interest)
+            .ToList();
 
-        // 5. Combine baseline and DP items
-        var finalItems = baselineItems.Concat(dpItems).DistinctBy(i => i.GlobalId).ToList();
-        Console.WriteLine($"Final Items: {finalItems.Count}, Items={string.Join(", ", finalItems.Select(i => $"{i.Name} (Type={i.PlaceType}, Price={i.AveragePricePerAdult})"))}");
-        var tripPlanResponse = BuildTripPlanResponse(finalItems, request);
+        // Stage 1: Add one item per priority
+        foreach (var interest in orderedInterests)
+        {
+            var itemType = GetItemType(interest);
+            if (!desiredTypes.Contains(itemType) || currentCounts[itemType] >= GetMaxCount(itemType, constraints)) continue;
 
-        if (finalItems.Any())
+            var stageConstraints = new UserDefinedKnapsackConstraints(
+                itemType == ItemType.Restaurant ? currentCounts[ItemType.Restaurant] + 1 : currentCounts[ItemType.Restaurant],
+                itemType == ItemType.Accommodation ? currentCounts[ItemType.Accommodation] + 1 : currentCounts[ItemType.Accommodation],
+                itemType == ItemType.Entertainment ? currentCounts[ItemType.Entertainment] + 1 : currentCounts[ItemType.Entertainment],
+                itemType == ItemType.TourismArea ? currentCounts[ItemType.TourismArea] + 1 : currentCounts[ItemType.TourismArea]
+            );
+
+            var (maxProfit, stageItems) = _solver.GetMaxProfit(remainingBudget, filteredItems.Except(selectedItems).ToList(), stageConstraints, priorities, true); // requireExact = true
+            if (stageItems.Any())
+            {
+                var newItem = stageItems.FirstOrDefault(i => i.PlaceType == itemType);
+                if (newItem != null && remainingBudget >= (int)newItem.AveragePricePerAdult)
+                {
+                    selectedItems.Add(newItem);
+                    remainingBudget -= (int)newItem.AveragePricePerAdult;
+                    currentCounts[itemType]++;
+                    Console.WriteLine($"Stage Item Selected: {newItem.Name}, Type={newItem.PlaceType}, Price={newItem.AveragePricePerAdult}, Remaining Budget={remainingBudget}");
+                }
+            }
+        }
+
+        // Stage 2: Add additional items if budget and constraints allow
+        while (remainingBudget > 0 && currentCounts.Any(kv => kv.Value < GetMaxCount(kv.Key, constraints)))
+        {
+            bool added = false;
+            foreach (var interest in orderedInterests)
+            {
+                var itemType = GetItemType(interest);
+                if (!desiredTypes.Contains(itemType) || currentCounts[itemType] >= GetMaxCount(itemType, constraints)) continue;
+
+                var stageConstraints = new UserDefinedKnapsackConstraints(
+                    itemType == ItemType.Restaurant ? currentCounts[ItemType.Restaurant] + 1 : currentCounts[ItemType.Restaurant],
+                    itemType == ItemType.Accommodation ? currentCounts[ItemType.Accommodation] + 1 : currentCounts[ItemType.Accommodation],
+                    itemType == ItemType.Entertainment ? currentCounts[ItemType.Entertainment] + 1 : currentCounts[ItemType.Entertainment],
+                    itemType == ItemType.TourismArea ? currentCounts[ItemType.TourismArea] + 1 : currentCounts[ItemType.TourismArea]
+                );
+
+                var (maxProfit, stageItems) = _solver.GetMaxProfit(remainingBudget, filteredItems.Except(selectedItems).ToList(), stageConstraints, priorities, true);
+                if (stageItems.Any())
+                {
+                    var newItem = stageItems.FirstOrDefault(i => i.PlaceType == itemType);
+                    if (newItem != null && remainingBudget >= (int)newItem.AveragePricePerAdult)
+                    {
+                        selectedItems.Add(newItem);
+                        remainingBudget -= (int)newItem.AveragePricePerAdult;
+                        currentCounts[itemType]++;
+                        added = true;
+                        Console.WriteLine($"Additional Item Selected: {newItem.Name}, Type={newItem.PlaceType}, Price={newItem.AveragePricePerAdult}, Remaining Budget={remainingBudget}");
+                    }
+                }
+            }
+            if (!added) break; // No more items can be added
+        }
+
+        // 4. Build response
+        var tripPlanResponse = BuildTripPlanResponse(selectedItems, request);
+        if (selectedItems.Any())
         {
             return new Respond<TripPlanResponse>
             {
                 Succeeded = true,
                 Message = "Trip plan optimized successfully",
                 Data = tripPlanResponse,
-                Meta = new { TotalItems = finalItems.Count, TotalSolutions = 1 }
+                Meta = new { TotalItems = selectedItems.Count, TotalSolutions = 1 }
             };
         }
 
         return new Respond<TripPlanResponse>
         {
             Succeeded = false,
-            Message = "No valid trip plan found",
+            Message = "No validpony valid trip plan found",
             Errors = new List<string> { "Unable to generate a solution within constraints" }
+        };
+    }
+
+    private ItemType GetItemType(string interest)
+    {
+        return interest?.Trim().ToLowerInvariant() switch
+        {
+            "accommodation" => ItemType.Accommodation,
+            "restaurants" or "food" => ItemType.Restaurant,
+            "entertainments" or "entertainment" => ItemType.Entertainment,
+            "tourismareas" or "tourism" => ItemType.TourismArea,
+            _ => ItemType.Restaurant // Default
+        };
+    }
+
+    private int GetMaxCount(ItemType itemType, IKnapsackConstraints constraints)
+    {
+        return itemType switch
+        {
+            ItemType.Restaurant => constraints.MaxRestaurants,
+            ItemType.Accommodation => constraints.MaxAccommodations,
+            ItemType.Entertainment => constraints.MaxEntertainments,
+            ItemType.TourismArea => constraints.MaxTourismAreas,
+            _ => 0
         };
     }
 
@@ -102,19 +188,19 @@ public partial class TripPlanOptimizer
                 switch (normalizedInterest)
                 {
                     case "accommodation":
-                        accommodationPriority += bonus--;
+                        accommodationPriority = bonus--;
                         break;
                     case "restaurants":
                     case "food":
-                        foodPriority += bonus--;
+                        foodPriority = bonus--;
                         break;
                     case "entertainments":
                     case "entertainment":
-                        entertainmentPriority += bonus--;
+                        entertainmentPriority = bonus--;
                         break;
                     case "tourismareas":
                     case "tourism":
-                        tourismPriority += bonus--;
+                        tourismPriority = bonus--;
                         break;
                     default:
                         Console.WriteLine($"Unrecognized interest: {normalizedInterest}");
@@ -133,6 +219,8 @@ public partial class TripPlanOptimizer
         return (accommodationPriority, foodPriority, entertainmentPriority, tourismPriority);
     }
     
+    
+    // Un touched yet
     public async Task<Respond<List<TripPlanResponse>>> OptimizePlanMultiple(TripPlanRequest request)
     {
         var priorities = CalculatePriorities(request.Interests);
@@ -182,7 +270,6 @@ public partial class TripPlanOptimizer
         };
     }
 }
-
 
 // HELPER CLASSES
 public record TripPlanRequest(

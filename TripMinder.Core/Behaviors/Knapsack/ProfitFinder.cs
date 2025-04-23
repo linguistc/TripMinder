@@ -3,9 +3,7 @@ namespace TripMinder.Core.Behaviors.Knapsack;
 public class ProfitFinder : IProfitFinder
 {
     public (float maxProfit, int usedBudget, int r, int a, int e, int t) FindMaxProfit(
-        float[,,,,] dp, 
-        int budget, 
-        IKnapsackConstraints constraints)
+        float[,,,,] dp, int budget, IKnapsackConstraints constraints, bool requireExact = false)
     {
         float maxProfit = float.MinValue;
         int bestW = 0, bestR = 0, bestA = 0, bestE = 0, bestT = 0;
@@ -17,11 +15,22 @@ public class ProfitFinder : IProfitFinder
         for (int t = 0; t <= constraints.MaxTourismAreas; t++)
         {
             float profit = dp[w, r, a, e, t];
-            bool valid = profit != float.MinValue
-                && (constraints.MaxRestaurants == 0 || r > 0)
-                && (constraints.MaxAccommodations == 0 || a > 0)
-                && (constraints.MaxEntertainments == 0 || e > 0)
-                && (constraints.MaxTourismAreas == 0 || t > 0);
+            bool valid = profit != float.MinValue;
+            if (requireExact)
+            {
+                valid &= r == constraints.MaxRestaurants &&
+                         a == constraints.MaxAccommodations &&
+                         e == constraints.MaxEntertainments &&
+                         t == constraints.MaxTourismAreas;
+            }
+            else
+            {
+                valid &= (constraints.MaxRestaurants == 0 || r > 0) &&
+                         (constraints.MaxAccommodations == 0 || a > 0) &&
+                         (constraints.MaxEntertainments == 0 || e > 0) &&
+                         (constraints.MaxTourismAreas == 0 || t > 0);
+            }
+            valid &= w <= budget; // تأكد إن التكلفة ضمن البادجت
 
             if (valid && (profit > maxProfit || (profit == maxProfit && w < bestW)))
             {
