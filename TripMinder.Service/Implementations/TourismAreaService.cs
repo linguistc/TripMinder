@@ -28,12 +28,12 @@ namespace TripMinder.Service.Implementations
 
         public async Task<List<TourismArea>> GetTourismAreasListByZoneIdAsync(int zoneId, CancellationToken cancellationToken = default)
         {
-            return await this.repository.GetTourismAreasByZoneIdAsync(zoneId, cancellationToken);
+            return await this.repository.GetTourismAreasListByZoneIdAsync(zoneId, cancellationToken);
         }
 
         public async Task<List<TourismArea>> GetTourismAreasListByGovernorateIdAsync(int governorateId, CancellationToken cancellationToken = default)
         {
-            return await this.repository.GetTourismAreasByGovernorateIdAsync(governorateId, cancellationToken);
+            return await this.repository.GetTourismAreasListByZoneIdAsync(governorateId, cancellationToken);
         }
 
         public async Task<TourismArea> GetTourismAreaByIdWithIncludeAsync(int id)
@@ -46,6 +46,31 @@ namespace TripMinder.Service.Implementations
                                     .FirstOrDefault(t => t.Id == id);
 
             return tourism;
+        }
+
+        public async Task<List<TourismArea>> GetTourismAreasByTypeIdAsync(int TypeId, CancellationToken cancellationToken = default)
+        {
+            return await this.repository.GetTourismAreasListByTypeIdAsync(TypeId, cancellationToken);
+        }
+
+        public async Task<List<TourismArea>> GetTourismAreasListByClassIdAsync(int classId, CancellationToken cancellationToken = default)
+        {
+            return await this.repository.GetTourismAreasListByClassIdAsync(classId, cancellationToken);
+        }
+
+        public async Task<List<TourismArea>> GetTourismAreasByRatingAsync(double rating, CancellationToken cancellationToken = default)
+        {
+            return await this.repository.GetTourismAreasListByRatingAsync(rating, cancellationToken);
+        }
+
+        public async Task<List<TourismArea>> GetTourismAreasMoreThanPriceAsync(double price, CancellationToken cancellationToken = default)
+        {
+            return await this.repository.GetTourismAreasListMoreThanPriceAsync(price, cancellationToken);
+        }
+
+        public async Task<List<TourismArea>> GetTourismAreasLessThanPriceAsync(double price, CancellationToken cancellationToken = default)
+        {
+            return await this.repository.GetTourismAreasListLessThanPriceAsync(price, cancellationToken);
         }
 
         public async Task<TourismArea> GetTourismAreaByIdAsync(int id)

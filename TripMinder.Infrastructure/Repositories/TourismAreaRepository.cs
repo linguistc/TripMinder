@@ -36,7 +36,7 @@ namespace TripMinder.Infrastructure.Repositories
             return result;
         }
 
-        public async Task<List<TourismArea>> GetTourismAreasByZoneIdAsync(int zoneId,
+        public async Task<List<TourismArea>> GetTourismAreasListByZoneIdAsync(int zoneId,
             CancellationToken cancellationToken = default)
         {
             return await this.tourismAreas
@@ -49,7 +49,7 @@ namespace TripMinder.Infrastructure.Repositories
                 .ToListAsync(cancellationToken);
         }
 
-        public async Task<List<TourismArea>> GetTourismAreasByGovernorateIdAsync(int governorateId,
+        public async Task<List<TourismArea>> GetTourismAreasListByGovernorateIdAsync(int governorateId,
             CancellationToken cancellationToken = default)
         {
             return await this.tourismAreas
@@ -65,7 +65,7 @@ namespace TripMinder.Infrastructure.Repositories
         
         
         
-        public async Task<List<TourismArea>> GetTourismAreasByClassIdAsync(int classId,
+        public async Task<List<TourismArea>> GetTourismAreasListByClassIdAsync(int classId,
             CancellationToken cancellationToken = default)
         {
             return await this.tourismAreas
@@ -78,7 +78,7 @@ namespace TripMinder.Infrastructure.Repositories
                 .ToListAsync(cancellationToken);
         }
         
-        public async Task<List<TourismArea>> GetTourismAreasByTypeIdAsync(int TypeId,
+        public async Task<List<TourismArea>> GetTourismAreasListByTypeIdAsync(int TypeId,
             CancellationToken cancellationToken = default)
         {
             return await this.tourismAreas
@@ -91,7 +91,7 @@ namespace TripMinder.Infrastructure.Repositories
                 .ToListAsync(cancellationToken);
         }
         
-        public async Task<List<TourismArea>> GetTourismAreasByRatingAsync(double rating, CancellationToken cancellationToken = default)
+        public async Task<List<TourismArea>> GetTourismAreasListByRatingAsync(double rating, CancellationToken cancellationToken = default)
         {
             return await this.tourismAreas
                 .Include(t => t.TourismType)
@@ -103,7 +103,7 @@ namespace TripMinder.Infrastructure.Repositories
                 .ToListAsync(cancellationToken);
         }
         
-        public async Task<List<TourismArea>> GetTourismAreasByPriceMoreThanAsync(double price, CancellationToken cancellationToken = default)
+        public async Task<List<TourismArea>> GetTourismAreasListMoreThanPriceAsync(double price, CancellationToken cancellationToken = default)
         {
             return await this.tourismAreas
                 .Include(t => t.TourismType)
@@ -115,7 +115,7 @@ namespace TripMinder.Infrastructure.Repositories
                 .ToListAsync(cancellationToken);
         }
         
-        public async Task<List<TourismArea>> GetTourismAreasByPriceLessThanAsync(double price, CancellationToken cancellationToken = default)
+        public async Task<List<TourismArea>> GetTourismAreasListLessThanPriceAsync(double price, CancellationToken cancellationToken = default)
         {
             return await this.tourismAreas
                 .Include(t => t.TourismType)

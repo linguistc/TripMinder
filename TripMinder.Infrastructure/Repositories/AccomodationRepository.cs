@@ -61,7 +61,7 @@ namespace TripMinder.Infrastructure.Repositories
                     .ToListAsync(cancellationToken);
         }
 
-        public async Task<List<Accomodation>> GetAccomodationListByClassIdAsync(int classId, CancellationToken cancellationToken = default)
+        public async Task<List<Accomodation>> GetAccomodationsListByClassIdAsync(int classId, CancellationToken cancellationToken = default)
         {
             return await this.accomodations
                 .Include(r => r.AccomodationType)
@@ -73,7 +73,7 @@ namespace TripMinder.Infrastructure.Repositories
                 .ToListAsync(cancellationToken);
         }
         
-        public async Task<List<Accomodation>> GetAccomodationListByTypeIdAsync(int TypeId, CancellationToken cancellationToken = default)
+        public async Task<List<Accomodation>> GetAccomodationsListByTypeIdAsync(int TypeId, CancellationToken cancellationToken = default)
         {
             return await this.accomodations
                 .Include(r => r.AccomodationType)
@@ -85,7 +85,7 @@ namespace TripMinder.Infrastructure.Repositories
                 .ToListAsync(cancellationToken);
         }
 
-        public async Task<List<Accomodation>> GetAccomodationListByNumOfBedsAsync(short numOfBeds,
+        public async Task<List<Accomodation>> GetAccomodationsListByNumOfBedsAsync(short numOfBeds,
             CancellationToken cancellationToken = default)
         {
             return await this.accomodations
@@ -98,7 +98,7 @@ namespace TripMinder.Infrastructure.Repositories
                 .ToListAsync(cancellationToken);
         }
         
-        public async Task<List<Accomodation>> GetAccomodationListByNumOfNembersAsync(short numOfMembers,
+        public async Task<List<Accomodation>> GetAccomodationsListByNumOfAdultsAsync(short numOfMembers,
             CancellationToken cancellationToken = default)
         {
             return await this.accomodations
@@ -111,7 +111,7 @@ namespace TripMinder.Infrastructure.Repositories
                 .ToListAsync(cancellationToken);
         }
         
-        public async Task<List<Accomodation>> GetAccomodationListLessThanPriceAsync(double price,
+        public async Task<List<Accomodation>> GetAccomodationsListLessThanPriceAsync(double price,
             CancellationToken cancellationToken = default)
         {
             return await this.accomodations
@@ -124,7 +124,7 @@ namespace TripMinder.Infrastructure.Repositories
                 .ToListAsync(cancellationToken);
         }
         
-        public async Task<List<Accomodation>> GetAccomodationListMoreThanPriceAsync(double price,
+        public async Task<List<Accomodation>> GetAccomodationsListMoreThanPriceAsync(double price,
             CancellationToken cancellationToken = default)
         {
             return await this.accomodations
@@ -137,7 +137,7 @@ namespace TripMinder.Infrastructure.Repositories
                 .ToListAsync(cancellationToken);
         }
         
-        public async Task<List<Accomodation>> GetAccomodationListByRatingAsync(double rating,
+        public async Task<List<Accomodation>> GetAccomodationsListByRatingAsync(double rating,
             CancellationToken cancellationToken = default)
         {
             return await this.accomodations

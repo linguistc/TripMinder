@@ -39,14 +39,40 @@ namespace TripMinder.Service.Implementations
 
         public async Task<Entertainment> GetEntertainmentByIdWithIncludeAsync(int id)
         {
-            var entertainment = this.repository.GetTableNoTracking()
+            var entertainment = await this.repository.GetTableNoTracking()
                                             .Include(e => e.EntertainmentType)
                                             .Include(e => e.PlaceType)
                                             .Include(e => e.Class)
                                             .Include(e => e.Zone)
-                                            .FirstOrDefault(e => e.Id == id);
+                                            .Include(e => e.Zone.Governorate)
+                                            .FirstOrDefaultAsync(e => e.Id == id);
 
             return entertainment;
+        }
+
+        public async Task<List<Entertainment>> GetEntertainmentsListByClassIdAsync(int classId, CancellationToken cancellationToken = default)
+        {
+            return await this.repository.GetEntertainmentsListByClassIdAsync(classId, cancellationToken);
+        }
+
+        public async Task<List<Entertainment>> GetEntertainmentsListByTypeIdAsync(int TypeId, CancellationToken cancellationToken = default)
+        {
+            return await this.repository.GetEntertainmentsListByTypeIdAsync(TypeId, cancellationToken);
+        }
+
+        public async Task<List<Entertainment>> GetEntertainmentsListMoreThanPriceAsync(double price, CancellationToken cancellationToken = default)
+        {
+            return await this.repository.GetEntertainmentsListMoreThanPriceAsync(price, cancellationToken);
+        }
+
+        public async Task<List<Entertainment>> GetEntertainmentsListLessThanPriceAsync(double price, CancellationToken cancellationToken = default)
+        {
+            return await this.repository.GetEntertainmentsListLessThanPriceAsync(price, cancellationToken);
+        }
+
+        public async Task<List<Entertainment>> GetEntertainmentsListByRatingAsync(double rating, CancellationToken cancellationToken = default)
+        {
+            return await this.repository.GetEntertainmentsListByRatingAsync(rating, cancellationToken);
         }
 
         public async Task<Entertainment> GetEntertainmentByIdAsync(int id)

@@ -21,27 +21,65 @@ namespace TripMinder.Service.Implementations
         #endregion
 
         #region Functions
-        public Task<List<Accomodation>> GetAccomodationsListAsync()
+        public async Task<List<Accomodation>> GetAccomodationsListAsync()
         {
-            return this._repository.GetAccomodationsListAsync();
+            return await this._repository.GetAccomodationsListAsync();
         }
 
-        public Task<List<Accomodation>> GetAccomodationsListByZoneIdAsync(int zoneId, CancellationToken cancellationToken = default)
+        public async Task<List<Accomodation>> GetAccomodationsListByZoneIdAsync(int zoneId, CancellationToken cancellationToken = default)
         {
-            return this._repository.GetAccomodationsListByZoneIdAsync(zoneId, cancellationToken);
+            return await this._repository.GetAccomodationsListByZoneIdAsync(zoneId, cancellationToken);
         }
 
-        public Task<List<Accomodation>> GetAccomodationsListByGovernorateIdAsync(int governorateId, CancellationToken cancellationToken = default)
+        public async Task<List<Accomodation>> GetAccomodationsListByGovernorateIdAsync(int governorateId, CancellationToken cancellationToken = default)
         {
-            return this._repository.GetAccomodationsListByGovernorateIdAsync(governorateId, cancellationToken);
+            return await this._repository.GetAccomodationsListByGovernorateIdAsync(governorateId, cancellationToken);
         }
-        
+
+        public async Task<List<Accomodation>> GetAccomodationsListByTypeIdAsync(int TypeId, CancellationToken cancellationToken = default)
+        {
+            return await this._repository.GetAccomodationsListByTypeIdAsync(TypeId, cancellationToken);
+        }
+
+        public async Task<List<Accomodation>> GetAccomodationListByClassIdAsync(int classId, CancellationToken cancellationToken = default)
+        {
+            
+            return await this._repository.GetAccomodationsListByClassIdAsync(classId, cancellationToken);
+            
+        }
+
+        public async Task<List<Accomodation>> GetAccomodationListByRatingAsync(double rating, CancellationToken cancellationToken = default)
+        {
+            return await this._repository.GetAccomodationsListByRatingAsync(rating, cancellationToken);
+        }
+
+        public async Task<List<Accomodation>> GetAccommodationListMoreThanPriceAsync(double price, CancellationToken cancellationToken = default)
+        {
+            return await this._repository.GetAccomodationsListMoreThanPriceAsync(price, cancellationToken);
+        }
+
+        public async Task<List<Accomodation>> GetAccommodationListLessThanPriceAsync(double price, CancellationToken cancellationToken = default)
+        {
+            return await this._repository.GetAccomodationsListLessThanPriceAsync(price, cancellationToken);
+        }
+
+        public async Task<List<Accomodation>> GetAccomodationListByNumberOfBedsAsync(short numberOfBeds, CancellationToken cancellationToken = default)
+        {
+            return await this._repository.GetAccomodationsListByNumOfBedsAsync(numberOfBeds, cancellationToken);
+        }
+
+        public async Task<List<Accomodation>> GetAccomodationListByNumberOfAdultsAsync(short numberOfRooms, CancellationToken cancellationToken = default)
+        {
+            
+            return await this._repository.GetAccomodationsListByNumOfAdultsAsync(numberOfRooms, cancellationToken);}
+
         public async Task<Accomodation> GetAccomodationByIdWithIncludeAsync(int id)
         {
             var accomodation = this._repository.GetTableNoTracking()
                                         .Include(a => a.PlaceType)
                                         .Include(a => a.Class)
                                         .Include(a => a.Zone)
+                                        .Include(a => a.Zone.Governorate)
                                         .FirstOrDefault(a => a.Id == id);
 
             return accomodation;

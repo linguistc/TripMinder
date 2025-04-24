@@ -15,6 +15,13 @@ namespace TripMinder.Core.Features.Accomodataions.Queries.Hanlders
                                          , IRequestHandler<GetAccomodationsListQuery, Respond<List<GetAccomodationsListResponse>>>
                                          , IRequestHandler<GetAccomodationsListByGovernorateIdQuery, Respond<List<GetAccomodationsListResponse>>>
                                          , IRequestHandler<GetAccomodationsListByZoneIdQuery, Respond<List<GetAccomodationsListResponse>>>
+                                         , IRequestHandler<GetAccomodationsListByClassIdQuery, Respond<List<GetAccomodationsListResponse>>>
+                                         , IRequestHandler<GetAccomodationsListByTypeIdQuery, Respond<List<GetAccomodationsListResponse>>>
+                                         , IRequestHandler<GetAccomodationsListByRatingQuery, Respond<List<GetAccomodationsListResponse>>>
+                                         , IRequestHandler<GetAccomodationsListByNumOfBedsQuery, Respond<List<GetAccomodationsListResponse>>>
+                                         , IRequestHandler<GetAccomodationsListByNumOfAdultsQuery, Respond<List<GetAccomodationsListResponse>>>
+                                         , IRequestHandler<GetAccomodationsListLessThanPriceQuery, Respond<List<GetAccomodationsListResponse>>>
+                                         , IRequestHandler<GetAccomodationsListMoreThanPriceQuery, Respond<List<GetAccomodationsListResponse>>>
     {
         #region Fields
         private readonly IAccomodationService service;
@@ -88,6 +95,40 @@ namespace TripMinder.Core.Features.Accomodataions.Queries.Hanlders
         }
 
         #endregion
-        
+
+        public async Task<Respond<List<GetAccomodationsListResponse>>> Handle(GetAccomodationsListByClassIdQuery request, CancellationToken cancellationToken)
+        {
+            throw new NotImplementedException();
+        }
+
+        public async Task<Respond<List<GetAccomodationsListResponse>>> Handle(GetAccomodationsListByTypeIdQuery request, CancellationToken cancellationToken)
+        {
+            throw new NotImplementedException();
+        }
+
+        public async Task<Respond<List<GetAccomodationsListResponse>>> Handle(GetAccomodationsListByRatingQuery request, CancellationToken cancellationToken)
+        {
+            throw new NotImplementedException();
+        }
+
+        public async Task<Respond<List<GetAccomodationsListResponse>>> Handle(GetAccomodationsListByNumOfBedsQuery request, CancellationToken cancellationToken)
+        {
+            throw new NotImplementedException();
+        }
+
+        public async Task<Respond<List<GetAccomodationsListResponse>>> Handle(GetAccomodationsListByNumOfAdultsQuery request, CancellationToken cancellationToken)
+        {
+            throw new NotImplementedException();
+        }
+
+        public async Task<Respond<List<GetAccomodationsListResponse>>> Handle(GetAccomodationsListLessThanPriceQuery request, CancellationToken cancellationToken)
+        {
+            throw new NotImplementedException();
+        }
+
+        public async Task<Respond<List<GetAccomodationsListResponse>>> Handle(GetAccomodationsListMoreThanPriceQuery request, CancellationToken cancellationToken)
+        {
+            throw new NotImplementedException();
+        }
     }
 }
