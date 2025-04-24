@@ -60,6 +60,67 @@ namespace TripMinder.Infrastructure.Repositories
                 .ToListAsync(cancellationToken);
         }
 
+        
+        public async Task<List<Entertainment>> GetEntertainmentsListByClassIdAsync(int classId, CancellationToken cancellationToken = default)
+        {
+            return await this.entertainments
+                .Include(r => r.EntertainmentType)
+                .Include(r => r.Zone).AsNoTracking()
+                .Include(r => r.Zone.Governorate).AsNoTracking()
+                .Include(r => r.Class)
+                .Include(r => r.PlaceType)
+                .Where(r => r.ClassId == classId)
+                .ToListAsync(cancellationToken);
+        }
+        
+        public async Task<List<Entertainment>> GetEntertainmentsListByTypeIdAsync(int TypeId, CancellationToken cancellationToken = default)
+        {
+            return await this.entertainments
+                .Include(r => r.EntertainmentType)
+                .Include(r => r.Zone).AsNoTracking()
+                .Include(r => r.Zone.Governorate).AsNoTracking()
+                .Include(r => r.Class)
+                .Include(r => r.PlaceType)
+                .Where(a => a.EntertainmentTypeId == TypeId)
+                .ToListAsync(cancellationToken);
+        }
+        public async Task<List<Entertainment>> GetEntertainmentsListMoreThanPriceAsync(double price, CancellationToken cancellationToken = default)
+        {
+            return await this.entertainments
+                .Include(r => r.EntertainmentType)
+                .Include(r => r.Zone).AsNoTracking()
+                .Include(r => r.Zone.Governorate).AsNoTracking()
+                .Include(r => r.Class)
+                .Include(r => r.PlaceType)
+                .Where(a => a.AveragePricePerAdult > price)
+                .ToListAsync(cancellationToken);
+        }
+        
+        public async Task<List<Entertainment>> GetEntertainmentsListLessThanPriceAsync(double price, CancellationToken cancellationToken = default)
+        {
+            return await this.entertainments
+                .Include(r => r.EntertainmentType)
+                .Include(r => r.Zone).AsNoTracking()
+                .Include(r => r.Zone.Governorate).AsNoTracking()
+                .Include(r => r.Class)
+                .Include(r => r.PlaceType)
+                .Where(a => a.AveragePricePerAdult < price)
+                .ToListAsync(cancellationToken);
+        }
+        
+        public async Task<List<Entertainment>> GetEntertainmentsListByRatingAsync(double rating, CancellationToken cancellationToken = default)
+        {
+            return await this.entertainments
+                .Include(r => r.EntertainmentType)
+                .Include(r => r.Zone).AsNoTracking()
+                .Include(r => r.Zone.Governorate).AsNoTracking()
+                .Include(r => r.Class)
+                .Include(r => r.PlaceType)
+                .Where(a => a.Rating > rating)
+                .ToListAsync(cancellationToken);
+        }
+        
+        
         #endregion
 
 

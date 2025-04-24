@@ -63,8 +63,68 @@ namespace TripMinder.Infrastructure.Repositories
                 .Where(r => r.Zone.GovernorateId == governorateId)
                 .ToListAsync(cancellationToken);
         }
-        #endregion
+        
+        public async Task<List<Restaurant>> GetRestaurantsListByClassIdAsync(int classId, CancellationToken cancellationToken = default)
+        {
+            return await this.restaurants
+                .Include(r => r.FoodCategory)
+                .Include(r => r.Zone).AsNoTracking()
+                .Include(r => r.Zone.Governorate).AsNoTracking()
+                .Include(r => r.Class)
+                .Include(r => r.PlaceType)
+                .Where(r => r.ClassId == classId)
+                .ToListAsync(cancellationToken);
+        }
+        
+        public async Task<List<Restaurant>> GetRestaurantsListByFoodTypeIdAsync(int foodTypeId, CancellationToken cancellationToken = default)
+        {
+            return await this.restaurants
+                .Include(r => r.FoodCategory)
+                .Include(r => r.Zone).AsNoTracking()
+                .Include(r => r.Zone.Governorate).AsNoTracking()
+                .Include(r => r.Class)
+                .Include(r => r.PlaceType)
+                .Where(r => r.FoodCategoryId == foodTypeId)
+                .ToListAsync(cancellationToken);
+        }
+        
+        public async Task<List<Restaurant>> GetRestaurantsListLessThanPriceAsync(double price, CancellationToken cancellationToken = default)
+        {
+            return await this.restaurants
+                .Include(r => r.FoodCategory)
+                .Include(r => r.Zone).AsNoTracking()
+                .Include(r => r.Zone.Governorate).AsNoTracking()
+                .Include(r => r.Class)
+                .Include(r => r.PlaceType)
+                .Where(a => a.AveragePricePerAdult < price)
+                .ToListAsync(cancellationToken);
+        }
+        
+        public async Task<List<Restaurant>> GetRestaurantsListMoreThanPriceAsync(double price, CancellationToken cancellationToken = default)
+        {
+            return await this.restaurants
+                .Include(r => r.FoodCategory)
+                .Include(r => r.Zone).AsNoTracking()
+                .Include(r => r.Zone.Governorate).AsNoTracking()
+                .Include(r => r.Class)
+                .Include(r => r.PlaceType)
+                .Where(a => a.AveragePricePerAdult > price)
+                .ToListAsync(cancellationToken);
+        }
 
+        public async Task<List<Restaurant>> GetRestaurantsListByRatingAsync(double rating, CancellationToken cancellationToken = default)
+        {
+            return await this.restaurants
+                .Include(r => r.FoodCategory)
+                .Include(r => r.Zone).AsNoTracking()
+                .Include(r => r.Zone.Governorate).AsNoTracking()
+                .Include(r => r.Class)
+                .Include(r => r.PlaceType)
+                .Where(a => a.Rating > rating)
+                .ToListAsync(cancellationToken);
+        }
+        
+        #endregion
 
 
     }
