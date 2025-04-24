@@ -25,7 +25,7 @@ namespace TripMinder.Service.Implementations
         {
             return await this.repository.GetAllTourismAreasAsync();
         }
-
+        
         public async Task<List<TourismArea>> GetTourismAreasListByZoneIdAsync(int zoneId, CancellationToken cancellationToken = default)
         {
             return await this.repository.GetTourismAreasListByZoneIdAsync(zoneId, cancellationToken);

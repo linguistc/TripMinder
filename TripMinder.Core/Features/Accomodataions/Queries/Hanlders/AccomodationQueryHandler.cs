@@ -18,8 +18,8 @@ namespace TripMinder.Core.Features.Accomodataions.Queries.Hanlders
                                          , IRequestHandler<GetAccomodationsListByClassIdQuery, Respond<List<GetAccomodationsListResponse>>>
                                          , IRequestHandler<GetAccomodationsListByTypeIdQuery, Respond<List<GetAccomodationsListResponse>>>
                                          , IRequestHandler<GetAccomodationsListByRatingQuery, Respond<List<GetAccomodationsListResponse>>>
-                                         , IRequestHandler<GetAccomodationsListByNumOfBedsQuery, Respond<List<GetAccomodationsListResponse>>>
-                                         , IRequestHandler<GetAccomodationsListByNumOfAdultsQuery, Respond<List<GetAccomodationsListResponse>>>
+                                         , IRequestHandler<GetAccomodationsListByNumberOfBedsQuery, Respond<List<GetAccomodationsListResponse>>>
+                                         , IRequestHandler<GetAccomodationsListByNumberOfAdultsQuery, Respond<List<GetAccomodationsListResponse>>>
                                          , IRequestHandler<GetAccomodationsListLessThanPriceQuery, Respond<List<GetAccomodationsListResponse>>>
                                          , IRequestHandler<GetAccomodationsListMoreThanPriceQuery, Respond<List<GetAccomodationsListResponse>>>
     {
@@ -98,37 +98,109 @@ namespace TripMinder.Core.Features.Accomodataions.Queries.Hanlders
 
         public async Task<Respond<List<GetAccomodationsListResponse>>> Handle(GetAccomodationsListByClassIdQuery request, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            var accomodationList = await this.service.GetAccomodationsListByClassIdAsync(request.ClassId, cancellationToken);
+            
+            accomodationList.ForEach(a => a.Score = CalculateScoreBehavior.CalculateScore(a.Class.Type, request.Priority, a.AveragePricePerAdult));
+            
+            var accomodationMapper = this.mapper.Map<List<GetAccomodationsListResponse>>(accomodationList);
+
+            var result = Success(accomodationMapper);
+
+            result.Meta = new { Count = accomodationMapper.Count };
+
+            return result;
         }
 
         public async Task<Respond<List<GetAccomodationsListResponse>>> Handle(GetAccomodationsListByTypeIdQuery request, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            var accomodationList = await this.service.GetAccomodationsListByTypeIdAsync(request.TypeId, cancellationToken);
+            
+            accomodationList.ForEach(a => a.Score = CalculateScoreBehavior.CalculateScore(a.Class.Type, request.Priority, a.AveragePricePerAdult));
+            
+            var accomodationMapper = this.mapper.Map<List<GetAccomodationsListResponse>>(accomodationList);
+
+            var result = Success(accomodationMapper);
+
+            result.Meta = new { Count = accomodationMapper.Count };
+
+            return result;        
         }
 
         public async Task<Respond<List<GetAccomodationsListResponse>>> Handle(GetAccomodationsListByRatingQuery request, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            var accomodationList = await this.service.GetAccomodationsListByRatingAsync(request.Rating, cancellationToken);
+            
+            accomodationList.ForEach(a => a.Score = CalculateScoreBehavior.CalculateScore(a.Class.Type, request.Priority, a.AveragePricePerAdult));
+            
+            var accomodationMapper = this.mapper.Map<List<GetAccomodationsListResponse>>(accomodationList);
+
+            var result = Success(accomodationMapper);
+
+            result.Meta = new { Count = accomodationMapper.Count };
+
+            return result;
         }
 
-        public async Task<Respond<List<GetAccomodationsListResponse>>> Handle(GetAccomodationsListByNumOfBedsQuery request, CancellationToken cancellationToken)
+        public async Task<Respond<List<GetAccomodationsListResponse>>> Handle(GetAccomodationsListByNumberOfBedsQuery request, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            var accomodationList = await this.service.GetAccomodationsListByNumberOfBedsAsync(request.NumOfBeds, cancellationToken);
+            
+            accomodationList.ForEach(a => a.Score = CalculateScoreBehavior.CalculateScore(a.Class.Type, request.Priority, a.AveragePricePerAdult));
+            
+            var accomodationMapper = this.mapper.Map<List<GetAccomodationsListResponse>>(accomodationList);
+
+            var result = Success(accomodationMapper);
+
+            result.Meta = new { Count = accomodationMapper.Count };
+
+            return result;
         }
 
-        public async Task<Respond<List<GetAccomodationsListResponse>>> Handle(GetAccomodationsListByNumOfAdultsQuery request, CancellationToken cancellationToken)
+        public async Task<Respond<List<GetAccomodationsListResponse>>> Handle(GetAccomodationsListByNumberOfAdultsQuery request, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            var accomodationList = await this.service.GetAccomodationsListByNumberOfAdultsAsync(request.NumOfAdults, cancellationToken);
+            
+            accomodationList.ForEach(a => a.Score = CalculateScoreBehavior.CalculateScore(a.Class.Type, request.Priority, a.AveragePricePerAdult));
+            
+            var accomodationMapper = this.mapper.Map<List<GetAccomodationsListResponse>>(accomodationList);
+
+            var result = Success(accomodationMapper);            
+
+            result.Meta = new { Count = accomodationMapper.Count };
+
+            return result;
         }
 
         public async Task<Respond<List<GetAccomodationsListResponse>>> Handle(GetAccomodationsListLessThanPriceQuery request, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            
+            var accomodationList = await this.service.GetAccomodationsListLessThanPriceAsync((double)request.Price, cancellationToken);
+            
+            accomodationList.ForEach(a => a.Score = CalculateScoreBehavior.CalculateScore(a.Class.Type, request.Priority, a.AveragePricePerAdult));
+            
+            var accomodationMapper = this.mapper.Map<List<GetAccomodationsListResponse>>(accomodationList);
+
+            var result = Success(accomodationMapper);
+
+            result.Meta = new { Count = accomodationMapper.Count };
+
+            return result;
+            
         }
 
         public async Task<Respond<List<GetAccomodationsListResponse>>> Handle(GetAccomodationsListMoreThanPriceQuery request, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            var accomodationList = await this.service.GetAccomodationsListMoreThanPriceAsync((double)request.Price, cancellationToken);
+            
+            accomodationList.ForEach(a => a.Score = CalculateScoreBehavior.CalculateScore(a.Class.Type, request.Priority, a.AveragePricePerAdult));
+            
+            var accomodationMapper = this.mapper.Map<List<GetAccomodationsListResponse>>(accomodationList);
+
+            var result = Success(accomodationMapper);
+
+            result.Meta = new { Count = accomodationMapper.Count };
+
+            return result;
         }
     }
 }

@@ -16,8 +16,15 @@
             public const string List = Prefix + "list/";
             public const string GetById = Prefix + SingleRouter;
 
+            #region Filtering
             public const string ListByZoneId = Prefix + "zone/{zoneId}/";
             public const string ListByGovernorateId = Prefix + "governorate/{governorateId}/";
+            public const string ListByClassId = Prefix + "class/{classId}/";
+            public const string ListByFoodTypeId = Prefix + "foodtype/{foodtypeId}/";
+            public const string ListByRating = Prefix + "rating/{rating}/";
+            public const string ListLessThanPrice = Prefix + "lessThanprice/{price}/";
+            public const string ListMoreThanPrice = Prefix + "moreThanprice/{price}/";
+            #endregion
             
             public const string Create = Prefix + "create/";
             public const string Update = Prefix + "Update/";
@@ -32,9 +39,17 @@
             public const string List = Prefix + "list/";
             public const string GetById = Prefix + SingleRouter;
             
+            #region Filtering
             public const string ListByZoneId = Prefix + "zone/{zoneId}/";
             public const string ListByGovernorateId = Prefix + "governorate/{governorateId}/";
-            
+            public const string ListByClassId = Prefix + "class/{classId}/";
+            public const string ListByTypeId = Prefix + "type/{typeId}/";
+            public const string ListByRating = Prefix + "rating/{rating}/";
+            public const string ListLessThanPrice = Prefix + "lessThanprice/{price}/";
+            public const string ListMoreThanPrice = Prefix + "moreThanprice/{price}/";
+            public const string ListByNumOfBeds = Prefix + "numOfBeds/{numOfBeds}/";
+            public const string ListByNumOfAdults = Prefix + "numOfAdults/{numOfAdults}/";
+            #endregion
             public const string Create = Prefix + "create/";
             public const string Update = Prefix + "Update/";
             public const string Delete = Prefix + SingleRouter;
@@ -47,8 +62,15 @@
             public const string List = Prefix + "list/";
             public const string GetById = Prefix + SingleRouter;
             
+            #region Filtering
             public const string ListByZoneId = Prefix + "zone/{zoneId}/";
             public const string ListByGovernorateId = Prefix + "governorate/{governorateId}/";
+            public const string ListByClassId = Prefix + "class/{classId}/";
+            public const string ListByTypeId = Prefix + "type/{typeId}/";
+            public const string ListByRating = Prefix + "rating/{rating}/";
+            public const string ListLessThanPrice = Prefix + "lessThanprice/{price}/";
+            public const string ListMoreThanPrice = Prefix + "moreThanprice/{price}/";
+            #endregion
             
             public const string Create = Prefix + "create/";
             public const string Update = Prefix + "Update/";
@@ -62,8 +84,15 @@
             public const string List = Prefix + "list/";
             public const string GetById = Prefix + SingleRouter;
             
+            #region Filtering
             public const string ListByZoneId = Prefix + "zone/{zoneId}/";
             public const string ListByGovernorateId = Prefix + "governorate/{governorateId}/";
+            public const string ListByClassId = Prefix + "class/{classId}/";
+            public const string ListByTypeId = Prefix + "type/{typeId}/";
+            public const string ListByRating = Prefix + "rating/{rating}/";
+            public const string ListLessThanPrice = Prefix + "lessThanprice/{price}/";
+            public const string ListMoreThanPrice = Prefix + "moreThanprice/{price}/";
+            #endregion
             
             public const string Create = Prefix + "create/";
             public const string Update = Prefix + "Update/";

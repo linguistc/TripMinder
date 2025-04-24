@@ -12,12 +12,18 @@ using TripMinder.Service.Contracts;
 namespace TripMinder.Core.Features.Entertainments.Queries.Handlers
 {
 
+    
 
     public class EntertainmentQueryHandler : RespondHandler
                                         , IRequestHandler<GetEntertainmentsListQuery, Respond<List<GetEntertainmentsListResponse>>>
                                         , IRequestHandler<GetEntertainmentByIdQuery, Respond<GetEntertainmentByIdResponse>>
                                         , IRequestHandler<GetEntertainmentsListByZoneIdQuery, Respond<List<GetEntertainmentsListResponse>>>
                                         , IRequestHandler<GetEntertainmentsListByGovernorateIdQuery, Respond<List<GetEntertainmentsListResponse>>>
+                                        , IRequestHandler<GetEntertainmentsListByClassIdQuery, Respond<List<GetEntertainmentsListResponse>>>
+                                        , IRequestHandler<GetEntertainmentsListByTypeIdQuery, Respond<List<GetEntertainmentsListResponse>>>
+                                        , IRequestHandler<GetEntertainmentsListByRatingQuery, Respond<List<GetEntertainmentsListResponse>>>
+                                        , IRequestHandler<GetEntertainmentsListLessThanPriceQuery, Respond<List<GetEntertainmentsListResponse>>>
+                                        , IRequestHandler<GetEntertainmentsListMoreThanPriceQuery, Respond<List<GetEntertainmentsListResponse>>>
     {
         #region Fields
         private readonly IMapper mapper;
@@ -92,8 +98,82 @@ namespace TripMinder.Core.Features.Entertainments.Queries.Handlers
 
             return result;
         }
-        #endregion
-        
 
+
+        public async Task<Respond<List<GetEntertainmentsListResponse>>> Handle(GetEntertainmentsListByClassIdQuery request, CancellationToken cancellationToken)
+        {
+            var entertainmentsList = await this.service.GetEntertainmentsListByClassIdAsync(request.ClassId, cancellationToken);
+
+            entertainmentsList.ForEach(a => a.Score = CalculateScoreBehavior.CalculateScore(a.Class.Type, request.Priority, a.AveragePricePerAdult));
+
+            var entertainmentMapper = this.mapper.Map<List<GetEntertainmentsListResponse>>(entertainmentsList);
+
+            var result = Success(entertainmentMapper);
+
+            result.Meta = new { Count = entertainmentMapper.Count };
+
+            return result;        
+        }
+
+        public async Task<Respond<List<GetEntertainmentsListResponse>>> Handle(GetEntertainmentsListByTypeIdQuery request, CancellationToken cancellationToken)
+        {
+            var entertainmentsList = await this.service.GetEntertainmentsListByTypeIdAsync(request.TypeId, cancellationToken);
+
+            entertainmentsList.ForEach(a => a.Score = CalculateScoreBehavior.CalculateScore(a.Class.Type, request.Priority, a.AveragePricePerAdult));
+
+            var entertainmentMapper = this.mapper.Map<List<GetEntertainmentsListResponse>>(entertainmentsList);
+
+            var result = Success(entertainmentMapper);
+
+            result.Meta = new { Count = entertainmentMapper.Count };
+
+            return result;
+        }
+
+        public async Task<Respond<List<GetEntertainmentsListResponse>>> Handle(GetEntertainmentsListByRatingQuery request, CancellationToken cancellationToken)
+        {
+            var entertainmentsList = await this.service.GetEntertainmentsListByRatingAsync(request.Rating, cancellationToken);
+
+            entertainmentsList.ForEach(a => a.Score = CalculateScoreBehavior.CalculateScore(a.Class.Type, request.Priority, a.AveragePricePerAdult));
+
+            var entertainmentMapper = this.mapper.Map<List<GetEntertainmentsListResponse>>(entertainmentsList);
+
+            var result = Success(entertainmentMapper);
+
+            result.Meta = new { Count = entertainmentMapper.Count };
+
+            return result;
+        }
+
+        public async Task<Respond<List<GetEntertainmentsListResponse>>> Handle(GetEntertainmentsListLessThanPriceQuery request, CancellationToken cancellationToken)
+        {
+            var entertainmentsList = await this.service.GetEntertainmentsListLessThanPriceAsync((double)request.Price, cancellationToken);
+
+            entertainmentsList.ForEach(a => a.Score = CalculateScoreBehavior.CalculateScore(a.Class.Type, request.Priority, a.AveragePricePerAdult));
+
+            var entertainmentMapper = this.mapper.Map<List<GetEntertainmentsListResponse>>(entertainmentsList);
+
+            var result = Success(entertainmentMapper);
+
+            result.Meta = new { Count = entertainmentMapper.Count };
+
+            return result;
+        }
+
+        public async Task<Respond<List<GetEntertainmentsListResponse>>> Handle(GetEntertainmentsListMoreThanPriceQuery request, CancellationToken cancellationToken)
+        {
+            var entertainmentsList = await this.service.GetEntertainmentsListMoreThanPriceAsync((double)request.Price, cancellationToken);
+
+            entertainmentsList.ForEach(a => a.Score = CalculateScoreBehavior.CalculateScore(a.Class.Type, request.Priority, a.AveragePricePerAdult));
+
+            var entertainmentMapper = this.mapper.Map<List<GetEntertainmentsListResponse>>(entertainmentsList);
+
+            var result = Success(entertainmentMapper);
+
+            result.Meta = new { Count = entertainmentMapper.Count };
+
+            return result;
+        }
+        #endregion
     }
 }

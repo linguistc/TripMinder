@@ -24,6 +24,8 @@ public class EntertainmentController : AppControllerBase
         var response = await this.Mediator.Send(new GetEntertainmentByIdQuery(id));
         return NewResult(response);
     }
+
+    #region Filtering Endpoints
     
     [HttpGet(Router.EntertainmentRouting.ListByZoneId)]
     public async Task<IActionResult> GetEntertainmentListByZoneIdAsync([FromRoute]int zoneId, [FromQuery]int? priority = 1)
@@ -40,4 +42,46 @@ public class EntertainmentController : AppControllerBase
         var response = await this.Mediator.Send(query);
         return Ok(response);
     }   
+    
+    [HttpGet(Router.EntertainmentRouting.ListByClassId)]
+    public async Task<IActionResult> GetEntertainmentListByClassIdAsync([FromRoute]int classId, [FromQuery]int? priority = 1)
+    {
+        var query = new GetEntertainmentsListByClassIdQuery(classId, priority ?? 1);
+        var response = await this.Mediator.Send(query);
+        return Ok(response);
+    }
+    
+    [HttpGet(Router.EntertainmentRouting.ListByTypeId)]
+    public async Task<IActionResult> GetEntertainmentListByTypeIdAsync([FromRoute]int typeId, [FromQuery]int? priority = 1)
+    {
+        var query = new GetEntertainmentsListByTypeIdQuery(typeId, priority ?? 1);
+        var response = await this.Mediator.Send(query);
+        return Ok(response);
+    }
+    
+    [HttpGet(Router.EntertainmentRouting.ListByRating)]
+    public async Task<IActionResult> GetEntertainmentListByRatingAsync([FromRoute]float rating, [FromQuery]int? priority = 1)
+    {
+        var query = new GetEntertainmentsListByRatingQuery(rating, priority ?? 1);
+        var response = await this.Mediator.Send(query);
+        return Ok(response);
+    }
+    
+    [HttpGet(Router.EntertainmentRouting.ListMoreThanPrice)]
+    public async Task<IActionResult> GetEntertainmentListMoreThanPriceAsync([FromRoute]decimal price, [FromQuery]int? priority = 1)
+    {
+        var query = new GetEntertainmentsListMoreThanPriceQuery(price, priority ?? 1);
+        var response = await this.Mediator.Send(query);
+        return Ok(response);
+    }
+    
+    [HttpGet(Router.EntertainmentRouting.ListLessThanPrice)]
+    public async Task<IActionResult> GetEntertainmentListLessThanPriceAsync([FromRoute]decimal price, [FromQuery]int? priority = 1)
+    {
+        var query = new GetEntertainmentsListLessThanPriceQuery(price, priority ?? 1);
+        var response = await this.Mediator.Send(query);
+        return Ok(response);
+    }
+    #endregion
+    
 }

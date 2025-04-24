@@ -99,7 +99,7 @@ namespace TripMinder.Infrastructure.Repositories
                 .Include(t => t.Zone.Governorate).AsNoTracking()
                 .Include(t => t.Class)
                 .Include(t => t.PlaceType)
-                .Where(t => t.Rating > rating)
+                .Where(t => t.Rating >= rating)
                 .ToListAsync(cancellationToken);
         }
         

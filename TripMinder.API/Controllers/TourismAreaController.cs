@@ -23,7 +23,8 @@ public class TourismAreaController : AppControllerBase
 
         return NewResult(response);
     }
-    
+
+    #region Filtering Endpoints
     [HttpGet(Router.TourismAreaRouting.ListByZoneId)]
     public async Task<IActionResult> GetTourismAreaListByZoneIdAsync([FromRoute]int zoneId, [FromQuery]int? priority = 1)
     {
@@ -39,4 +40,48 @@ public class TourismAreaController : AppControllerBase
         var response = await this.Mediator.Send(query);
         return Ok(response);
     }
+    
+    [HttpGet(Router.TourismAreaRouting.ListByClassId)]
+    public async Task<IActionResult> GetTourismAreaListByClassIdAsync([FromRoute]int classId, [FromQuery]int? priority = 1)
+    {
+        var query = new GetTourismAreasListByClassIdQuery(classId, priority ?? 1);
+        var response = await this.Mediator.Send(query);
+        return Ok(response);
+    }
+    
+    
+    [HttpGet(Router.TourismAreaRouting.ListByTypeId)]
+    public async Task<IActionResult> GetTourismAreaListByTypeIdAsync([FromRoute]int typeId, [FromQuery]int? priority = 1)
+    {
+        var query = new GetTourismAreasListByTypeIdQuery(typeId, priority ?? 1);
+        var response = await this.Mediator.Send(query);
+        return Ok(response);
+    }
+    
+    [HttpGet(Router.TourismAreaRouting.ListByRating)]
+    public async Task<IActionResult> GetTourismAreaListByRatingAsync([FromRoute]float rating, [FromQuery]int? priority = 1)
+    {
+        var query = new GetTourismAreasListByRatingQuery(rating, priority ?? 1);
+        var response = await this.Mediator.Send(query);
+        return Ok(response);
+    }
+    
+    [HttpGet(Router.TourismAreaRouting.ListLessThanPrice)]
+    public async Task<IActionResult> GetTourismAreaListLessThanPriceAsync([FromRoute]decimal price, [FromQuery]int? priority = 1)
+    {
+        var query = new GetTourismAreasListLessThanPriceQuery(price, priority ?? 1);
+        var response = await this.Mediator.Send(query);
+        return Ok(response);
+    }
+    
+    
+    [HttpGet(Router.TourismAreaRouting.ListMoreThanPrice)]
+    public async Task<IActionResult> GetTourismAreaListMoreThanPriceAsync([FromRoute]decimal price, [FromQuery]int? priority = 1)
+    {
+        var query = new GetTourismAreasListMoreThanPriceQuery(price, priority ?? 1);
+        var response = await this.Mediator.Send(query);
+        return Ok(response);
+    }
+    
+    #endregion
 }

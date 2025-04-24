@@ -41,37 +41,37 @@ namespace TripMinder.Service.Implementations
             return await this._repository.GetAccomodationsListByTypeIdAsync(TypeId, cancellationToken);
         }
 
-        public async Task<List<Accomodation>> GetAccomodationListByClassIdAsync(int classId, CancellationToken cancellationToken = default)
+        public async Task<List<Accomodation>> GetAccomodationsListByClassIdAsync(int classId, CancellationToken cancellationToken = default)
         {
             
             return await this._repository.GetAccomodationsListByClassIdAsync(classId, cancellationToken);
             
         }
 
-        public async Task<List<Accomodation>> GetAccomodationListByRatingAsync(double rating, CancellationToken cancellationToken = default)
+        public async Task<List<Accomodation>> GetAccomodationsListByRatingAsync(double rating, CancellationToken cancellationToken = default)
         {
             return await this._repository.GetAccomodationsListByRatingAsync(rating, cancellationToken);
         }
 
-        public async Task<List<Accomodation>> GetAccommodationListMoreThanPriceAsync(double price, CancellationToken cancellationToken = default)
+        public async Task<List<Accomodation>> GetAccomodationsListMoreThanPriceAsync(double price, CancellationToken cancellationToken = default)
         {
             return await this._repository.GetAccomodationsListMoreThanPriceAsync(price, cancellationToken);
         }
 
-        public async Task<List<Accomodation>> GetAccommodationListLessThanPriceAsync(double price, CancellationToken cancellationToken = default)
+        public async Task<List<Accomodation>> GetAccomodationsListLessThanPriceAsync(double price, CancellationToken cancellationToken = default)
         {
             return await this._repository.GetAccomodationsListLessThanPriceAsync(price, cancellationToken);
         }
 
-        public async Task<List<Accomodation>> GetAccomodationListByNumberOfBedsAsync(short numberOfBeds, CancellationToken cancellationToken = default)
+        public async Task<List<Accomodation>> GetAccomodationsListByNumberOfBedsAsync(short numberOfBeds, CancellationToken cancellationToken = default)
         {
             return await this._repository.GetAccomodationsListByNumOfBedsAsync(numberOfBeds, cancellationToken);
         }
 
-        public async Task<List<Accomodation>> GetAccomodationListByNumberOfAdultsAsync(short numberOfRooms, CancellationToken cancellationToken = default)
+        public async Task<List<Accomodation>> GetAccomodationsListByNumberOfAdultsAsync(short numberOfRooms, CancellationToken cancellationToken = default)
         {
-            
-            return await this._repository.GetAccomodationsListByNumOfAdultsAsync(numberOfRooms, cancellationToken);}
+            return await this._repository.GetAccomodationsListByNumOfAdultsAsync(numberOfRooms, cancellationToken);
+        }
 
         public async Task<Accomodation> GetAccomodationByIdWithIncludeAsync(int id)
         {

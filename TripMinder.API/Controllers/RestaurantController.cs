@@ -24,6 +24,8 @@ namespace TripMinder.API.Controllers
             return NewResult(response);
         }
 
+        
+        # region Filtering Endpoints
         [HttpGet(Router.RestaurantRouting.ListByZoneId)]
         public async Task<IActionResult> GetRestaurantListByZoneIdAsync([FromRoute]int zoneId, [FromQuery]int? priority = 1)
         {
@@ -40,12 +42,54 @@ namespace TripMinder.API.Controllers
             return Ok(response);
         }
         
-        [HttpPost(Router.RestaurantRouting.Create)]
-        public async Task<IActionResult> Create(CreateRestaurantCommand command)
+        [HttpGet(Router.RestaurantRouting.ListByClassId)]
+        public async Task<IActionResult> GetRestaurantListByClassIdAsync([FromRoute]int classId, [FromQuery]int? priority = 1)
         {
-            var response = await this.Mediator.Send(command);
-            return NewResult(response);
+            var query = new GetRestaurantsListByClassIdQuery(classId, priority ?? 1);
+            var response = await this.Mediator.Send(query);
+            return Ok(response);
         }
+        
+        [HttpGet(Router.RestaurantRouting.ListByFoodTypeId)]
+        public async Task<IActionResult> GetRestaurantListByTypeIdAsync([FromRoute]int foodtypeId, [FromQuery]int? priority = 1)
+        {
+            var query = new GetRestaurantsListByFoodTypeIdQuery(foodtypeId, priority ?? 1);
+            var response = await this.Mediator.Send(query);
+            return Ok(response);
+        }
+        
+        [HttpGet(Router.RestaurantRouting.ListByRating)]
+        public async Task<IActionResult> GetRestaurantListByRatingAsync([FromRoute]float rating, [FromQuery]int? priority = 1)
+        {
+            var query = new GetRestaurantsListByRatingQuery(rating, priority ?? 1);
+            var response = await this.Mediator.Send(query);
+            return Ok(response);
+        }
+        
+        [HttpGet(Router.RestaurantRouting.ListMoreThanPrice)]
+        public async Task<IActionResult> GetRestaurantListMoreThanPriceAsync([FromRoute]decimal price, [FromQuery]int? priority = 1)
+        {
+            var query = new GetRestaurantsListMoreThanPriceQuery(price, priority ?? 1);
+            var response = await this.Mediator.Send(query);
+            return Ok(response);
+        }
+        
+        [HttpGet(Router.RestaurantRouting.ListLessThanPrice)]
+        public async Task<IActionResult> GetRestaurantListLessThanPriceAsync([FromRoute]decimal price, [FromQuery]int? priority = 1)
+        {
+            var query = new GetRestaurantsListLessThanPriceQuery(price, priority ?? 1);
+            var response = await this.Mediator.Send(query);
+            return Ok(response);
+        }
+        
+        #endregion
+        
+        // [HttpPost(Router.RestaurantRouting.Create)]
+        // public async Task<IActionResult> Create(CreateRestaurantCommand command)
+        // {
+        //     var response = await this.Mediator.Send(command);
+        //     return NewResult(response);
+        // }
         
         // [HttpPut(Router.RestaurantRouting.Update)]
         // public async Task<IActionResult> Update(UpdateRestaurantCommand command)

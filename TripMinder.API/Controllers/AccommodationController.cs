@@ -21,6 +21,8 @@ namespace TripMinder.API.Controllers
             var response = await this.Mediator.Send(new GetAccomodationByIdQuery(id));
             return NewResult(response);
         }
+
+        #region Filtering Endpoints
         
         [HttpGet(Router.AccomodationRouting.ListByZoneId)]
         public async Task<IActionResult> GetAccommodationListByZoneIdAsync([FromRoute]int zoneId, [FromQuery]int? priority = 1)
@@ -40,5 +42,55 @@ namespace TripMinder.API.Controllers
 
             return Ok(response);
         }
+        
+        [HttpGet(Router.AccomodationRouting.ListByTypeId)]
+        public async Task<IActionResult> GetAccommodationListByTypeIdAsync([FromRoute]int typeId, [FromQuery]int? priority = 1)
+        {
+            var query = new GetAccomodationsListByTypeIdQuery(typeId, priority ?? 1);
+            var response = await this.Mediator.Send(query);
+            return Ok(response);
+        }
+        
+        [HttpGet(Router.AccomodationRouting.ListByClassId)]
+        public async Task<IActionResult> GetAccommodationListByClassIdAsync([FromRoute]int classId, [FromQuery]int? priority = 1)
+        {
+            var query = new GetAccomodationsListByClassIdQuery(classId, priority ?? 1);
+            var response = await this.Mediator.Send(query);
+            return Ok(response);
+        }
+        
+        [HttpGet(Router.AccomodationRouting.ListByRating)]
+        public async Task<IActionResult> GetAccommodationListByRatingAsync([FromRoute]float rating, [FromQuery]int? priority = 1)
+        {
+            var query = new GetAccomodationsListByRatingQuery(rating, priority ?? 1);
+            var response = await this.Mediator.Send(query);
+            return Ok(response);
+        }
+        
+        [HttpGet(Router.AccomodationRouting.ListLessThanPrice)]
+        public async Task<IActionResult> GetAccommodationListLessThanPriceAsync([FromRoute]decimal price, [FromQuery]int? priority = 1)
+        {
+            var query = new GetAccomodationsListLessThanPriceQuery(price, priority ?? 1);
+            var response = await this.Mediator.Send(query);
+            return Ok(response);
+        }
+        
+        [HttpGet(Router.AccomodationRouting.ListMoreThanPrice)]
+        public async Task<IActionResult> GetAccommodationListMoreThanPriceAsync([FromRoute]decimal price, [FromQuery]int? priority = 1)
+        {
+            var query = new GetAccomodationsListMoreThanPriceQuery(price, priority ?? 1);
+            var response = await this.Mediator.Send(query);
+            return Ok(response);
+        }
+        
+        [HttpGet(Router.AccomodationRouting.ListByNumOfAdults)]
+        public async Task<IActionResult> GetAccommodationListByNumOfAdultsAsync([FromRoute]short numOfAdults, [FromQuery]int? priority = 1)
+        {
+            var query = new GetAccomodationsListByNumberOfAdultsQuery(numOfAdults, priority ?? 1);
+            var response = await this.Mediator.Send(query);
+            return Ok(response);
+        }
+        #endregion
     }
 }
+
