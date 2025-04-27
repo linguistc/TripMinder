@@ -1,5 +1,4 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
 
 namespace TripMinder.Data.Entities
 {
@@ -33,14 +32,12 @@ namespace TripMinder.Data.Entities
         [Phone]
         public string PhoneNumber { get; set; }
 
-        public ICollection<UserSocialProfile> SocialMediaProfiles { get; set; }
+        public ICollection<UserSocialProfile>? SocialMediaProfiles { get; set; }
         public ICollection<UserImage> Images { get; set; }
         public ICollection<UserHistory> History { get; set; }
         public ICollection<UserBookMark> Bookmarks { get; set; }
         public ICollection<UserRating> Ratings { get; set; }
 
         //public ICollection<UserPreference> Preferences { get; set; }
-    }  
-
-
+    }
 }
