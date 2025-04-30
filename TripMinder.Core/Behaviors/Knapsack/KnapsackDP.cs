@@ -11,12 +11,11 @@ public class KnapsackDP : IKnapsackDP
 
     public (float[,,,,] dp, bool[,,,,,] decision, int?[,,,,,] itemIds) Calculate(
         int budget,
-        List<Item> items,
+        List<DpItem> items,
         int maxR,
         int maxA,
         int maxE,
-        int maxT,
-        List<Item> baselineItems = null)
+        int maxT)
     {
         return _calculator.Calculate(budget, items, maxR, maxA, maxE, maxT);
     }

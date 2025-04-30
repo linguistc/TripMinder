@@ -3,7 +3,7 @@ namespace TripMinder.Core.Behaviors.Knapsack;
 public class DynamicProgrammingCalculator : IDynamicProgrammingCalculator
 {
     public (float[,,,,] dp, bool[,,,,,] decision, int?[,,,,,] itemIds) Calculate(
-        int budget, List<Item> items, int maxR, int maxA, int maxE, int maxT, List<Item> baselineItems = null)
+        int budget, List<DpItem> items, int maxR, int maxA, int maxE, int maxT)
     {
         float[,,,,] dp = new float[budget + 1, maxR + 1, maxA + 1, maxE + 1, maxT + 1];
         bool[,,,,,] decision = new bool[budget + 1, maxR + 1, maxA + 1, maxE + 1, maxT + 1, items.Count];
@@ -13,21 +13,22 @@ public class DynamicProgrammingCalculator : IDynamicProgrammingCalculator
         Console.WriteLine($"Processing {items.Count} items: {string.Join(", ", items.Select(i => $"{i.Name} (GlobalId={i.GlobalId}, Score={i.Score}, Price={i.AveragePricePerAdult})"))}");
 
         // Initialize dp with float.MinValue
-        for (int w = 0; w <= budget; w++)
-        for (int r = 0; r <= maxR; r++)
-        for (int a = 0; a <= maxA; a++)
-        for (int e = 0; e <= maxE; e++)
-        for (int t = 0; t <= maxT; t++)
+        // استخدام DpItem.Profit و DpItem.Weight:
+        for (int w = budget; w >= 0; w--)
+        for (int r = maxR; r >= 0; r--)
+        for (int a = maxA; a >= 0; a--)
+        for (int e = maxE; e >= 0; e--)
+        for (int t = maxT; t >= 0; t--)
         {
             dp[w, r, a, e, t] = float.MinValue;
         }
-        dp[0, 0, 0, 0, 0] = 0; // Base case
+        dp[0, 0, 0, 0, 0] = 0;
 
         // Run DP for all items
         for (int i = 0; i < items.Count; i++)
         {
             var item = items[i];
-            int cost = (int)item.AveragePricePerAdult;
+            int cost = (int)item.Weight;
             bool isRestaurant = item.PlaceType == ItemType.Restaurant;
             bool isAccommodation = item.PlaceType == ItemType.Accommodation;
             bool isEntertainment = item.PlaceType == ItemType.Entertainment;
@@ -42,7 +43,7 @@ public class DynamicProgrammingCalculator : IDynamicProgrammingCalculator
                 Console.WriteLine($"Skipping item: {item.Name}, GlobalId={item.GlobalId}, Type={item.PlaceType} (zero capacity)");
                 continue;
             }
-
+            
             for (int w = budget; w >= cost; w--)
             for (int r = maxR; r >= (isRestaurant ? 1 : 0); r--)
             for (int a = maxA; a >= (isAccommodation ? 1 : 0); a--)
@@ -55,7 +56,8 @@ public class DynamicProgrammingCalculator : IDynamicProgrammingCalculator
                 int newE = isEntertainment ? e - 1 : e;
                 int newT = isTourismArea ? t - 1 : t;
 
-                var prev = dp[w - cost, newR, newA, newE, newT];
+                var prev = dp[w - cost, r - (isRestaurant ? 1 : 0), a - (isAccommodation ? 1 : 0), e - (isEntertainment ? 1 : 0), t - (isTourismArea ? 1 : 0)];
+
                 if (prev != float.MinValue)
                 {
                     float score = Math.Max(item.Score, 0.01f); // Ensure positive score

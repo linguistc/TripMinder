@@ -7,7 +7,7 @@ public record KnapsackState(
     int Entertainments,
     int TourismAreas,
     int Index,
-    List<Item> Items,
+    List<DpItem> Items,
     bool[,,,,,] Decision,
     List<Item> CurrentSelection,
     SolutionOptimizer? Optimizer = null,

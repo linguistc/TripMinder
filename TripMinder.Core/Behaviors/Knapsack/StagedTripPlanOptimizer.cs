@@ -1,4 +1,3 @@
-
 namespace TripMinder.Core.Behaviors.Knapsack;
 
 using System.Collections.Generic;
@@ -20,6 +19,9 @@ public class StagedTripPlanOptimizer : IStagedTripPlanOptimizer
         UserDefinedKnapsackConstraints originalConstraints,
         (int a, int f, int e, int t)? priorities = null)
     {
+        // Convert items to DpItems
+        var dpItems = items.Select(i => new DpItem(i)).ToList();
+
         // Prepare types and constraints
         var phaseOrder = orderedInterests.Select(GetItemType).ToList();
         var maxPerType = new Dictionary<ItemType, int>
@@ -40,11 +42,9 @@ public class StagedTripPlanOptimizer : IStagedTripPlanOptimizer
 
             foreach (var type in phaseOrder)
             {
-                // Don't exceed user max
                 if (currentMax[type] >= maxPerType[type])
                     continue;
 
-                // Prepare constraints for this phase
                 var phaseConstraints = new UserDefinedKnapsackConstraints(
                     currentMax.GetValueOrDefault(ItemType.Restaurant) + (type == ItemType.Restaurant ? 1 : 0),
                     currentMax.GetValueOrDefault(ItemType.Accommodation) + (type == ItemType.Accommodation ? 1 : 0),
@@ -52,21 +52,19 @@ public class StagedTripPlanOptimizer : IStagedTripPlanOptimizer
                     currentMax.GetValueOrDefault(ItemType.TourismArea) + (type == ItemType.TourismArea ? 1 : 0)
                 );
 
-                // Run knapsack for this phase (always with full budget)
                 var (profit, itemsSelected) = await Task.Run(() =>
                     _solver.GetMaxProfit(
                         budget,
-                        items,
+                        items, // KnapsackSolver will handle conversion to DpItem
                         phaseConstraints,
                         priorities,
-                        true // requireExact = true
+                        true
                     )
                 );
 
                 int countOfType = itemsSelected.Count(i => i.PlaceType == type);
                 if (countOfType > currentMax[type])
                 {
-                    // Success: update max and bestItems
                     currentMax[type]++;
                     lastSuccessMax[type] = currentMax[type];
                     bestItems = itemsSelected;
@@ -74,18 +72,17 @@ public class StagedTripPlanOptimizer : IStagedTripPlanOptimizer
                 }
                 else
                 {
-                    // Failed to add more: fix max at last successful
                     currentMax[type] = lastSuccessMax[type];
                 }
             }
 
-            // Early stop: if no type increased in this full loop, or all max reached
             if (!changedInThisLoop || phaseOrder.All(t => currentMax[t] >= maxPerType[t]))
                 break;
 
-            // Also, if budget is less than min price of any available item, stop
             var minPrices = phaseOrder
-                .Select(t => items.Where(i => i.PlaceType == t).Select(i => i.AveragePricePerAdult).DefaultIfEmpty(double.MaxValue).Min())
+                .Select(t =>
+                    items.Where(i => i.PlaceType == t).Select(i => i.AveragePricePerAdult)
+                        .DefaultIfEmpty(double.MaxValue).Min())
                 .ToList();
             if (budget < minPrices.Min())
                 break;
@@ -106,3 +103,4 @@ public class StagedTripPlanOptimizer : IStagedTripPlanOptimizer
         };
     }
 }
+

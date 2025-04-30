@@ -16,17 +16,17 @@ public class ItemFetcher : IItemFetcher
         this._mediator = mediator;
     }
 
-    public async Task<List<Item>> FetchItems(int governorateId, int? zoneId, (int a, int f, int e, int t) priorities)
+    public async Task<List<Item>> FetchItems(int governorateId, int? zoneId, (int a, int f, int e, int t) priorities, double dailyBudgetPerAdult)
     {
         var allItems = new List<Item>();
 
         if (zoneId.HasValue)
         {
-            await FetchItemsByZoneId(zoneId.Value, priorities, allItems);
+            await FetchItemsByZoneId(zoneId.Value, priorities, allItems, dailyBudgetPerAdult);
         }
         else
         {
-            await FetchItemsByGovernorateId(governorateId, priorities, allItems);
+            await FetchItemsByGovernorateId(governorateId, priorities, allItems, dailyBudgetPerAdult);
         }
 
         Console.WriteLine($"Fetched Items: Total={allItems.Count}, Restaurants={allItems.Count(i => i.PlaceType == ItemType.Restaurant)}, Accommodations={allItems.Count(i => i.PlaceType == ItemType.Accommodation)}, Entertainments={allItems.Count(i => i.PlaceType == ItemType.Entertainment)}, TourismAreas={allItems.Count(i => i.PlaceType == ItemType.TourismArea)}, GlobalIds={string.Join(", ", allItems.Select(i => $"{i.GlobalId} (Score={i.Score}, Price={i.AveragePricePerAdult})"))}");
@@ -74,7 +74,7 @@ public class ItemFetcher : IItemFetcher
         return filteredItems;
     }
 
-    private async Task FetchItemsByZoneId(int zoneId, (int a, int f, int e, int t) priorities, List<Item> allItems)
+    private async Task FetchItemsByZoneId(int zoneId, (int a, int f, int e, int t) priorities, List<Item> allItems, double dailyBudgetPerAdult)
     {
         var accommodationsResponse = await _mediator.Send(new GetAccomodationsListByZoneIdQuery(zoneId, priorities.a));
         Console.WriteLine($"Accommodations Response: Succeeded={accommodationsResponse?.Succeeded}, Count={(accommodationsResponse?.Data?.Count() ?? 0)}");
@@ -91,7 +91,7 @@ public class ItemFetcher : IItemFetcher
                     AveragePricePerAdult = a.AveragePricePerAdult <= 0
                         ? GetRandomPrice(ItemType.Accommodation)
                         : (float)a.AveragePricePerAdult,
-                    Score = CalculateScoreBehavior.CalculateScore(a.ClassType ?? "C", priorities.a, a.AveragePricePerAdult),
+                    Score = CalculateScoreBehavior.CalculateScore(a.ClassType ?? "C", priorities.a, a.AveragePricePerAdult, dailyBudgetPerAdult),
                     PlaceType = ItemType.Accommodation,
                     Rating = a.Rating,
                     ImageSource = a.ImageSource
@@ -120,7 +120,7 @@ public class ItemFetcher : IItemFetcher
                     AveragePricePerAdult = r.AveragePricePerAdult <= 0
                         ? GetRandomPrice(ItemType.Restaurant)
                         : (float)r.AveragePricePerAdult,
-                    Score = CalculateScoreBehavior.CalculateScore(r.ClassType ?? "C", priorities.f, r.AveragePricePerAdult),
+                    Score = CalculateScoreBehavior.CalculateScore(r.ClassType ?? "C", priorities.f, r.AveragePricePerAdult, dailyBudgetPerAdult),
                     PlaceType = ItemType.Restaurant,
                     Rating = r.Rating,
                     ImageSource = r.ImageSource
@@ -151,7 +151,7 @@ public class ItemFetcher : IItemFetcher
                     AveragePricePerAdult = e.AveragePricePerAdult <= 0
                         ? GetRandomPrice(ItemType.Entertainment)
                         : (float)e.AveragePricePerAdult,
-                    Score = CalculateScoreBehavior.CalculateScore(e.ClassType ?? "C", priorities.e, e.AveragePricePerAdult),
+                    Score = CalculateScoreBehavior.CalculateScore(e.ClassType ?? "C", priorities.e, e.AveragePricePerAdult, dailyBudgetPerAdult),
                     PlaceType = ItemType.Entertainment,
                     Rating = e.Rating,
                     ImageSource = e.ImageSource
@@ -180,7 +180,7 @@ public class ItemFetcher : IItemFetcher
                     AveragePricePerAdult = t.AveragePricePerAdult <= 0
                         ? GetRandomPrice(ItemType.TourismArea)
                         : (float)t.AveragePricePerAdult,
-                    Score = CalculateScoreBehavior.CalculateScore(t.ClassType ?? "C", priorities.t, t.AveragePricePerAdult),
+                    Score = CalculateScoreBehavior.CalculateScore(t.ClassType ?? "C", priorities.t, t.AveragePricePerAdult, dailyBudgetPerAdult),
                     PlaceType = ItemType.TourismArea,
                     Rating = t.Rating,
                     ImageSource = t.ImageSource
@@ -195,7 +195,7 @@ public class ItemFetcher : IItemFetcher
         }
     }
 
-    private async Task FetchItemsByGovernorateId(int governorateId, (int a, int f, int e, int t) priorities, List<Item> allItems)
+    private async Task FetchItemsByGovernorateId(int governorateId, (int a, int f, int e, int t) priorities, List<Item> allItems, double dailyBudgetPerAdult)
     {
         var accommodationsResponse = await _mediator.Send(new GetAccomodationsListByGovernorateIdQuery(governorateId, priorities.a));
         Console.WriteLine($"Accommodations Response: Succeeded={accommodationsResponse?.Succeeded}, Count={(accommodationsResponse?.Data?.Count() ?? 0)}");
@@ -212,7 +212,7 @@ public class ItemFetcher : IItemFetcher
                     AveragePricePerAdult = a.AveragePricePerAdult <= 0
                         ? GetRandomPrice(ItemType.Accommodation)
                         : (float)a.AveragePricePerAdult,
-                    Score = CalculateScoreBehavior.CalculateScore(a.ClassType ?? "C", priorities.a, a.AveragePricePerAdult),
+                    Score = CalculateScoreBehavior.CalculateScore(a.ClassType ?? "C", priorities.a, a.AveragePricePerAdult, dailyBudgetPerAdult),
                     PlaceType = ItemType.Accommodation,
                     Rating = a.Rating,
                     ImageSource = a.ImageSource
@@ -241,7 +241,7 @@ public class ItemFetcher : IItemFetcher
                     AveragePricePerAdult = r.AveragePricePerAdult <= 0
                         ? GetRandomPrice(ItemType.Restaurant)
                         : (float)r.AveragePricePerAdult,
-                    Score = CalculateScoreBehavior.CalculateScore(r.ClassType ?? "C", priorities.f, r.AveragePricePerAdult),
+                    Score = CalculateScoreBehavior.CalculateScore(r.ClassType ?? "C", priorities.f, r.AveragePricePerAdult, dailyBudgetPerAdult),
                     PlaceType = ItemType.Restaurant,
                     Rating = r.Rating,
                     ImageSource = r.ImageSource
@@ -272,7 +272,7 @@ public class ItemFetcher : IItemFetcher
                     AveragePricePerAdult = e.AveragePricePerAdult <= 0
                         ? GetRandomPrice(ItemType.Entertainment)
                         : (float)e.AveragePricePerAdult,
-                    Score = CalculateScoreBehavior.CalculateScore(e.ClassType ?? "C", priorities.e, e.AveragePricePerAdult),
+                    Score = CalculateScoreBehavior.CalculateScore(e.ClassType ?? "C", priorities.e, e.AveragePricePerAdult, dailyBudgetPerAdult),
                     PlaceType = ItemType.Entertainment,
                     Rating = e.Rating,
                     ImageSource = e.ImageSource
@@ -301,7 +301,7 @@ public class ItemFetcher : IItemFetcher
                     AveragePricePerAdult = t.AveragePricePerAdult <= 0
                         ? GetRandomPrice(ItemType.TourismArea)
                         : (float)t.AveragePricePerAdult,
-                    Score = CalculateScoreBehavior.CalculateScore(t.ClassType ?? "C", priorities.t, t.AveragePricePerAdult),
+                    Score = CalculateScoreBehavior.CalculateScore(t.ClassType ?? "C", priorities.t, t.AveragePricePerAdult, dailyBudgetPerAdult),
                     PlaceType = ItemType.TourismArea,
                     Rating = t.Rating,
                     ImageSource = t.ImageSource

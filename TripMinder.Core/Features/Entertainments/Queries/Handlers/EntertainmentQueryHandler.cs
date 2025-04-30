@@ -71,9 +71,7 @@ namespace TripMinder.Core.Features.Entertainments.Queries.Handlers
         public async Task<Respond<List<GetEntertainmentsListResponse>>> Handle(GetEntertainmentsListByZoneIdQuery request, CancellationToken cancellationToken)
         {
             var entertainmentsList = await this.service.GetEntertainmentsListByZoneIdAsync(request.ZoneId, cancellationToken);
-
-            entertainmentsList.ForEach(a => a.Score = CalculateScoreBehavior.CalculateScore(a.Class.Type, request.Priority, a.AveragePricePerAdult));
-
+            
             var entertainmentMapper = this.mapper.Map<List<GetEntertainmentsListResponse>>(entertainmentsList);
 
             var result = Success(entertainmentMapper);
@@ -87,9 +85,7 @@ namespace TripMinder.Core.Features.Entertainments.Queries.Handlers
         public async Task<Respond<List<GetEntertainmentsListResponse>>> Handle(GetEntertainmentsListByGovernorateIdQuery request, CancellationToken cancellationToken)
         {
             var entertainmentsList = await this.service.GetEntertainmentsListByGovernorateIdAsync(request.GovernorateId, cancellationToken);
-
-            entertainmentsList.ForEach(a => a.Score = CalculateScoreBehavior.CalculateScore(a.Class.Type, request.Priority, a.AveragePricePerAdult));
-
+            
             var entertainmentMapper = this.mapper.Map<List<GetEntertainmentsListResponse>>(entertainmentsList);
 
             var result = Success(entertainmentMapper);
@@ -103,9 +99,7 @@ namespace TripMinder.Core.Features.Entertainments.Queries.Handlers
         public async Task<Respond<List<GetEntertainmentsListResponse>>> Handle(GetEntertainmentsListByClassIdQuery request, CancellationToken cancellationToken)
         {
             var entertainmentsList = await this.service.GetEntertainmentsListByClassIdAsync(request.ClassId, cancellationToken);
-
-            entertainmentsList.ForEach(a => a.Score = CalculateScoreBehavior.CalculateScore(a.Class.Type, request.Priority, a.AveragePricePerAdult));
-
+            
             var entertainmentMapper = this.mapper.Map<List<GetEntertainmentsListResponse>>(entertainmentsList);
 
             var result = Success(entertainmentMapper);
@@ -118,9 +112,7 @@ namespace TripMinder.Core.Features.Entertainments.Queries.Handlers
         public async Task<Respond<List<GetEntertainmentsListResponse>>> Handle(GetEntertainmentsListByTypeIdQuery request, CancellationToken cancellationToken)
         {
             var entertainmentsList = await this.service.GetEntertainmentsListByTypeIdAsync(request.TypeId, cancellationToken);
-
-            entertainmentsList.ForEach(a => a.Score = CalculateScoreBehavior.CalculateScore(a.Class.Type, request.Priority, a.AveragePricePerAdult));
-
+            
             var entertainmentMapper = this.mapper.Map<List<GetEntertainmentsListResponse>>(entertainmentsList);
 
             var result = Success(entertainmentMapper);
@@ -133,9 +125,7 @@ namespace TripMinder.Core.Features.Entertainments.Queries.Handlers
         public async Task<Respond<List<GetEntertainmentsListResponse>>> Handle(GetEntertainmentsListByRatingQuery request, CancellationToken cancellationToken)
         {
             var entertainmentsList = await this.service.GetEntertainmentsListByRatingAsync(request.Rating, cancellationToken);
-
-            entertainmentsList.ForEach(a => a.Score = CalculateScoreBehavior.CalculateScore(a.Class.Type, request.Priority, a.AveragePricePerAdult));
-
+            
             var entertainmentMapper = this.mapper.Map<List<GetEntertainmentsListResponse>>(entertainmentsList);
 
             var result = Success(entertainmentMapper);
@@ -148,9 +138,7 @@ namespace TripMinder.Core.Features.Entertainments.Queries.Handlers
         public async Task<Respond<List<GetEntertainmentsListResponse>>> Handle(GetEntertainmentsListLessThanPriceQuery request, CancellationToken cancellationToken)
         {
             var entertainmentsList = await this.service.GetEntertainmentsListLessThanPriceAsync((double)request.Price, cancellationToken);
-
-            entertainmentsList.ForEach(a => a.Score = CalculateScoreBehavior.CalculateScore(a.Class.Type, request.Priority, a.AveragePricePerAdult));
-
+            
             var entertainmentMapper = this.mapper.Map<List<GetEntertainmentsListResponse>>(entertainmentsList);
 
             var result = Success(entertainmentMapper);
@@ -163,9 +151,7 @@ namespace TripMinder.Core.Features.Entertainments.Queries.Handlers
         public async Task<Respond<List<GetEntertainmentsListResponse>>> Handle(GetEntertainmentsListMoreThanPriceQuery request, CancellationToken cancellationToken)
         {
             var entertainmentsList = await this.service.GetEntertainmentsListMoreThanPriceAsync((double)request.Price, cancellationToken);
-
-            entertainmentsList.ForEach(a => a.Score = CalculateScoreBehavior.CalculateScore(a.Class.Type, request.Priority, a.AveragePricePerAdult));
-
+            
             var entertainmentMapper = this.mapper.Map<List<GetEntertainmentsListResponse>>(entertainmentsList);
 
             var result = Success(entertainmentMapper);

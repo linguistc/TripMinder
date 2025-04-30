@@ -1,7 +1,10 @@
+namespace TripMinder.Core.Behaviors.Knapsack;
+
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 using TripMinder.Core.Bases;
 using TripMinder.Service.Contracts;
-
-namespace TripMinder.Core.Behaviors.Knapsack;
 
 public partial class TripPlanOptimizer
 {
@@ -12,7 +15,7 @@ public partial class TripPlanOptimizer
     private readonly IRestaurantService _restaurantService;
     private readonly IEntertainmentService _entertainmentService;
     private readonly ITourismAreaService _tourismAreaService;
-        
+
     public TripPlanOptimizer(
         IKnapsackSolver solver,
         IItemFetcher itemFetcher,
@@ -31,15 +34,24 @@ public partial class TripPlanOptimizer
         _tourismAreaService = tourismAreaService;
     }
 
-    
-
     public async Task<Respond<TripPlanResponse>> OptimizePlanPhasedAsync(TripPlanRequest request)
     {
-        // 1. Calculate priorities and fetch items
-        var priorities = CalculatePriorities(request.Interests);
-        var allItems = await _itemFetcher.FetchItems(request.GovernorateId, request.ZoneId, priorities);
+        // 1. Check if optimization is feasible
+        // if (!await CanRunOptimizationAsync(request.BudgetPerAdult))
+        // {
+        //     return new Respond<TripPlanResponse>
+        //     {
+        //         Succeeded = false,
+        //         Message = "Budget too low to generate a trip plan",
+        //         Errors = new List<string> { "Budget is less than the minimum item price" }
+        //     };
+        // }
 
-        // 2. Determine interested types and filter items
+        // 2. Calculate priorities and fetch items
+        var priorities = CalculatePriorities(request.Interests);
+        var allItems = await _itemFetcher.FetchItems(request.GovernorateId, request.ZoneId, priorities, request.BudgetPerAdult);
+
+        // 3. Determine interested types and filter items
         var interestTypes = new List<ItemType>();
         if (priorities.accommodation > 0) interestTypes.Add(ItemType.Accommodation);
         if (priorities.food > 0) interestTypes.Add(ItemType.Restaurant);
@@ -47,8 +59,37 @@ public partial class TripPlanOptimizer
         if (priorities.tourism > 0) interestTypes.Add(ItemType.TourismArea);
 
         var filteredItems = allItems.Where(i => interestTypes.Contains(i.PlaceType)).ToList();
+        if (!filteredItems.Any())
+        {
+            return new Respond<TripPlanResponse>
+            {
+                Succeeded = false,
+                Message = "No items available for the selected interests",
+                Errors = new List<string> { "No valid items found" }
+            };
+        }
 
-        // 3. Prepare max constraints per type
+        // 4. Link type to priority
+        var typeToPriority = new Dictionary<ItemType, int>
+        {
+            [ItemType.Accommodation] = priorities.accommodation,
+            [ItemType.Restaurant] = priorities.food,
+            [ItemType.Entertainment] = priorities.entertainment,
+            [ItemType.TourismArea] = priorities.tourism
+        };
+
+        // 5. Recalculate scores
+        foreach (var item in filteredItems)
+        {
+            item.Score = CalculateScoreBehavior.CalculateScore(
+                item.ClassType,
+                typeToPriority[item.PlaceType],
+                item.AveragePricePerAdult,
+                request.BudgetPerAdult
+            );
+        }
+
+        // 6. Prepare max constraints per type
         var maxPerType = new Dictionary<ItemType, int>
         {
             [ItemType.Accommodation] = request.MaxAccommodations,
@@ -57,69 +98,84 @@ public partial class TripPlanOptimizer
             [ItemType.TourismArea] = request.MaxTourismAreas
         };
 
-        // 4. Prepare phased expansion variables
-        var phaseOrder = interestTypes.ToList(); // Ordered by user priority
+        // 7. Order interests by priority
+        var orderedInterests = request.Interests
+            .Select((interest, index) => (interest, priority: typeToPriority[GetItemType(interest)]))
+            .OrderByDescending(x => x.priority)
+            .Select(x => x.interest)
+            .ToList();
+        var phaseOrder = orderedInterests.Select(GetItemType).Distinct().ToList();
+
+        // 8. Phased expansion
         var currentMax = phaseOrder.ToDictionary(t => t, t => 0);
-        var lastSuccessMax = phaseOrder.ToDictionary(t => t, t => 0);
-        var budget = (int)request.BudgetPerAdult;
+        var fixedMax = phaseOrder.ToDictionary(t => t, t => 0); // Tracks max after failure
         var bestItems = new List<Item>();
+        int budget = (int)request.BudgetPerAdult;
+        int unchangedPhases = 0;
 
-        // === Early Stop Phased Expansion Loop ===
-        while (true)
+        while (unchangedPhases < phaseOrder.Count)
         {
-            bool changedInThisLoop = false;
+            bool changedInThisPhase = false;
 
-            foreach (var type in phaseOrder)
+            foreach (var interest in orderedInterests)
             {
-                // Don't exceed user max
-                if (currentMax[type] >= maxPerType[type])
-                    continue;
+                var itemType = GetItemType(interest);
+                if (currentMax[itemType] >= maxPerType[itemType] || currentMax[itemType] >= fixedMax[itemType])
+                    continue; // Skip if max reached or fixed
 
                 // Prepare constraints for this phase
                 var phaseConstraints = new UserDefinedKnapsackConstraints(
-                    currentMax.GetValueOrDefault(ItemType.Restaurant) + (type == ItemType.Restaurant ? 1 : 0),
-                    currentMax.GetValueOrDefault(ItemType.Accommodation) + (type == ItemType.Accommodation ? 1 : 0),
-                    currentMax.GetValueOrDefault(ItemType.Entertainment) + (type == ItemType.Entertainment ? 1 : 0),
-                    currentMax.GetValueOrDefault(ItemType.TourismArea) + (type == ItemType.TourismArea ? 1 : 0)
+                    phaseOrder.Contains(ItemType.Restaurant) ? currentMax.GetValueOrDefault(ItemType.Restaurant) + (itemType == ItemType.Restaurant ? 1 : 0) : 0,
+                    phaseOrder.Contains(ItemType.Accommodation) ? currentMax.GetValueOrDefault(ItemType.Accommodation) + (itemType == ItemType.Accommodation ? 1 : 0) : 0,
+                    phaseOrder.Contains(ItemType.Entertainment) ? currentMax.GetValueOrDefault(ItemType.Entertainment) + (itemType == ItemType.Entertainment ? 1 : 0) : 0,
+                    phaseOrder.Contains(ItemType.TourismArea) ? currentMax.GetValueOrDefault(ItemType.TourismArea) + (itemType == ItemType.TourismArea ? 1 : 0) : 0
                 );
 
-                // Run knapsack for this phase (always with full budget)
+                // Run Knapsack on full budget
                 var (profit, items) = _solver.GetMaxProfit(
                     budget,
                     filteredItems,
                     phaseConstraints,
-                    priorities
+                    priorities,
+                    false // requireExact to enforce exact counts
                 );
 
-                int countOfType = items.Count(i => i.PlaceType == type);
-                if (countOfType > currentMax[type])
+                int countOfType = items.Count(i => i.PlaceType == itemType);
+                if (countOfType > currentMax[itemType])
                 {
                     // Success: update max and bestItems
-                    currentMax[type]++;
-                    lastSuccessMax[type] = currentMax[type];
+                    currentMax[itemType]++;
+                    fixedMax[itemType] = currentMax[itemType];
                     bestItems = items;
-                    changedInThisLoop = true;
+                    changedInThisPhase = true;
+                    unchangedPhases = 0;
+                    Console.WriteLine($"Phase Success: Added {itemType}, Items={string.Join(", ", items.Select(i => i.Name))}, Profit={profit}, BudgetUsed={items.Sum(i => i.AveragePricePerAdult)}");
                 }
                 else
                 {
-                    // Failed to add more: fix max at last successful
-                    currentMax[type] = lastSuccessMax[type];
+                    // Failure: fix max at last successful count
+                    fixedMax[itemType] = currentMax[itemType];
+                    Console.WriteLine($"Phase Failure: Fixed max for {itemType} at {fixedMax[itemType]}");
                 }
             }
 
-            // Early stop: if no type increased in this full loop, or all max reached
-            if (!changedInThisLoop || phaseOrder.All(t => currentMax[t] >= maxPerType[t]))
-                break;
+            if (!changedInThisPhase)
+                unchangedPhases++;
+            else
+                unchangedPhases = 0;
 
-            // Also, if budget is less than min price of any available item, stop
+            // Early stop if budget is too low
             var minPrices = phaseOrder
                 .Select(t => filteredItems.Where(i => i.PlaceType == t).Select(i => i.AveragePricePerAdult).DefaultIfEmpty(double.MaxValue).Min())
                 .ToList();
             if (budget < minPrices.Min())
+            {
+                Console.WriteLine("Stopping: Budget too low for any new item");
                 break;
+            }
         }
 
-        // Build response
+        // 9. Build response
         var tripPlanResponse = BuildTripPlanResponse(bestItems, request);
         if (bestItems.Any())
         {
@@ -138,7 +194,7 @@ public partial class TripPlanOptimizer
             Errors = new List<string> { "Unable to generate a solution within constraints" }
         };
     }
-    
+
     private async Task<bool> CanRunOptimizationAsync(double budget)
     {
         var minPrices = new[]
@@ -152,6 +208,7 @@ public partial class TripPlanOptimizer
         var minPrice = minPrices.Where(p => p.HasValue).Min();
         return minPrice.HasValue && budget >= minPrice.Value;
     }
+
     private ItemType GetItemType(string interest)
     {
         return interest?.Trim().ToLowerInvariant() switch
@@ -178,7 +235,6 @@ public partial class TripPlanOptimizer
 
     private TripPlanResponse BuildTripPlanResponse(List<Item> selectedItems, TripPlanRequest request)
     {
-        // Existing implementation
         var response = new TripPlanResponse
         {
             Accommodation = selectedItems.FirstOrDefault(i => i.PlaceType == ItemType.Accommodation)?.ToResponse(),
@@ -193,9 +249,9 @@ public partial class TripPlanOptimizer
         Console.WriteLine($"Built Response: Accommodation={(response.Accommodation?.Name ?? "None")}, Restaurants={response.Restaurants.Count}, Entertainments={response.Entertainments.Count}, TourismAreas={response.TourismAreas.Count}");
         return response;
     }
+
     private (int accommodation, int food, int entertainment, int tourism) CalculatePriorities(Queue<string> interests)
     {
-        // Existing implementation
         int accommodationPriority = 0, foodPriority = 0, entertainmentPriority = 0, tourismPriority = 0;
         int bonus = interests?.Count ?? 0;
 
@@ -240,25 +296,25 @@ public partial class TripPlanOptimizer
         Console.WriteLine($"Calculated Priorities: Accommodation={accommodationPriority}, Food={foodPriority}, Entertainment={entertainmentPriority}, Tourism={tourismPriority}");
         return (accommodationPriority, foodPriority, entertainmentPriority, tourismPriority);
     }
-
-    
-    // Un touched yet
     public async Task<Respond<List<TripPlanResponse>>> OptimizePlanMultiple(TripPlanRequest request)
     {
         var priorities = CalculatePriorities(request.Interests);
-        Console.WriteLine($"Calculated Priorities: Accommodation={priorities.accommodation}, Food={priorities.food}, Entertainment={priorities.entertainment}, Tourism={priorities.tourism}");
+        Console.WriteLine(
+            $"Calculated Priorities: Accommodation={priorities.accommodation}, Food={priorities.food}, Entertainment={priorities.entertainment}, Tourism={priorities.tourism}");
 
-        var allItems = await _itemFetcher.FetchItems(request.GovernorateId, request.ZoneId, priorities);
-        Console.WriteLine($"Fetched Items: Total={allItems.Count}, Restaurants={allItems.Count(i => i.PlaceType == ItemType.Restaurant)}, Accommodations={allItems.Count(i => i.PlaceType == ItemType.Accommodation)}, Entertainments={allItems.Count(i => i.PlaceType == ItemType.Entertainment)}, TourismAreas={allItems.Count(i => i.PlaceType == ItemType.TourismArea)}, GlobalIds={string.Join(", ", allItems.Select(i => $"{i.GlobalId} (Score={i.Score}, Price={i.AveragePricePerAdult})"))}");
+        var allItems =
+            await _itemFetcher.FetchItems(request.GovernorateId, request.ZoneId, priorities, request.BudgetPerAdult);
+        Console.WriteLine(
+            $"Fetched Items: Total={allItems.Count}, Restaurants={allItems.Count(i => i.PlaceType == ItemType.Restaurant)}, Accommodations={allItems.Count(i => i.PlaceType == ItemType.Accommodation)}, Entertainments={allItems.Count(i => i.PlaceType == ItemType.Entertainment)}, TourismAreas={allItems.Count(i => i.PlaceType == ItemType.TourismArea)}, GlobalIds={string.Join(", ", allItems.Select(i => $"{i.GlobalId} (Score={i.Score}, Price={i.AveragePricePerAdult})"))}");
 
-        // Filter items based on interests
         var desiredTypes = new HashSet<ItemType>();
         if (priorities.accommodation > 0) desiredTypes.Add(ItemType.Accommodation);
         if (priorities.food > 0) desiredTypes.Add(ItemType.Restaurant);
         if (priorities.entertainment > 0) desiredTypes.Add(ItemType.Entertainment);
         if (priorities.tourism > 0) desiredTypes.Add(ItemType.TourismArea);
         var filteredItems = allItems.Where(i => desiredTypes.Contains(i.PlaceType)).ToList();
-        Console.WriteLine($"Filtered Items: Total={filteredItems.Count}, Restaurants={filteredItems.Count(i => i.PlaceType == ItemType.Restaurant)}, Accommodations={filteredItems.Count(i => i.PlaceType == ItemType.Accommodation)}, Entertainments={filteredItems.Count(i => i.PlaceType == ItemType.Entertainment)}, TourismAreas={filteredItems.Count(i => i.PlaceType == ItemType.TourismArea)}, GlobalIds={string.Join(", ", filteredItems.Select(i => $"{i.GlobalId} (Score={i.Score}, Price={i.AveragePricePerAdult})"))}");
+        Console.WriteLine(
+            $"Filtered Items: Total={filteredItems.Count}, Restaurants={filteredItems.Count(i => i.PlaceType == ItemType.Restaurant)}, Accommodations={filteredItems.Count(i => i.PlaceType == ItemType.Accommodation)}, Entertainments={filteredItems.Count(i => i.PlaceType == ItemType.Entertainment)}, TourismAreas={filteredItems.Count(i => i.PlaceType == ItemType.TourismArea)}, GlobalIds={string.Join(", ", filteredItems.Select(i => $"{i.GlobalId} (Score={i.Score}, Price={i.AveragePricePerAdult})"))}");
 
         var totalBudget = (int)(request.BudgetPerAdult);
 
@@ -268,18 +324,26 @@ public partial class TripPlanOptimizer
             request.MaxEntertainments,
             request.MaxTourismAreas);
 
-        var (maxProfit, allSolutions) = _solver.GetMaxProfitMultiple(totalBudget, filteredItems, constraints, priorities);
+        var (maxProfit, allSolutions) =
+            _solver.GetMaxProfitMultiple(totalBudget, filteredItems, constraints, priorities);
         var tripPlans = allSolutions.Select(items => BuildTripPlanResponse(items, request)).ToList();
 
         if (tripPlans.Any())
         {
-            Console.WriteLine($"Generated {tripPlans.Count} trip plans with total items: {tripPlans.Sum(p => p.Restaurants.Count + p.Entertainments.Count + p.TourismAreas.Count + (p.Accommodation != null ? 1 : 0))}");
+            Console.WriteLine(
+                $"Generated {tripPlans.Count} trip plans with total items: {tripPlans.Sum(p => p.Restaurants.Count + p.Entertainments.Count + p.TourismAreas.Count + (p.Accommodation != null ? 1 : 0))}");
             return new Respond<List<TripPlanResponse>>
             {
                 Succeeded = true,
                 Message = "Trip plans optimized successfully",
                 Data = tripPlans,
-                Meta = new { TotalItems = tripPlans.Sum(p => p.Restaurants.Count + p.Entertainments.Count + p.TourismAreas.Count + (p.Accommodation != null ? 1 : 0)), TotalSolutions = allSolutions.Count }
+                Meta = new
+                {
+                    TotalItems = tripPlans.Sum(p =>
+                        p.Restaurants.Count + p.Entertainments.Count + p.TourismAreas.Count +
+                        (p.Accommodation != null ? 1 : 0)),
+                    TotalSolutions = allSolutions.Count
+                }
             };
         }
 

@@ -1,25 +1,47 @@
 namespace TripMinder.Core.Behaviors;
+using System;
+
 public static class CalculateScoreBehavior
 {
-    public static float CalculateScore(string classType, int priority, double averagePricePerAdult)
+    /// <summary>
+    /// يحسب سكور العنصر بناءً على:
+    /// 1. فئة العنصر (classType) بأوزان أسّية (AHP-like).
+    /// 2. أولوية المستخدم (priority) بأوزان متناقصة أُسّياً.
+    /// 3. معامل سعر موحّد normalization بناءً على متوسط البودجت اليومي لكل فرد.
+    /// </summary>
+    /// <param name="classType">فئة العنصر (A, B, C, D)</param>
+    /// <param name="priority">أولوية المستخدم (1 = أعلى)</param>
+    /// <param name="averagePricePerAdult">متوسط سعر الفرد للعنصر</param>
+    /// <param name="dailyBudgetPerAdult">البودجت اليومي لكل فرد</param>
+    /// <returns>score قيمة العنصر المحسوبة</returns>
+    public static float CalculateScore(
+        string classType,
+        int priority,
+        double averagePricePerAdult,
+        double dailyBudgetPerAdult)
     {
+        // 1. Class Weight: أوزان أُسّية لضمان تفوق فئة أعلى
         float classWeight = classType switch
         {
-            "A" => 4f,
-            "B" => 3f,
-            "C" => 2f,
-            "D" => 1f,
-            _ => 0.5f
+            "A" => 16f,
+            "B" => 8f,
+            "C" => 4f,
+            "D" => 2f,
+            _   => 1f  // فئات أخرى بوزن منخفض جداً
         };
-        // تقليل الفرق بين الأولويات
-        float priorityWeight = priority > 0 ? (1.2f - (priority - 1) * 0.1f) : 0.5f; // 1.2, 1.1, 1.0, 0.9
-        
-        // Penalization للسعر العالي
-        float pricePenalty = averagePricePerAdult > 2000 ? 0.8f : averagePricePerAdult > 1000 ? 0.9f : 1f;
-        
-        // مكافأة للسعر المنخفض
-        float priceBonus = averagePricePerAdult < 100 ? 1.2f : 1f;
-        
-        return classWeight * priorityWeight * pricePenalty * priceBonus;
+
+        // 2. Priority Weight: تناقص أُسّي بنسبة 20% بين الدرجات
+        const float priorityDecay = 0.8f;
+        float priorityWeight = priority > 0
+            ? (float)Math.Pow(priorityDecay, priority - 1)
+            : (float)Math.Pow(priorityDecay, 4);
+
+        // 3. Price Normalization: دالة تعتمد على البودجت اليومي كمعامل مقياس
+        //    سعر منخفض يعطي قيمة أقرب إلى 1، سعر = dailyBudget يعطي 0.5، سعر أعلى يقلل القيمة
+        float scale = (float)Math.Max(dailyBudgetPerAdult, 1.0);
+        float priceFactor = 1f / (1f + (float)(averagePricePerAdult / scale));
+
+        // النتيجة النهائية: حاصل ضرب المكونات الثلاثة
+        return classWeight * priorityWeight * priceFactor;
     }
 }

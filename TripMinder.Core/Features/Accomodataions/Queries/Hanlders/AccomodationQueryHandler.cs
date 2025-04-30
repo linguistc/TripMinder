@@ -69,8 +69,6 @@ namespace TripMinder.Core.Features.Accomodataions.Queries.Hanlders
         {
             var accomodationList = await this.service.GetAccomodationsListByZoneIdAsync(request.ZoneId, cancellationToken);
             
-            accomodationList.ForEach(a => a.Score = CalculateScoreBehavior.CalculateScore(a.Class.Type, request.Priority, a.AveragePricePerAdult));
-
             var accomodationMapper = this.mapper.Map<List<GetAccomodationsListResponse>>(accomodationList);
 
             var result = Success(accomodationMapper);
@@ -82,8 +80,6 @@ namespace TripMinder.Core.Features.Accomodataions.Queries.Hanlders
         public async Task<Respond<List<GetAccomodationsListResponse>>> Handle(GetAccomodationsListByGovernorateIdQuery request, CancellationToken cancellationToken)
         {
             var accomodationList = await this.service.GetAccomodationsListByGovernorateIdAsync(request.GovernorateId, cancellationToken);
-            
-            accomodationList.ForEach(a => a.Score = CalculateScoreBehavior.CalculateScore(a.Class.Type, request.Priority, a.AveragePricePerAdult));
             
             var accomodationMapper = this.mapper.Map<List<GetAccomodationsListResponse>>(accomodationList);
 
@@ -100,8 +96,6 @@ namespace TripMinder.Core.Features.Accomodataions.Queries.Hanlders
         {
             var accomodationList = await this.service.GetAccomodationsListByClassIdAsync(request.ClassId, cancellationToken);
             
-            accomodationList.ForEach(a => a.Score = CalculateScoreBehavior.CalculateScore(a.Class.Type, request.Priority, a.AveragePricePerAdult));
-            
             var accomodationMapper = this.mapper.Map<List<GetAccomodationsListResponse>>(accomodationList);
 
             var result = Success(accomodationMapper);
@@ -114,8 +108,6 @@ namespace TripMinder.Core.Features.Accomodataions.Queries.Hanlders
         public async Task<Respond<List<GetAccomodationsListResponse>>> Handle(GetAccomodationsListByTypeIdQuery request, CancellationToken cancellationToken)
         {
             var accomodationList = await this.service.GetAccomodationsListByTypeIdAsync(request.TypeId, cancellationToken);
-            
-            accomodationList.ForEach(a => a.Score = CalculateScoreBehavior.CalculateScore(a.Class.Type, request.Priority, a.AveragePricePerAdult));
             
             var accomodationMapper = this.mapper.Map<List<GetAccomodationsListResponse>>(accomodationList);
 
@@ -130,8 +122,6 @@ namespace TripMinder.Core.Features.Accomodataions.Queries.Hanlders
         {
             var accomodationList = await this.service.GetAccomodationsListByRatingAsync(request.Rating, cancellationToken);
             
-            accomodationList.ForEach(a => a.Score = CalculateScoreBehavior.CalculateScore(a.Class.Type, request.Priority, a.AveragePricePerAdult));
-            
             var accomodationMapper = this.mapper.Map<List<GetAccomodationsListResponse>>(accomodationList);
 
             var result = Success(accomodationMapper);
@@ -145,8 +135,6 @@ namespace TripMinder.Core.Features.Accomodataions.Queries.Hanlders
         {
             var accomodationList = await this.service.GetAccomodationsListByNumberOfBedsAsync(request.NumOfBeds, cancellationToken);
             
-            accomodationList.ForEach(a => a.Score = CalculateScoreBehavior.CalculateScore(a.Class.Type, request.Priority, a.AveragePricePerAdult));
-            
             var accomodationMapper = this.mapper.Map<List<GetAccomodationsListResponse>>(accomodationList);
 
             var result = Success(accomodationMapper);
@@ -159,8 +147,6 @@ namespace TripMinder.Core.Features.Accomodataions.Queries.Hanlders
         public async Task<Respond<List<GetAccomodationsListResponse>>> Handle(GetAccomodationsListByNumberOfAdultsQuery request, CancellationToken cancellationToken)
         {
             var accomodationList = await this.service.GetAccomodationsListByNumberOfAdultsAsync(request.NumOfAdults, cancellationToken);
-            
-            accomodationList.ForEach(a => a.Score = CalculateScoreBehavior.CalculateScore(a.Class.Type, request.Priority, a.AveragePricePerAdult));
             
             var accomodationMapper = this.mapper.Map<List<GetAccomodationsListResponse>>(accomodationList);
 
@@ -176,8 +162,6 @@ namespace TripMinder.Core.Features.Accomodataions.Queries.Hanlders
             
             var accomodationList = await this.service.GetAccomodationsListLessThanPriceAsync((double)request.Price, cancellationToken);
             
-            accomodationList.ForEach(a => a.Score = CalculateScoreBehavior.CalculateScore(a.Class.Type, request.Priority, a.AveragePricePerAdult));
-            
             var accomodationMapper = this.mapper.Map<List<GetAccomodationsListResponse>>(accomodationList);
 
             var result = Success(accomodationMapper);
@@ -191,8 +175,6 @@ namespace TripMinder.Core.Features.Accomodataions.Queries.Hanlders
         public async Task<Respond<List<GetAccomodationsListResponse>>> Handle(GetAccomodationsListMoreThanPriceQuery request, CancellationToken cancellationToken)
         {
             var accomodationList = await this.service.GetAccomodationsListMoreThanPriceAsync((double)request.Price, cancellationToken);
-            
-            accomodationList.ForEach(a => a.Score = CalculateScoreBehavior.CalculateScore(a.Class.Type, request.Priority, a.AveragePricePerAdult));
             
             var accomodationMapper = this.mapper.Map<List<GetAccomodationsListResponse>>(accomodationList);
 
