@@ -66,7 +66,7 @@ public class TripSuggesterMultipleController : AppControllerBase
 
         // Fallback to single solution if multiple solutions fail
         _logger.LogWarning("Multiple solutions failed, attempting single solution");
-        var singleResponse = await _optimizer.OptimizePlan(request);
+        var singleResponse = await _optimizer.OptimizePlanPhasedAsync(request);
         if (singleResponse.Succeeded && singleResponse.Data != null)
         {
             _logger.LogInformation("Single solution succeeded, returning as fallback");

@@ -1,138 +1,108 @@
+
 namespace TripMinder.Core.Behaviors.Knapsack;
 
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
 public class StagedTripPlanOptimizer : IStagedTripPlanOptimizer
+{
+    private readonly IKnapsackSolver _solver;
+
+    public StagedTripPlanOptimizer(IKnapsackSolver solver)
     {
-        private readonly IKnapsackSolver _solver;
+        _solver = solver;
+    }
 
-        public StagedTripPlanOptimizer(IKnapsackSolver solver)
+    public async Task<List<Item>> OptimizeStagedAsync(
+        List<Item> items,
+        List<string> orderedInterests,
+        int budget,
+        UserDefinedKnapsackConstraints originalConstraints,
+        (int a, int f, int e, int t)? priorities = null)
+    {
+        // Prepare types and constraints
+        var phaseOrder = orderedInterests.Select(GetItemType).ToList();
+        var maxPerType = new Dictionary<ItemType, int>
         {
-            _solver = solver;
-        }
+            [ItemType.Accommodation] = originalConstraints.MaxAccommodations,
+            [ItemType.Restaurant] = originalConstraints.MaxRestaurants,
+            [ItemType.Entertainment] = originalConstraints.MaxEntertainments,
+            [ItemType.TourismArea] = originalConstraints.MaxTourismAreas
+        };
+        var currentMax = phaseOrder.ToDictionary(t => t, t => 0);
+        var lastSuccessMax = phaseOrder.ToDictionary(t => t, t => 0);
+        var bestItems = new List<Item>();
 
-        public async Task<List<Item>> OptimizeStagedAsync(
-            List<Item> items,
-            List<string> orderedInterests,
-            int budget,
-            UserDefinedKnapsackConstraints originalConstraints,
-            (int a, int f, int e, int t)? priorities = null)
+        // Phased Expansion Loop
+        while (true)
         {
-            var selectedItems = new List<Item>();
-            var currentCounts = new Dictionary<ItemType, int>
+            bool changedInThisLoop = false;
+
+            foreach (var type in phaseOrder)
             {
-                { ItemType.Restaurant, 0 },
-                { ItemType.Accommodation, 0 },
-                { ItemType.Entertainment, 0 },
-                { ItemType.TourismArea, 0 }
-            };
-            var currentConstraints = new UserDefinedKnapsackConstraints(
-                originalConstraints.MaxRestaurants,
-                originalConstraints.MaxAccommodations,
-                originalConstraints.MaxEntertainments,
-                originalConstraints.MaxTourismAreas);
-            int stablePhases = 0;
-            int stage = 1;
+                // Don't exceed user max
+                if (currentMax[type] >= maxPerType[type])
+                    continue;
 
-            while (stablePhases < 4 && budget > 0)
-            {
-                bool added = false;
-                foreach (var interest in orderedInterests)
-                {
-                    var itemType = GetItemType(interest);
-                    if (currentCounts[itemType] >= currentConstraints.GetMaxCount(itemType))
-                    {
-                        Console.WriteLine($"Stage {stage}: Skipping {itemType}, max count reached: {currentCounts[itemType]}/{currentConstraints.GetMaxCount(itemType)}");
-                        continue;
-                    }
+                // Prepare constraints for this phase
+                var phaseConstraints = new UserDefinedKnapsackConstraints(
+                    currentMax.GetValueOrDefault(ItemType.Restaurant) + (type == ItemType.Restaurant ? 1 : 0),
+                    currentMax.GetValueOrDefault(ItemType.Accommodation) + (type == ItemType.Accommodation ? 1 : 0),
+                    currentMax.GetValueOrDefault(ItemType.Entertainment) + (type == ItemType.Entertainment ? 1 : 0),
+                    currentMax.GetValueOrDefault(ItemType.TourismArea) + (type == ItemType.TourismArea ? 1 : 0)
+                );
 
-                    var availableItems = items.Except(selectedItems).Where(i => i.PlaceType == itemType).ToList();
-                    if (!availableItems.Any())
-                    {
-                        Console.WriteLine($"Stage {stage}: No available items for {itemType}");
-                        currentConstraints = UpdateConstraints(currentConstraints, itemType, currentCounts[itemType]);
-                        continue;
-                    }
-
-                    var stageConstraints = new UserDefinedKnapsackConstraints(
-                        itemType == ItemType.Restaurant ? currentCounts[ItemType.Restaurant] + 1 : currentCounts[ItemType.Restaurant],
-                        itemType == ItemType.Accommodation ? currentCounts[ItemType.Accommodation] + 1 : currentCounts[ItemType.Accommodation],
-                        itemType == ItemType.Entertainment ? currentCounts[ItemType.Entertainment] + 1 : currentCounts[ItemType.Entertainment],
-                        itemType == ItemType.TourismArea ? currentCounts[ItemType.TourismArea] + 1 : currentCounts[ItemType.TourismArea]
-                    );
-
-                    var (maxProfit, stageItems) = await Task.Run(() => _solver.GetMaxProfit(
+                // Run knapsack for this phase (always with full budget)
+                var (profit, itemsSelected) = await Task.Run(() =>
+                    _solver.GetMaxProfit(
                         budget,
-                        availableItems,
-                        stageConstraints,
+                        items,
+                        phaseConstraints,
                         priorities,
-                        true)); // requireExact = true
+                        true // requireExact = true
+                    )
+                );
 
-                    var newItem = stageItems.FirstOrDefault(i => i.PlaceType == itemType);
-                    if (newItem != null && budget >= (int)newItem.AveragePricePerAdult)
-                    {
-                        selectedItems.Add(newItem);
-                        budget -= (int)newItem.AveragePricePerAdult;
-                        currentCounts[itemType]++;
-                        added = true;
-                        stablePhases = 0; // Reset stable phases
-                        Console.WriteLine($"Stage {stage}: Added {newItem.Name} (Type={newItem.PlaceType}, Price={newItem.AveragePricePerAdult}, Score={newItem.Score}), Budget={budget}, Count={currentCounts[itemType]}");
-                    }
-                    else
-                    {
-                        Console.WriteLine($"Stage {stage}: Failed to add item for {itemType}. Selected={stageItems.Count}, BudgetCheck={(newItem == null ? "No item" : (budget >= (int)newItem.AveragePricePerAdult).ToString())}");
-                        currentConstraints = UpdateConstraints(currentConstraints, itemType, currentCounts[itemType]);
-                    }
-                }
-
-                if (!added)
+                int countOfType = itemsSelected.Count(i => i.PlaceType == type);
+                if (countOfType > currentMax[type])
                 {
-                    stablePhases++;
-                    Console.WriteLine($"Stage {stage}: No items added, stable phases={stablePhases}");
+                    // Success: update max and bestItems
+                    currentMax[type]++;
+                    lastSuccessMax[type] = currentMax[type];
+                    bestItems = itemsSelected;
+                    changedInThisLoop = true;
                 }
-                stage++;
+                else
+                {
+                    // Failed to add more: fix max at last successful
+                    currentMax[type] = lastSuccessMax[type];
+                }
             }
 
-            Console.WriteLine($"Optimization Complete: Total Items={selectedItems.Count}, Final Budget={budget}, Stable Phases={stablePhases}");
-            return selectedItems;
+            // Early stop: if no type increased in this full loop, or all max reached
+            if (!changedInThisLoop || phaseOrder.All(t => currentMax[t] >= maxPerType[t]))
+                break;
+
+            // Also, if budget is less than min price of any available item, stop
+            var minPrices = phaseOrder
+                .Select(t => items.Where(i => i.PlaceType == t).Select(i => i.AveragePricePerAdult).DefaultIfEmpty(double.MaxValue).Min())
+                .ToList();
+            if (budget < minPrices.Min())
+                break;
         }
 
-        private ItemType GetItemType(string interest)
-        {
-            return interest?.Trim().ToLowerInvariant() switch
-            {
-                "accommodation" => ItemType.Accommodation,
-                "restaurants" or "food" => ItemType.Restaurant,
-                "entertainments" or "entertainment" => ItemType.Entertainment,
-                "tourismareas" or "tourism" => ItemType.TourismArea,
-                _ => throw new ArgumentException($"Unknown interest: {interest}")
-            };
-        }
-
-        private UserDefinedKnapsackConstraints UpdateConstraints(UserDefinedKnapsackConstraints constraints, ItemType itemType, int currentCount)
-        {
-            return new UserDefinedKnapsackConstraints(
-                itemType == ItemType.Restaurant ? currentCount : constraints.MaxRestaurants,
-                itemType == ItemType.Accommodation ? currentCount : constraints.MaxAccommodations,
-                itemType == ItemType.Entertainment ? currentCount : constraints.MaxEntertainments,
-                itemType == ItemType.TourismArea ? currentCount : constraints.MaxTourismAreas
-            );
-        }
+        return bestItems;
     }
 
-    public static class KnapsackConstraintsExtensions
+    private ItemType GetItemType(string interest)
     {
-        public static int GetMaxCount(this IKnapsackConstraints constraints, ItemType itemType)
+        return interest?.Trim().ToLowerInvariant() switch
         {
-            return itemType switch
-            {
-                ItemType.Restaurant => constraints.MaxRestaurants,
-                ItemType.Accommodation => constraints.MaxAccommodations,
-                ItemType.Entertainment => constraints.MaxEntertainments,
-                ItemType.TourismArea => constraints.MaxTourismAreas,
-                _ => throw new ArgumentException($"Unknown item type: {itemType}")
-            };
-        }
+            "accommodation" => ItemType.Accommodation,
+            "restaurants" or "food" => ItemType.Restaurant,
+            "entertainments" or "entertainment" => ItemType.Entertainment,
+            "tourismareas" or "tourism" => ItemType.TourismArea,
+            _ => throw new ArgumentException($"Unknown interest: {interest}")
+        };
     }
-    
+}

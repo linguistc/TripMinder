@@ -31,72 +31,114 @@ public partial class TripPlanOptimizer
         _tourismAreaService = tourismAreaService;
     }
 
-    public async Task<Respond<TripPlanResponse>> OptimizePlan(TripPlanRequest request)
+    
+
+    public async Task<Respond<TripPlanResponse>> OptimizePlanPhasedAsync(TripPlanRequest request)
     {
-        // 1. Validate budget against minimum price
-        // if (!await CanRunOptimizationAsync(request.BudgetPerAdult))
-        // {
-        //     return new Respond<TripPlanResponse>
-        //     {
-        //         Succeeded = false,
-        //         Message = "Budget is too low for any items",
-        //         Errors = new List<string> { "Budget is less than the minimum item price" }
-        //     };
-        // }
-
-        // 2. Calculate priorities
+        // 1. Calculate priorities and fetch items
         var priorities = CalculatePriorities(request.Interests);
-        Console.WriteLine($"Calculated Priorities: Accommodation={priorities.accommodation}, Food={priorities.food}, Entertainment={priorities.entertainment}, Tourism={priorities.tourism}");
-
-        // 3. Fetch and filter items
         var allItems = await _itemFetcher.FetchItems(request.GovernorateId, request.ZoneId, priorities);
-        var desiredTypes = new HashSet<ItemType>();
-        if (priorities.accommodation > 0) desiredTypes.Add(ItemType.Accommodation);
-        if (priorities.food > 0) desiredTypes.Add(ItemType.Restaurant);
-        if (priorities.entertainment > 0) desiredTypes.Add(ItemType.Entertainment);
-        if (priorities.tourism > 0) desiredTypes.Add(ItemType.TourismArea);
-        var filteredItems = allItems.Where(i => desiredTypes.Contains(i.PlaceType)).ToList();
-        Console.WriteLine($"Filtered Items: Total={filteredItems.Count}, Restaurants={filteredItems.Count(i => i.PlaceType == ItemType.Restaurant)}, Accommodations={filteredItems.Count(i => i.PlaceType == ItemType.Accommodation)}, Entertainments={filteredItems.Count(i => i.PlaceType == ItemType.Entertainment)}, TourismAreas={filteredItems.Count(i => i.PlaceType == ItemType.TourismArea)}");
 
-        // 4. Run staged optimization
-        var constraints = new UserDefinedKnapsackConstraints(
-            request.MaxRestaurants,
-            request.MaxAccommodations,
-            request.MaxEntertainments,
-            request.MaxTourismAreas);
-        var orderedInterests = request.Interests.Select((interest, index) => (interest, priority: priorities.accommodation + priorities.food + priorities.entertainment + priorities.tourism - index))
-            .OrderByDescending(x => x.priority)
-            .Select(x => x.interest)
-            .ToList();
+        // 2. Determine interested types and filter items
+        var interestTypes = new List<ItemType>();
+        if (priorities.accommodation > 0) interestTypes.Add(ItemType.Accommodation);
+        if (priorities.food > 0) interestTypes.Add(ItemType.Restaurant);
+        if (priorities.entertainment > 0) interestTypes.Add(ItemType.Entertainment);
+        if (priorities.tourism > 0) interestTypes.Add(ItemType.TourismArea);
 
-        var selectedItems = await _stagedOptimizer.OptimizeStagedAsync(
-            filteredItems,
-            orderedInterests,
-            (int)request.BudgetPerAdult,
-            constraints,
-            priorities);
+        var filteredItems = allItems.Where(i => interestTypes.Contains(i.PlaceType)).ToList();
 
-        // 5. Build response
-        var tripPlanResponse = BuildTripPlanResponse(selectedItems, request);
-        if (selectedItems.Any())
+        // 3. Prepare max constraints per type
+        var maxPerType = new Dictionary<ItemType, int>
+        {
+            [ItemType.Accommodation] = request.MaxAccommodations,
+            [ItemType.Restaurant] = request.MaxRestaurants,
+            [ItemType.Entertainment] = request.MaxEntertainments,
+            [ItemType.TourismArea] = request.MaxTourismAreas
+        };
+
+        // 4. Prepare phased expansion variables
+        var phaseOrder = interestTypes.ToList(); // Ordered by user priority
+        var currentMax = phaseOrder.ToDictionary(t => t, t => 0);
+        var lastSuccessMax = phaseOrder.ToDictionary(t => t, t => 0);
+        var budget = (int)request.BudgetPerAdult;
+        var bestItems = new List<Item>();
+
+        // === Early Stop Phased Expansion Loop ===
+        while (true)
+        {
+            bool changedInThisLoop = false;
+
+            foreach (var type in phaseOrder)
+            {
+                // Don't exceed user max
+                if (currentMax[type] >= maxPerType[type])
+                    continue;
+
+                // Prepare constraints for this phase
+                var phaseConstraints = new UserDefinedKnapsackConstraints(
+                    currentMax.GetValueOrDefault(ItemType.Restaurant) + (type == ItemType.Restaurant ? 1 : 0),
+                    currentMax.GetValueOrDefault(ItemType.Accommodation) + (type == ItemType.Accommodation ? 1 : 0),
+                    currentMax.GetValueOrDefault(ItemType.Entertainment) + (type == ItemType.Entertainment ? 1 : 0),
+                    currentMax.GetValueOrDefault(ItemType.TourismArea) + (type == ItemType.TourismArea ? 1 : 0)
+                );
+
+                // Run knapsack for this phase (always with full budget)
+                var (profit, items) = _solver.GetMaxProfit(
+                    budget,
+                    filteredItems,
+                    phaseConstraints,
+                    priorities
+                );
+
+                int countOfType = items.Count(i => i.PlaceType == type);
+                if (countOfType > currentMax[type])
+                {
+                    // Success: update max and bestItems
+                    currentMax[type]++;
+                    lastSuccessMax[type] = currentMax[type];
+                    bestItems = items;
+                    changedInThisLoop = true;
+                }
+                else
+                {
+                    // Failed to add more: fix max at last successful
+                    currentMax[type] = lastSuccessMax[type];
+                }
+            }
+
+            // Early stop: if no type increased in this full loop, or all max reached
+            if (!changedInThisLoop || phaseOrder.All(t => currentMax[t] >= maxPerType[t]))
+                break;
+
+            // Also, if budget is less than min price of any available item, stop
+            var minPrices = phaseOrder
+                .Select(t => filteredItems.Where(i => i.PlaceType == t).Select(i => i.AveragePricePerAdult).DefaultIfEmpty(double.MaxValue).Min())
+                .ToList();
+            if (budget < minPrices.Min())
+                break;
+        }
+
+        // Build response
+        var tripPlanResponse = BuildTripPlanResponse(bestItems, request);
+        if (bestItems.Any())
         {
             return new Respond<TripPlanResponse>
             {
                 Succeeded = true,
-                Message = "Trip plan optimized successfully",
+                Message = "Trip plan optimized successfully (Phased Expansion)",
                 Data = tripPlanResponse,
-                Meta = new { TotalItems = selectedItems.Count, TotalSolutions = 1 }
+                Meta = new { TotalItems = bestItems.Count }
             };
         }
-
         return new Respond<TripPlanResponse>
         {
             Succeeded = false,
-            Message = "No valid trip plan found",
+            Message = "No valid trip plan found (Phased Expansion)",
             Errors = new List<string> { "Unable to generate a solution within constraints" }
         };
     }
-
+    
     private async Task<bool> CanRunOptimizationAsync(double budget)
     {
         var minPrices = new[]

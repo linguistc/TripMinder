@@ -82,7 +82,7 @@ public class TripSuggesterController : AppControllerBase
             requestDto.MaxTourismAreas
         );
 
-        var response = await _optimizer.OptimizePlan(request);
+        var response = await _optimizer.OptimizePlanPhasedAsync(request);
 
         if (response.Succeeded)
         {
