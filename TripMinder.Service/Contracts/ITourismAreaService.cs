@@ -4,6 +4,7 @@ namespace TripMinder.Service.Contracts
 {
     public interface ITourismAreaService
     {
+        public Task<double?> GetMinimumPriceAsync(CancellationToken cancellationToken = default);
         public Task<List<TourismArea>> GetTourismAreasListAsync();
         public Task<List<TourismArea>> GetTourismAreasListByZoneIdAsync(int zoneId, CancellationToken cancellationToken = default);
         public Task<List<TourismArea>> GetTourismAreasListByGovernorateIdAsync(int governorateId, CancellationToken cancellationToken = default);

@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using TripMinder.Data.Entities;
 using TripMinder.Infrastructure.Contracts;
+using TripMinder.Infrastructure.Extentions;
 using TripMinder.Service.Contracts;
 
 namespace TripMinder.Service.Implementations
@@ -8,14 +9,18 @@ namespace TripMinder.Service.Implementations
     public class TourismAreaService : ITourismAreaService
     {
         #region Fields
-        private readonly ITourismAreaRepository repository;
+        private readonly ITourismAreaRepository _repository;
 
         #endregion
 
         #region Constructors
+        public async Task<double?> GetMinimumPriceAsync(CancellationToken cancellationToken = default)
+        {
+            return await this._repository.GetMinimumPriceAsync(cancellationToken);
+        }
         public TourismAreaService(ITourismAreaRepository repository)
         {
-            this.repository = repository;
+            this._repository = repository;
         }
 
         #endregion
@@ -23,22 +28,22 @@ namespace TripMinder.Service.Implementations
         #region Functions
         public async Task<List<TourismArea>> GetTourismAreasListAsync()
         {
-            return await this.repository.GetAllTourismAreasAsync();
+            return await this._repository.GetAllTourismAreasAsync();
         }
         
         public async Task<List<TourismArea>> GetTourismAreasListByZoneIdAsync(int zoneId, CancellationToken cancellationToken = default)
         {
-            return await this.repository.GetTourismAreasListByZoneIdAsync(zoneId, cancellationToken);
+            return await this._repository.GetTourismAreasListByZoneIdAsync(zoneId, cancellationToken);
         }
 
         public async Task<List<TourismArea>> GetTourismAreasListByGovernorateIdAsync(int governorateId, CancellationToken cancellationToken = default)
         {
-            return await this.repository.GetTourismAreasListByZoneIdAsync(governorateId, cancellationToken);
+            return await this._repository.GetTourismAreasListByZoneIdAsync(governorateId, cancellationToken);
         }
 
         public async Task<TourismArea> GetTourismAreaByIdWithIncludeAsync(int id)
         {
-            var tourism = this.repository.GetTableNoTracking()
+            var tourism = this._repository.GetTableNoTracking()
                                     .Include(t => t.TourismType)
                                     .Include(t => t.PlaceType)
                                     .Include(t => t.Class)
@@ -50,39 +55,39 @@ namespace TripMinder.Service.Implementations
 
         public async Task<List<TourismArea>> GetTourismAreasByTypeIdAsync(int TypeId, CancellationToken cancellationToken = default)
         {
-            return await this.repository.GetTourismAreasListByTypeIdAsync(TypeId, cancellationToken);
+            return await this._repository.GetTourismAreasListByTypeIdAsync(TypeId, cancellationToken);
         }
 
         public async Task<List<TourismArea>> GetTourismAreasListByClassIdAsync(int classId, CancellationToken cancellationToken = default)
         {
-            return await this.repository.GetTourismAreasListByClassIdAsync(classId, cancellationToken);
+            return await this._repository.GetTourismAreasListByClassIdAsync(classId, cancellationToken);
         }
 
         public async Task<List<TourismArea>> GetTourismAreasByRatingAsync(double rating, CancellationToken cancellationToken = default)
         {
-            return await this.repository.GetTourismAreasListByRatingAsync(rating, cancellationToken);
+            return await this._repository.GetTourismAreasListByRatingAsync(rating, cancellationToken);
         }
 
         public async Task<List<TourismArea>> GetTourismAreasMoreThanPriceAsync(double price, CancellationToken cancellationToken = default)
         {
-            return await this.repository.GetTourismAreasListMoreThanPriceAsync(price, cancellationToken);
+            return await this._repository.GetTourismAreasListMoreThanPriceAsync(price, cancellationToken);
         }
 
         public async Task<List<TourismArea>> GetTourismAreasLessThanPriceAsync(double price, CancellationToken cancellationToken = default)
         {
-            return await this.repository.GetTourismAreasListLessThanPriceAsync(price, cancellationToken);
+            return await this._repository.GetTourismAreasListLessThanPriceAsync(price, cancellationToken);
         }
 
         public async Task<TourismArea> GetTourismAreaByIdAsync(int id)
         {
-            var tourismArea = await this.repository.GetByIdAsync(id);
+            var tourismArea = await this._repository.GetByIdAsync(id);
 
             return tourismArea;
         }
 
         public async Task<string> CreateAsync(TourismArea newTourismArea)
         {
-            await this.repository.CreateAsync(newTourismArea);
+            await this._repository.CreateAsync(newTourismArea);
             return "Created";
         }
 
@@ -108,17 +113,17 @@ namespace TripMinder.Service.Implementations
 
         public async Task<string> UpdateAsync(TourismArea tourismArea)
         {
-            await this.repository.UpdateAsync(tourismArea);
+            await this._repository.UpdateAsync(tourismArea);
             return "Updated";
         }
 
         public async Task<string> DeleteAsync(TourismArea tourismArea)
         {
-            var trans = this.repository.BeginTransaction();
+            var trans = this._repository.BeginTransaction();
 
             try
             {
-                await this.repository.DeleteAsync(tourismArea);
+                await this._repository.DeleteAsync(tourismArea);
                 await trans.CommitAsync();
                 return "Deleted";
             }

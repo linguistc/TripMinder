@@ -5,6 +5,7 @@ namespace TripMinder.Service.Contracts
 {
     public interface IRestaurantService
     {
+        public Task<double?> GetMinimumPriceAsync(CancellationToken cancellationToken = default);
         public Task<List<Restaurant>> GetRestaurantsListAsync();
         public Task<List<Restaurant>> GetRestaurantsListByZoneIdAsync(int zoneId, CancellationToken cancellationToken = default);
         public Task<List<Restaurant>> GetRestaurantsListByGovernorateIdAsync(int governorateId, CancellationToken cancellationToken = default);

@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using TripMinder.Data.Entities;
 using TripMinder.Infrastructure.Contracts;
+using TripMinder.Infrastructure.Extentions;
 using TripMinder.Service.Contracts;
 
 namespace TripMinder.Service.Implementations
@@ -24,6 +25,11 @@ namespace TripMinder.Service.Implementations
         public async Task<List<Accomodation>> GetAccomodationsListAsync()
         {
             return await this._repository.GetAccomodationsListAsync();
+        }
+
+        public async Task<double?> GetMinimumPriceAsync(CancellationToken cancellationToken = default)
+        {
+            return await this._repository.GetMinimumPriceAsync(cancellationToken);
         }
 
         public async Task<List<Accomodation>> GetAccomodationsListByZoneIdAsync(int zoneId, CancellationToken cancellationToken = default)
