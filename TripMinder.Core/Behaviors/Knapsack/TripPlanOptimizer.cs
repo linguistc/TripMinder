@@ -1,3 +1,8 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using TripMinder.Core.Behaviors.Knapsack;
 using TripMinder.Core.Behaviors.Shared;
 using TripMinder.Core.Bases;
 using TripMinder.Service.Contracts;
@@ -46,7 +51,7 @@ public partial class TripPlanOptimizer
         // }
 
         // 2. Calculate priorities and fetch items
-        var priorities = CalculatePriorities(request.Interests);
+        var priorities = CalculatePriorities(new Queue<string>(request.Interests));
         var allItems = await _itemFetcher.FetchItems(request.GovernorateId, request.ZoneId, priorities, request.BudgetPerAdult);
 
         // 3. Determine interested types and filter items
@@ -67,24 +72,24 @@ public partial class TripPlanOptimizer
             };
         }
 
-        // 4. Link type to priority
-        var typeToPriority = new Dictionary<ItemType, int>
+        // 4. Link type to priority weight
+        var typeToPriorityWeight = new Dictionary<ItemType, double>
         {
-            [ItemType.Accommodation] = priorities.accommodation,
-            [ItemType.Restaurant] = priorities.food,
-            [ItemType.Entertainment] = priorities.entertainment,
-            [ItemType.TourismArea] = priorities.tourism
+            [ItemType.Accommodation] = 1.0 + priorities.accommodation * 0.5,
+            [ItemType.Restaurant] = 1.0 + priorities.food * 0.5,
+            [ItemType.Entertainment] = 1.0 + priorities.entertainment * 0.5,
+            [ItemType.TourismArea] = 1.0 + priorities.tourism * 0.5
         };
 
-        // 5. Recalculate scores
+        // 5. Recalculate scores with priority weighting
         foreach (var item in filteredItems)
         {
             item.Score = CalculateScoreBehavior.CalculateScore(
                 item.ClassType,
-                typeToPriority[item.PlaceType],
+                priorities.accommodation, // Use highest priority for consistency
                 item.AveragePricePerAdult,
                 request.BudgetPerAdult
-            );
+            ) * (float)typeToPriorityWeight[item.PlaceType];
         }
 
         // 6. Prepare constraints
@@ -95,23 +100,16 @@ public partial class TripPlanOptimizer
             request.MaxTourismAreas
         );
 
-        // 7. Order interests by priority
-        var orderedInterests = request.Interests
-            .Select((interest, index) => (interest, priority: typeToPriority[GetItemType(interest)]))
-            .OrderByDescending(x => x.priority)
-            .Select(x => x.interest)
-            .ToList();
-
-        // 8. Run phased optimization
+        // 7. Run phased optimization with original interests order
         var bestItems = await _stagedOptimizer.OptimizeStagedAsync(
             filteredItems,
-            orderedInterests,
+            request.Interests.ToList(), // Convert Queue<string> to List<string>
             (int)request.BudgetPerAdult,
             constraints,
             priorities
         );
 
-        // 9. Build response
+        // 8. Build response
         var tripPlanResponse = BuildTripPlanResponse(bestItems, request);
         if (bestItems.Any())
         {
@@ -183,6 +181,7 @@ public partial class TripPlanOptimizer
 
         if (interests != null)
         {
+            int index = 0;
             foreach (var interest in interests)
             {
                 var normalizedInterest = interest?.Trim().ToLowerInvariant();
@@ -190,24 +189,25 @@ public partial class TripPlanOptimizer
                 switch (normalizedInterest)
                 {
                     case "accommodation":
-                        accommodationPriority = bonus--;
+                        accommodationPriority = bonus - index;
                         break;
                     case "restaurants":
                     case "food":
-                        foodPriority = bonus--;
+                        foodPriority = bonus - index;
                         break;
                     case "entertainments":
                     case "entertainment":
-                        entertainmentPriority = bonus--;
+                        entertainmentPriority = bonus - index;
                         break;
                     case "tourismareas":
                     case "tourism":
-                        tourismPriority = bonus--;
+                        tourismPriority = bonus - index;
                         break;
                     default:
                         Console.WriteLine($"Unrecognized interest: {normalizedInterest}");
                         break;
                 }
+                index++;
             }
         }
 

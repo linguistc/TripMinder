@@ -1,7 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using TripMinder.Core.Behaviors.Shared;
 
 namespace TripMinder.Core.Behaviors.Knapsack;
@@ -33,78 +29,105 @@ public class StagedTripPlanOptimizer : IStagedTripPlanOptimizer
         };
         var dpItems = items.Select(i => new DpItem(i)).ToList();
 
-        var states = new List<KnapsackState> { new KnapsackState { RemainingBudget = budget } };
-        var bestState = states[0];
+        // Calculate priority weights
+        var priorityWeights = new Dictionary<ItemType, double>();
+        for (int i = 0; i < phaseOrder.Count; i++)
+        {
+            priorityWeights[phaseOrder[i]] = 1.0 + (phaseOrder.Count - i) * 0.5; // e.g., 2.5, 2.0, 1.5, 1.0
+        }
+
+        var bestSolution = new KnapsackState { RemainingBudget = budget };
         int phase = 0;
         int unchangedPhases = 0;
+        var currentCounts = new Dictionary<ItemType, int>(); // Tracks items selected per type
 
-        while (unchangedPhases < phaseOrder.Count && states.Any(s => s.RemainingBudget >= minPrice))
+        while (unchangedPhases < phaseOrder.Count && bestSolution.RemainingBudget >= minPrice)
         {
             var currentType = phaseOrder[phase % phaseOrder.Count];
-            int categoryLimit = (phase / phaseOrder.Count) + 1;
-            if (bestState.CategoryCounts.GetValueOrDefault(currentType, 0) >= maxPerType[currentType])
+            if (currentCounts.GetValueOrDefault(currentType, 0) >= maxPerType[currentType])
             {
                 unchangedPhases++;
                 phase++;
                 continue;
             }
 
-            var newStates = new List<KnapsackState>();
-            foreach (var state in states.ToList())
+            // Define item count constraints for this phase
+            var phaseConstraints = new Dictionary<ItemType, int>();
+            for (int i = 0; i <= phase % phaseOrder.Count; i++)
             {
-                UpdateStatesForNewItem(state, dpItems, currentType, categoryLimit, phaseOrder.Count, budget, newStates);
-                if (newStates.Any())
-                {
-                    states.AddRange(newStates);
-                    var currentBest = states.OrderByDescending(s => s.TotalProfit).First();
-                    if (currentBest.TotalProfit > bestState.TotalProfit)
-                        bestState = currentBest;
-                    unchangedPhases = 0;
-                    Console.WriteLine($"Phase {phase + 1}: Added item for {currentType}, Best Profit={bestState.TotalProfit}");
-                }
-                else
-                {
-                    unchangedPhases++;
-                    maxPerType[currentType] = state.CategoryCounts.GetValueOrDefault(currentType, 0);
-                    Console.WriteLine($"Phase {phase + 1}: Failed to add for {currentType}, Fixed Max={maxPerType[currentType]}");
-                }
+                var type = phaseOrder[i];
+                int count = (i == phase % phaseOrder.Count) ? currentCounts.GetValueOrDefault(type, 0) + 1 : currentCounts.GetValueOrDefault(type, 0);
+                phaseConstraints[type] = Math.Min(count, maxPerType[type]);
             }
 
-            states = states.OrderByDescending(s => s.TotalProfit).Take(100).ToList(); // Prune to top 100 states
+            // Run knapsack with full budget and phase constraints
+            var newSolution = RunKnapsack(dpItems, budget, phaseConstraints, priorityWeights);
+            if (newSolution != null && newSolution.TotalProfit > bestSolution.TotalProfit)
+            {
+                bestSolution = newSolution;
+                currentCounts = newSolution.CategoryCounts;
+                unchangedPhases = 0;
+                Console.WriteLine($"Phase {phase + 1}: Added item for {currentType}, Profit={bestSolution.TotalProfit}, Budget Used={budget - bestSolution.RemainingBudget}");
+            }
+            else
+            {
+                unchangedPhases++;
+                maxPerType[currentType] = currentCounts.GetValueOrDefault(currentType, 0);
+                Console.WriteLine($"Phase {phase + 1}: Failed to add for {currentType}, Fixed Max={maxPerType[currentType]}");
+            }
+
             phase++;
         }
 
-        var selectedItems = bestState.SelectedItems.Select(i => items.First(x => x.GlobalId == i.GlobalId && x.PlaceType == i.PlaceType)).ToList();
-        Console.WriteLine($"Optimization Complete: Selected {selectedItems.Count} items, Total Profit={bestState.TotalProfit}, Total Cost={budget - bestState.RemainingBudget}");
+        var selectedItems = bestSolution.SelectedItems.Select(i => items.First(x => x.GlobalId == i.GlobalId && x.PlaceType == i.PlaceType)).ToList();
+        Console.WriteLine($"Optimization Complete: Selected {selectedItems.Count} items, Total Profit={bestSolution.TotalProfit}, Total Cost={budget - bestSolution.RemainingBudget}");
         return selectedItems;
     }
 
-    private void UpdateStatesForNewItem(KnapsackState state, List<DpItem> items, ItemType category, int categoryLimit, int totalCategories, int totalBudget, List<KnapsackState> newStates)
+    private KnapsackState RunKnapsack(
+        List<DpItem> items,
+        int budget,
+        Dictionary<ItemType, int> phaseConstraints,
+        Dictionary<ItemType, double> priorityWeights)
     {
-        foreach (var item in items.Where(i => i.PlaceType == category))
+        var states = new List<KnapsackState> { new KnapsackState { RemainingBudget = budget } };
+        var bestState = states[0];
+        var usedItemIds = new HashSet<string>();
+
+        foreach (var item in items)
         {
-            if (state.RemainingBudget < item.Weight) continue;
-            if (state.CategoryCounts.GetValueOrDefault(item.PlaceType, 0) >= categoryLimit) continue;
-            if (state.UsedCategories.Contains(item.PlaceType)) continue;
+            if (usedItemIds.Contains(item.Original.GlobalId)) continue;
+            var itemType = item.PlaceType;
+            if (!phaseConstraints.ContainsKey(itemType)) continue;
+            if (states.Any(s => s.CategoryCounts.GetValueOrDefault(itemType, 0) >= phaseConstraints[itemType])) continue;
+            if (item.Weight > budget) continue;
 
-            var newState = state.Clone();
-            newState.TotalProfit += item.Profit;
-            newState.RemainingBudget -= item.Weight;
-            newState.SelectedItems.Add(item);
-
-            if (!newState.CategoryCounts.ContainsKey(item.PlaceType))
-                newState.CategoryCounts[item.PlaceType] = 0;
-            newState.CategoryCounts[item.PlaceType]++;
-            newState.UsedCategories.Add(item.PlaceType);
-
-            if (newState.UsedCategories.Count == totalCategories)
+            var newStates = new List<KnapsackState>();
+            foreach (var state in states)
             {
-                newState.UsedCategories.Clear();
-                newState.Phase++;
+                if (state.RemainingBudget < item.Weight) continue;
+                if (state.CategoryCounts.GetValueOrDefault(itemType, 0) >= phaseConstraints[itemType]) continue;
+
+                var newState = state.Clone();
+                double weightedProfit = item.Profit * priorityWeights.GetValueOrDefault(itemType, 1.0);
+                newState.TotalProfit += weightedProfit;
+                newState.RemainingBudget -= item.Weight;
+                newState.SelectedItems.Add(item);
+                newState.CategoryCounts[itemType] = newState.CategoryCounts.GetValueOrDefault(itemType, 0) + 1;
+                newStates.Add(newState);
             }
 
-            newStates.Add(newState);
+            if (newStates.Any())
+            {
+                states.AddRange(newStates);
+                var currentBest = states.OrderByDescending(s => s.TotalProfit).First();
+                if (currentBest.TotalProfit > bestState.TotalProfit)
+                    bestState = currentBest;
+                usedItemIds.Add(item.Original.GlobalId);
+            }
         }
+
+        return bestState.SelectedItems.Any() ? bestState : null;
     }
 
     private ItemType GetItemType(string interest)
