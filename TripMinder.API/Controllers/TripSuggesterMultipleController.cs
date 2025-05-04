@@ -3,6 +3,7 @@ using TripMinder.API.Bases;
 using TripMinder.Core.Behaviors.Knapsack;
 using TripMinder.Data.AppMetaData;
 using TripMinder.Core.Bases;
+using TripMinder.Core.Behaviors.Shared;
 
 namespace TripMinder.API.Controllers;
 

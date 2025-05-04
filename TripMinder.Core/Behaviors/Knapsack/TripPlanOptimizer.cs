@@ -1,10 +1,8 @@
-namespace TripMinder.Core.Behaviors.Knapsack;
-
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+using TripMinder.Core.Behaviors.Shared;
 using TripMinder.Core.Bases;
 using TripMinder.Service.Contracts;
+
+namespace TripMinder.Core.Behaviors.Knapsack;
 
 public partial class TripPlanOptimizer
 {
@@ -89,14 +87,13 @@ public partial class TripPlanOptimizer
             );
         }
 
-        // 6. Prepare max constraints per type
-        var maxPerType = new Dictionary<ItemType, int>
-        {
-            [ItemType.Accommodation] = request.MaxAccommodations,
-            [ItemType.Restaurant] = request.MaxRestaurants,
-            [ItemType.Entertainment] = request.MaxEntertainments,
-            [ItemType.TourismArea] = request.MaxTourismAreas
-        };
+        // 6. Prepare constraints
+        var constraints = new UserDefinedKnapsackConstraints(
+            request.MaxRestaurants,
+            request.MaxAccommodations,
+            request.MaxEntertainments,
+            request.MaxTourismAreas
+        );
 
         // 7. Order interests by priority
         var orderedInterests = request.Interests
@@ -104,76 +101,15 @@ public partial class TripPlanOptimizer
             .OrderByDescending(x => x.priority)
             .Select(x => x.interest)
             .ToList();
-        var phaseOrder = orderedInterests.Select(GetItemType).Distinct().ToList();
 
-        // 8. Phased expansion
-        var currentMax = phaseOrder.ToDictionary(t => t, t => 0);
-        var fixedMax = phaseOrder.ToDictionary(t => t, t => 0); // Tracks max after failure
-        var bestItems = new List<Item>();
-        int budget = (int)request.BudgetPerAdult;
-        int unchangedPhases = 0;
-
-        while (unchangedPhases < phaseOrder.Count)
-        {
-            bool changedInThisPhase = false;
-
-            foreach (var interest in orderedInterests)
-            {
-                var itemType = GetItemType(interest);
-                if (currentMax[itemType] >= maxPerType[itemType] || currentMax[itemType] >= fixedMax[itemType])
-                    continue; // Skip if max reached or fixed
-
-                // Prepare constraints for this phase
-                var phaseConstraints = new UserDefinedKnapsackConstraints(
-                    phaseOrder.Contains(ItemType.Restaurant) ? currentMax.GetValueOrDefault(ItemType.Restaurant) + (itemType == ItemType.Restaurant ? 1 : 0) : 0,
-                    phaseOrder.Contains(ItemType.Accommodation) ? currentMax.GetValueOrDefault(ItemType.Accommodation) + (itemType == ItemType.Accommodation ? 1 : 0) : 0,
-                    phaseOrder.Contains(ItemType.Entertainment) ? currentMax.GetValueOrDefault(ItemType.Entertainment) + (itemType == ItemType.Entertainment ? 1 : 0) : 0,
-                    phaseOrder.Contains(ItemType.TourismArea) ? currentMax.GetValueOrDefault(ItemType.TourismArea) + (itemType == ItemType.TourismArea ? 1 : 0) : 0
-                );
-
-                // Run Knapsack on full budget
-                var (profit, items) = _solver.GetMaxProfit(
-                    budget,
-                    filteredItems,
-                    phaseConstraints,
-                    priorities,
-                    false // requireExact to enforce exact counts
-                );
-
-                int countOfType = items.Count(i => i.PlaceType == itemType);
-                if (countOfType > currentMax[itemType])
-                {
-                    // Success: update max and bestItems
-                    currentMax[itemType]++;
-                    fixedMax[itemType] = currentMax[itemType];
-                    bestItems = items;
-                    changedInThisPhase = true;
-                    unchangedPhases = 0;
-                    Console.WriteLine($"Phase Success: Added {itemType}, Items={string.Join(", ", items.Select(i => i.Name))}, Profit={profit}, BudgetUsed={items.Sum(i => i.AveragePricePerAdult)}");
-                }
-                else
-                {
-                    // Failure: fix max at last successful count
-                    fixedMax[itemType] = currentMax[itemType];
-                    Console.WriteLine($"Phase Failure: Fixed max for {itemType} at {fixedMax[itemType]}");
-                }
-            }
-
-            if (!changedInThisPhase)
-                unchangedPhases++;
-            else
-                unchangedPhases = 0;
-
-            // Early stop if budget is too low
-            var minPrices = phaseOrder
-                .Select(t => filteredItems.Where(i => i.PlaceType == t).Select(i => i.AveragePricePerAdult).DefaultIfEmpty(double.MaxValue).Min())
-                .ToList();
-            if (budget < minPrices.Min())
-            {
-                Console.WriteLine("Stopping: Budget too low for any new item");
-                break;
-            }
-        }
+        // 8. Run phased optimization
+        var bestItems = await _stagedOptimizer.OptimizeStagedAsync(
+            filteredItems,
+            orderedInterests,
+            (int)request.BudgetPerAdult,
+            constraints,
+            priorities
+        );
 
         // 9. Build response
         var tripPlanResponse = BuildTripPlanResponse(bestItems, request);
@@ -221,19 +157,7 @@ public partial class TripPlanOptimizer
         };
     }
 
-    private int GetMaxCount(ItemType itemType, IKnapsackConstraints constraints)
-    {
-        return itemType switch
-        {
-            ItemType.Restaurant => constraints.MaxRestaurants,
-            ItemType.Accommodation => constraints.MaxAccommodations,
-            ItemType.Entertainment => constraints.MaxEntertainments,
-            ItemType.TourismArea => constraints.MaxTourismAreas,
-            _ => 0
-        };
-    }
-
-    private TripPlanResponse BuildTripPlanResponse(List<Item> selectedItems, TripPlanRequest request)
+    public TripPlanResponse BuildTripPlanResponse(List<Item> selectedItems, TripPlanRequest request)
     {
         var response = new TripPlanResponse
         {
@@ -250,7 +174,7 @@ public partial class TripPlanOptimizer
         return response;
     }
 
-    private (int accommodation, int food, int entertainment, int tourism) CalculatePriorities(Queue<string> interests)
+    public (int accommodation, int food, int entertainment, int tourism) CalculatePriorities(Queue<string> interests)
     {
         int accommodationPriority = 0, foodPriority = 0, entertainmentPriority = 0, tourismPriority = 0;
         int bonus = interests?.Count ?? 0;
@@ -296,6 +220,7 @@ public partial class TripPlanOptimizer
         Console.WriteLine($"Calculated Priorities: Accommodation={accommodationPriority}, Food={foodPriority}, Entertainment={entertainmentPriority}, Tourism={tourismPriority}");
         return (accommodationPriority, foodPriority, entertainmentPriority, tourismPriority);
     }
+    
     public async Task<Respond<List<TripPlanResponse>>> OptimizePlanMultiple(TripPlanRequest request)
     {
         var priorities = CalculatePriorities(request.Interests);
@@ -355,42 +280,4 @@ public partial class TripPlanOptimizer
             Errors = new List<string> { "Unable to generate solutions within constraints" }
         };
     }
-}
-
-
-// HELPER CLASSES
-public record TripPlanRequest(
-    int GovernorateId,
-    int? ZoneId, 
-    double BudgetPerAdult, 
-    int NumberOfTravelers, 
-    Queue<string> Interests, 
-    int MaxRestaurants, 
-    int MaxAccommodations, 
-    int MaxEntertainments, 
-    int MaxTourismAreas);
-public record TripPlanResponse
-{
-    public ItemResponse Accommodation { get; init; }
-    public List<ItemResponse> Restaurants { get; init; }
-    public List<ItemResponse> Entertainments { get; init; }
-    public List<ItemResponse> TourismAreas { get; init; }
-}
-
-public record ItemResponse(int Id, string Name, string ClassType, double AveragePricePerAdult, float Score, ItemType PlaceType, double Rating, string ImageSource);
-
-public enum ItemType { Accommodation, Restaurant, Entertainment, TourismArea }
-
-public class Item
-{
-    public int Id { get; set; }
-    public string GlobalId { get; set; }
-    public string Name { get; set; }
-    public string ClassType { get; set; }
-    public double AveragePricePerAdult { get; set; }
-    public float Score { get; set; }
-    public ItemType PlaceType { get; set; }
-    public double Rating { get; set; }
-    public string ImageSource { get; set; }
-    public ItemResponse ToResponse() => new ItemResponse(Id, Name, ClassType, AveragePricePerAdult, Score, PlaceType, Rating, ImageSource);
 }

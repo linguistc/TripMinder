@@ -6,6 +6,7 @@ using TripMinder.Core.Features.Accomodataions.Queries.Models;
 using TripMinder.Core.Features.Entertainments.Queries.Models;
 using TripMinder.Core.Features.Restaurants.Queries.Models;
 using TripMinder.Data.AppMetaData;
+using TripMinder.Core.Behaviors.Shared;
 
 namespace TripMinder.API.Controllers;
 

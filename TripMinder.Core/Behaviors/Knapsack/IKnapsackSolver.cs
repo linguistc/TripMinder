@@ -1,5 +1,6 @@
 using TripMinder.Core.Behaviors.Knapsack;
 
+using TripMinder.Core.Behaviors.Shared;
 namespace TripMinder.Core.Behaviors;
 
 public interface IKnapsackSolver

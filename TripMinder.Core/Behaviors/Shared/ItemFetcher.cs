@@ -4,7 +4,7 @@ using TripMinder.Core.Features.Entertainments.Queries.Models;
 using TripMinder.Core.Features.Restaurants.Queries.Models;
 using TripMinder.Core.Features.TourismAreas.Queries.Models;
 
-namespace TripMinder.Core.Behaviors.Knapsack;
+namespace TripMinder.Core.Behaviors.Shared;
 
 public class ItemFetcher : IItemFetcher
 {

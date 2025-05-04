@@ -1,6 +1,6 @@
 using MediatR;
 
-namespace TripMinder.Core.Behaviors.Knapsack;
+namespace TripMinder.Core.Behaviors.Shared;
 
 public interface IItemFetcher
 {

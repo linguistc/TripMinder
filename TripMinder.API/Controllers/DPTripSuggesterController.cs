@@ -1,62 +1,24 @@
 using Microsoft.AspNetCore.Mvc;
 using TripMinder.API.Bases;
-using System.ComponentModel.DataAnnotations;
-using TripMinder.Core.Bases;
 using TripMinder.Core.Behaviors.Knapsack;
 using TripMinder.Core.Behaviors.Shared;
 using TripMinder.Data.AppMetaData;
 
 namespace TripMinder.API.Controllers;
 
-public record TripPlanRequestDto(
-    [Required]
-    [Range(1, int.MaxValue)]
-    int GovernorateId,
-
-    [Range(1, int.MaxValue)]
-    int? ZoneId,
-    
-    [Required]
-    [Range(0, double.MaxValue)]
-    double BudgetPerAdult,
-    
-    [Required]
-    [Range(1, int.MaxValue)]
-    int NumberOfTravelers,
-    
-    [Required]
-    List<string> Interests, 
-    
-    [Required]
-    [Range(0, int.MaxValue, ErrorMessage = "MaxRestaurants must be non-negative")]
-    int MaxRestaurants, 
-    
-    [Required]
-    [Range(0, int.MaxValue, ErrorMessage = "MaxAccommodations must be non-negative")]
-    int MaxAccommodations, 
-    
-    [Required]
-    [Range(0, int.MaxValue, ErrorMessage = "MaxEntertainments must be non-negative")]
-    int MaxEntertainments, 
-    
-    [Required]
-    [Range(0, int.MaxValue, ErrorMessage = "MaxTourismAreas must be non-negative")]
-    int MaxTourismAreas);
-
 [ApiController]
-public class TripSuggesterController : AppControllerBase
+public class DPTripSuggesterController : AppControllerBase
 {
-    private readonly GreedyTripPlanner _planner;
+    private readonly TripPlanOptimizer _optimizer;
     private readonly ILogger<TripSuggesterController> _logger;
-    
-    public TripSuggesterController(GreedyTripPlanner planner,
-        ILogger<TripSuggesterController> logger)
+
+    public DPTripSuggesterController(TripPlanOptimizer optimizer, ILogger<TripSuggesterController> logger)
     {
-        _planner = planner;
-        _logger = logger;
+        this._optimizer = optimizer;
+        this._logger = logger;
     }
-    
-    [HttpPost(Router.TripSuggesterRouting.OptimizeTrip)]
+
+    [HttpPost(Router.DPTripSuggesterRouting.DPOptimizeTrip)]
     public async Task<IActionResult> OptimizeTrip([FromBody] TripPlanRequestDto requestDto)
     {
         _logger.LogInformation("Received trip optimization request: GovernorateId={GovernorateId}, ZoneId={ZoneId}, BudgetPerAdult={BudgetPerAdult}, NumberOfTravelers={NumberOfTravelers}, MaxRestaurants={MaxRestaurants}, Interests={Interests}",
@@ -84,22 +46,16 @@ public class TripSuggesterController : AppControllerBase
             requestDto.MaxTourismAreas
         );
 
-        var response = await _planner.PlanTripAsync(request);
+        var response = await _optimizer.OptimizePlanPhasedAsync(request);
 
         if (response.Succeeded)
         {
-            if (response.Data.Accommodation == null && 
-                !response.Data.Restaurants.Any() && 
-                !response.Data.Entertainments.Any() && 
+            if (response.Data.Accommodation == null || 
+                !response.Data.Restaurants.Any() || 
+                !response.Data.Entertainments.Any() || 
                 !response.Data.TourismAreas.Any())
             {
-                _logger.LogWarning("Response is empty: {@Response}", response);
-                return Ok(new Respond<TripPlanResponse>
-                {
-                    Succeeded = false,
-                    Message = "No items selected within constraints",
-                    Errors = new List<string> { "Empty trip plan generated" }
-                });
+                _logger.LogWarning("Response is incomplete: {@Response}", response);
             }
             _logger.LogInformation("Optimization succeeded: Restaurants={RestaurantsCount}, TotalCost={TotalCost}",
                 response.Data.Restaurants.Count, response.Data.Restaurants.Sum(r => r.AveragePricePerAdult));
@@ -109,5 +65,4 @@ public class TripSuggesterController : AppControllerBase
         _logger.LogError("Optimization failed: {Message}, Errors: {@Errors}", response.Message, response.Errors);
         return BadRequest(new { response.Message, response.Errors });
     }
-    
 }

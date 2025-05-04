@@ -1,4 +1,4 @@
-namespace TripMinder.Core.Behaviors;
+namespace TripMinder.Core.Behaviors.Shared;
 using System;
 
 public static class CalculateScoreBehavior

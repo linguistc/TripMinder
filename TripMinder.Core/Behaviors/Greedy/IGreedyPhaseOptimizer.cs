@@ -1,9 +1,10 @@
 using TripMinder.Core.Behaviors.Shared;
+
 namespace TripMinder.Core.Behaviors.Knapsack;
 
-public interface IStagedTripPlanOptimizer
+public interface IGreedyPhaseOptimizer
 {
-    Task<List<Item>> OptimizeStagedAsync(
+    Task<List<Item>> OptimizePhasedAsync(
         List<Item> items,
         List<string> orderedInterests,
         int budget,

@@ -1,32 +1,35 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using TripMinder.Core.Behaviors.Shared;
+
 namespace TripMinder.Core.Behaviors.Knapsack;
 
 public class KnapsackBacktracker : IKnapsackBacktracker
 {
-    public void BacktrackAllSolutions(KnapsackState state)
+    public void BacktrackAllSolutions(KnapsackState state, List<DpItem> items, bool[,,,,,] decision)
     {
-        var solutions = BacktrackTopSolutions(state);
-        if (state.Optimizer != null)
-        {
-            foreach (var solution in solutions)
-            {
-                state.Optimizer.TryAddSolution(solution.Select(d => d.Original).ToList());
-            }
-        }
+        var solutions = BacktrackTopSolutions(state, items, decision);
+        // Removed Optimizer dependency as it's not part of the new KnapsackState
+        Console.WriteLine($"BacktrackAllSolutions: Found {solutions.Count} solutions");
     }
 
-    public List<List<DpItem>> BacktrackTopSolutions(KnapsackState state, int maxSolutions = 10)
+    public List<List<DpItem>> BacktrackTopSolutions(KnapsackState state, List<DpItem> items, bool[,,,,,] decision, int maxSolutions = 10)
     {
         var solutions = new List<(List<DpItem> Solution, double Score)>();
         var usedItemsPerSolution = new List<HashSet<string>>();
-        var originalScores = state.Items.ToDictionary(i => i.Original.GlobalId, i => i.Profit);
+        var originalScores = items.ToDictionary(i => i.Original.GlobalId, i => (double)i.Original.Score);
+        var modifiedScores = new Dictionary<string, double>();
 
         var stack = new Stack<(KnapsackState State, HashSet<string> UsedItems, double CurrentScore)>();
-        stack.Push((state with { CurrentSelection = new List<Item>() }, new HashSet<string>(), 0));
+        var initialState = state.Clone();
+        initialState.SelectedItems = new List<DpItem>();
+        stack.Push((initialState, new HashSet<string>(), 0));
 
-        int maxR = state.Decision.GetLength(1) - 1;
-        int maxA = state.Decision.GetLength(2) - 1;
-        int maxE = state.Decision.GetLength(3) - 1;
-        int maxT = state.Decision.GetLength(4) - 1;
+        int maxR = decision.GetLength(1) - 1;
+        int maxA = decision.GetLength(2) - 1;
+        int maxE = decision.GetLength(3) - 1;
+        int maxT = decision.GetLength(4) - 1;
 
         var requiredTypes = new HashSet<ItemType>();
         if (state.Priorities.HasValue)
@@ -37,18 +40,18 @@ public class KnapsackBacktracker : IKnapsackBacktracker
             if (state.Priorities.Value.t > 0) requiredTypes.Add(ItemType.TourismArea);
         }
 
-        Console.WriteLine($"BacktrackTopSolutions: Required Types={string.Join(", ", requiredTypes)}, Initial Budget={state.Budget}, Restaurants={state.Restaurants}, Accommodations={state.Accommodations}, Entertainments={state.Entertainments}, TourismAreas={state.TourismAreas}, Total Items={state.Items.Count}");
+        Console.WriteLine($"BacktrackTopSolutions: Required Types={string.Join(", ", requiredTypes)}, Initial Budget={state.RemainingBudget}, Restaurants={state.CategoryCounts.GetValueOrDefault(ItemType.Restaurant, 0)}, Accommodations={state.CategoryCounts.GetValueOrDefault(ItemType.Accommodation, 0)}, Entertainments={state.CategoryCounts.GetValueOrDefault(ItemType.Entertainment, 0)}, TourismAreas={state.CategoryCounts.GetValueOrDefault(ItemType.TourismArea, 0)}, Total Items={items.Count}");
 
         while (stack.Count > 0)
         {
             var (currentState, currentUsedItems, currentScore) = stack.Pop();
 
-            if (currentState.Index < 0)
+            if (currentState.SelectedItems.Count == items.Count || currentState.RemainingBudget <= 0)
             {
-                var selectedTypes = currentState.CurrentSelection.Select(i => i.PlaceType).ToHashSet();
-                if ((selectedTypes.Intersect(requiredTypes).Any() || currentState.Budget <= 0) && currentState.CurrentSelection.Any())
+                var selectedTypes = currentState.SelectedItems.Select(i => i.PlaceType).ToHashSet();
+                if ((selectedTypes.Intersect(requiredTypes).Any() || currentState.RemainingBudget <= 0) && currentState.SelectedItems.Any())
                 {
-                    var solution = currentState.CurrentSelection.Select(i => state.Items.First(d => d.Original.GlobalId == i.GlobalId)).ToList();
+                    var solution = currentState.SelectedItems.ToList();
                     double score = currentScore;
 
                     bool isUnique = true;
@@ -67,7 +70,7 @@ public class KnapsackBacktracker : IKnapsackBacktracker
                     {
                         solutions.Add((solution, score));
                         usedItemsPerSolution.Add(new HashSet<string>(solution.Select(d => d.Original.GlobalId)));
-                        Console.WriteLine($"Solution added: Items={string.Join(", ", solution.Select(d => d.Original.Name))}, Score={score}, Budget={currentState.Budget}, Types={string.Join(", ", selectedTypes)}");
+                        Console.WriteLine($"Solution added: Items={string.Join(", ", solution.Select(d => d.Original.Name))}, Score={score}, Remaining Budget={currentState.RemainingBudget}, Types={string.Join(", ", selectedTypes)}");
 
                         if (solutions.Count > maxSolutions)
                         {
@@ -79,60 +82,67 @@ public class KnapsackBacktracker : IKnapsackBacktracker
                 }
                 else
                 {
-                    Console.WriteLine($"Solution rejected: Types={string.Join(", ", selectedTypes)}, Budget={currentState.Budget}, Required={string.Join(", ", requiredTypes)}");
+                    Console.WriteLine($"Solution rejected: Types={string.Join(", ", selectedTypes)}, Remaining Budget={currentState.RemainingBudget}, Required={string.Join(", ", requiredTypes)}");
                 }
                 continue;
             }
 
-            var selectedDpItem = (DpItem)currentState.Items[currentState.Index];
-            var selectedItem = selectedDpItem.Original;
-            int newBudget = currentState.Budget - selectedDpItem.Weight;
+            stack.Push((currentState.Clone(), new HashSet<string>(currentUsedItems), currentScore));
 
-            stack.Push((currentState with { Index = currentState.Index - 1 }, currentUsedItems, currentScore));
-
-            int newR = currentState.Restaurants - (selectedItem.PlaceType == ItemType.Restaurant ? 1 : 0);
-            int newA = currentState.Accommodations - (selectedItem.PlaceType == ItemType.Accommodation ? 1 : 0);
-            int newE = currentState.Entertainments - (selectedItem.PlaceType == ItemType.Entertainment ? 1 : 0);
-            int newT = currentState.TourismAreas - (selectedItem.PlaceType == ItemType.TourismArea ? 1 : 0);
-
-            if (newR >= 0 && newA >= 0 && newE >= 0 && newT >= 0 && newBudget >= 0 &&
-                currentState.Decision[currentState.Budget, currentState.Restaurants, currentState.Accommodations, currentState.Entertainments, currentState.TourismAreas, currentState.Index])
+            for (int i = items.Count - 1; i >= 0; i--)
             {
-                int usageCount = usedItemsPerSolution.Count(s => s.Contains(selectedItem.GlobalId));
-                int maxUsage = state.Items.Count < 15 ? 4 : 3;
-                if (usageCount < maxUsage)
+                var selectedDpItem = items[i];
+                var selectedItem = selectedDpItem.Original;
+                int newBudget = currentState.RemainingBudget - selectedDpItem.Weight;
+
+                int currentR = currentState.CategoryCounts.GetValueOrDefault(ItemType.Restaurant, 0);
+                int currentA = currentState.CategoryCounts.GetValueOrDefault(ItemType.Accommodation, 0);
+                int currentE = currentState.CategoryCounts.GetValueOrDefault(ItemType.Entertainment, 0);
+                int currentT = currentState.CategoryCounts.GetValueOrDefault(ItemType.TourismArea, 0);
+
+                int newR = currentR - (selectedItem.PlaceType == ItemType.Restaurant ? 1 : 0);
+                int newA = currentA - (selectedItem.PlaceType == ItemType.Accommodation ? 1 : 0);
+                int newE = currentE - (selectedItem.PlaceType == ItemType.Entertainment ? 1 : 0);
+                int newT = currentT - (selectedItem.PlaceType == ItemType.TourismArea ? 1 : 0);
+
+                if (newR >= 0 && newA >= 0 && newE >= 0 && newT >= 0 && newBudget >= 0 &&
+                    decision[currentState.RemainingBudget, currentR, currentA, currentE, currentT, i])
                 {
-                    var newSelection = new List<Item>(currentState.CurrentSelection) { selectedItem };
-                    var newUsedItems = new HashSet<string>(currentUsedItems) { selectedItem.GlobalId };
-                    var newState = currentState with
+                    int usageCount = usedItemsPerSolution.Count(s => s.Contains(selectedItem.GlobalId));
+                    int maxUsage = items.Count < 15 ? 4 : 3;
+                    if (usageCount < maxUsage)
                     {
-                        Budget = newBudget,
-                        Restaurants = newR,
-                        Accommodations = newA,
-                        Entertainments = newE,
-                        TourismAreas = newT,
-                        Index = currentState.Index - 1,
-                        CurrentSelection = newSelection
-                    };
-                    stack.Push((newState, newUsedItems, currentScore + selectedDpItem.Profit));
-                    Console.WriteLine($"Pushing state: Item={selectedItem.Name}, GlobalId={selectedItem.GlobalId}, New Budget={newBudget}, New Restaurants={newR}, Score={currentScore + selectedDpItem.Profit}");
+                        var newState = currentState.Clone();
+                        newState.SelectedItems.Add(selectedDpItem);
+                        newState.RemainingBudget = newBudget;
+                        newState.CategoryCounts[ItemType.Restaurant] = newR;
+                        newState.CategoryCounts[ItemType.Accommodation] = newA;
+                        newState.CategoryCounts[ItemType.Entertainment] = newE;
+                        newState.CategoryCounts[ItemType.TourismArea] = newT;
+
+                        var newUsedItems = new HashSet<string>(currentUsedItems) { selectedItem.GlobalId };
+                        double modifiedScore = selectedDpItem.Profit * (modifiedScores.ContainsKey(selectedItem.GlobalId) ? modifiedScores[selectedItem.GlobalId] : 1.0);
+                        modifiedScores[selectedItem.GlobalId] = modifiedScores.GetValueOrDefault(selectedItem.GlobalId, 1.0) * 0.9;
+
+                        stack.Push((newState, newUsedItems, currentScore + modifiedScore));
+                        Console.WriteLine($"Pushing state: Item={selectedItem.Name}, GlobalId={selectedItem.GlobalId}, New Budget={newBudget}, New Restaurants={newR}, Score={currentScore + modifiedScore}");
+                    }
+                    else
+                    {
+                        Console.WriteLine($"Item skipped (usage limit): {selectedItem.Name}, GlobalId={selectedItem.GlobalId}, UsageCount={usageCount}");
+                    }
                 }
                 else
                 {
-                    Console.WriteLine($"Item skipped (usage limit): {selectedItem.Name}, GlobalId={selectedItem.GlobalId}, UsageCount={usageCount}");
+                    Console.WriteLine($"Item skipped: {selectedItem.Name}, GlobalId={selectedItem.GlobalId}, Budget={currentState.RemainingBudget}, Restaurants={currentR}, Decision={(decision[currentState.RemainingBudget, currentR, currentA, currentE, currentT, i] ? "True" : "False")}");
                 }
             }
-            else
-            {
-                Console.WriteLine($"Item skipped: {selectedItem.Name}, GlobalId={selectedItem.GlobalId}, Budget={currentState.Budget}, Restaurants={currentState.Restaurants}, Decision={(currentState.Decision[currentState.Budget, currentState.Restaurants, currentState.Accommodations, currentState.Entertainments, currentState.TourismAreas, currentState.Index] ? "True" : "False")}");
-            }
-
-            selectedDpItem.Original.Score = selectedDpItem.Original.Score * 0.9f;
         }
 
-        foreach (var dpItem in state.Items)
+        foreach (var item in items)
         {
-            dpItem.Original.Score = originalScores[dpItem.Original.GlobalId];
+            if (modifiedScores.ContainsKey(item.Original.GlobalId))
+                item.Original.Score = (float)originalScores[item.Original.GlobalId];
         }
 
         var finalSolutions = solutions
@@ -145,14 +155,14 @@ public class KnapsackBacktracker : IKnapsackBacktracker
         return finalSolutions;
     }
 
-    public List<DpItem> BacktrackSingleSolution(KnapsackState state)
+    public List<DpItem> BacktrackSingleSolution(KnapsackState state, List<DpItem> items, bool[,,,,,] decision)
     {
         var selectedItems = new List<DpItem>();
-        int currentW = state.Budget;
-        int currentR = state.Restaurants;
-        int currentA = state.Accommodations;
-        int currentE = state.Entertainments;
-        int currentT = state.TourismAreas;
+        int currentW = state.RemainingBudget;
+        int currentR = state.CategoryCounts.GetValueOrDefault(ItemType.Restaurant, 0);
+        int currentA = state.CategoryCounts.GetValueOrDefault(ItemType.Accommodation, 0);
+        int currentE = state.CategoryCounts.GetValueOrDefault(ItemType.Entertainment, 0);
+        int currentT = state.CategoryCounts.GetValueOrDefault(ItemType.TourismArea, 0);
         var usedItemIds = new HashSet<string>();
 
         var requiredTypes = new HashSet<ItemType>();
@@ -166,9 +176,9 @@ public class KnapsackBacktracker : IKnapsackBacktracker
 
         Console.WriteLine($"Starting Backtracking: Budget={currentW}, Restaurants={currentR}, Accommodations={currentA}, Entertainments={currentE}, TourismAreas={currentT}");
 
-        for (int i = state.Items.Count - 1; i >= 0; i--)
+        for (int i = items.Count - 1; i >= 0; i--)
         {
-            var dpItem = (DpItem)state.Items[i];
+            var dpItem = items[i];
             var item = dpItem.Original;
             if (currentW < 0 || currentR < 0 || currentA < 0 || currentE < 0 || currentT < 0)
             {
@@ -176,7 +186,7 @@ public class KnapsackBacktracker : IKnapsackBacktracker
                 break;
             }
 
-            if (state.Decision[currentW, currentR, currentA, currentE, currentT, i] && !usedItemIds.Contains(item.GlobalId))
+            if (decision[currentW, currentR, currentA, currentE, currentT, i] && !usedItemIds.Contains(item.GlobalId))
             {
                 if (requiredTypes.Contains(item.PlaceType))
                 {

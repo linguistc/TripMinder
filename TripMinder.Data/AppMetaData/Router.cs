@@ -220,6 +220,13 @@
         {
             public const string Prefix = Rule + "tripsuggester/";
             public const string OptimizeTrip = Prefix + "optimize/";
+            public const string TestOptimizeTrip = Prefix + "testoptimize/";
+        }
+        
+        public class DPTripSuggesterRouting
+        {
+            public const string Prefix = Rule + "dptripsuggester/";
+            public const string DPOptimizeTrip = Prefix + "dpoptimize/";
         }
         
         public class TripSuggesterMultipleRouting
