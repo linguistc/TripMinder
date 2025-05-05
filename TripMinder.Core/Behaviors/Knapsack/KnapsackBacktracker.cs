@@ -188,17 +188,15 @@ public class KnapsackBacktracker : IKnapsackBacktracker
 
             if (decision[currentW, currentR, currentA, currentE, currentT, i] && !usedItemIds.Contains(item.GlobalId))
             {
-                if (requiredTypes.Contains(item.PlaceType))
-                {
-                    selectedItems.Add(dpItem);
-                    usedItemIds.Add(item.GlobalId);
-                    currentW -= dpItem.Weight;
-                    if (item.PlaceType == ItemType.Restaurant) currentR--;
-                    if (item.PlaceType == ItemType.Accommodation) currentA--;
-                    if (item.PlaceType == ItemType.Entertainment) currentE--;
-                    if (item.PlaceType == ItemType.TourismArea) currentT--;
-                    Console.WriteLine($"Selected Item: {item.Name}, GlobalId: {item.GlobalId}, Type: {item.PlaceType}, Price: {dpItem.Weight}, Profit: {dpItem.Profit}, New Budget={currentW}");
-                }
+                selectedItems.Add(dpItem);
+                usedItemIds.Add(item.GlobalId);
+                currentW -= dpItem.Weight;
+                if (item.PlaceType == ItemType.Restaurant) currentR--;
+                if (item.PlaceType == ItemType.Accommodation) currentA--;
+                if (item.PlaceType == ItemType.Entertainment) currentE--;
+                if (item.PlaceType == ItemType.TourismArea) currentT--;
+                Console.WriteLine($"Selected Item: {item.Name}, GlobalId: {item.GlobalId}, Type: {item.PlaceType}, Price: {dpItem.Weight}, Profit: {dpItem.Profit}, New Budget={currentW}");
+                
             }
         }
 

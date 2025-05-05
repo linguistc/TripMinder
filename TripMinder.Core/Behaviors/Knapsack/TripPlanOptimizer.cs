@@ -84,12 +84,24 @@ public partial class TripPlanOptimizer
         // 5. Recalculate scores with priority weighting
         foreach (var item in filteredItems)
         {
-            item.Score = CalculateScoreBehavior.CalculateScore(
+            int p = item.PlaceType switch
+            {
+                ItemType.Accommodation => priorities.accommodation,
+                ItemType.Restaurant => priorities.food,
+                ItemType.Entertainment => priorities.entertainment,
+                ItemType.TourismArea => priorities.tourism,
+                _ => 1
+            };
+
+            var baseScore = CalculateScoreBehavior.CalculateScore(
                 item.ClassType,
-                priorities.accommodation, // Use highest priority for consistency
+                p,
                 item.AveragePricePerAdult,
                 request.BudgetPerAdult
-            ) * (float)typeToPriorityWeight[item.PlaceType];
+            );
+            item.Score = baseScore * (float)typeToPriorityWeight[item.PlaceType];
+            Console.WriteLine($"Item: {item.Name}, Type: {item.PlaceType}, Priority: {p}, BaseScore: {baseScore}, FinalScore: {item.Score}");
+            
         }
 
         // 6. Prepare constraints
@@ -103,7 +115,7 @@ public partial class TripPlanOptimizer
         // 7. Run phased optimization with original interests order
         var bestItems = await _stagedOptimizer.OptimizeStagedAsync(
             filteredItems,
-            request.Interests.ToList(), // Convert Queue<string> to List<string>
+            request.Interests.ToList(),
             (int)request.BudgetPerAdult,
             constraints,
             priorities
@@ -220,6 +232,7 @@ public partial class TripPlanOptimizer
         Console.WriteLine($"Calculated Priorities: Accommodation={accommodationPriority}, Food={foodPriority}, Entertainment={entertainmentPriority}, Tourism={tourismPriority}");
         return (accommodationPriority, foodPriority, entertainmentPriority, tourismPriority);
     }
+    
     
     public async Task<Respond<List<TripPlanResponse>>> OptimizePlanMultiple(TripPlanRequest request)
     {

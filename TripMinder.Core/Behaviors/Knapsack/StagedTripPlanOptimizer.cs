@@ -4,6 +4,20 @@ namespace TripMinder.Core.Behaviors.Knapsack;
 
 public class StagedTripPlanOptimizer : IStagedTripPlanOptimizer
 {
+    private readonly IDynamicProgrammingCalculator _dpCalculator;
+    private readonly IProfitFinder _profitFinder;
+    private readonly IKnapsackBacktracker _backtracker;
+
+    public StagedTripPlanOptimizer(
+        IDynamicProgrammingCalculator dpCalculator,
+        IProfitFinder profitFinder,
+        IKnapsackBacktracker backtracker)
+    {
+        _dpCalculator = dpCalculator;
+        _profitFinder = profitFinder;
+        _backtracker = backtracker;
+    }
+
     public async Task<List<Item>> OptimizeStagedAsync(
         List<Item> items,
         List<string> orderedInterests,
@@ -11,79 +25,217 @@ public class StagedTripPlanOptimizer : IStagedTripPlanOptimizer
         UserDefinedKnapsackConstraints constraints,
         (int a, int f, int e, int t)? priorities = null)
     {
-        // Pre-check: Ensure budget is sufficient
-        var minPrice = items.Any() ? items.Min(i => i.AveragePricePerAdult) : double.MaxValue;
+        // 1. Check cheapest item
+        double minPrice = items.Any() ? items.Min(i => i.AveragePricePerAdult) : double.MaxValue;
         if (budget < minPrice)
+            return new List<Item>();
+
+        // 2. Prepare DP items and phase order
+        var phaseOrder = orderedInterests
+            .Select(s => GetItemType(s))
+            .Distinct()
+            .ToList();
+
+        var dpItems = items.Select(i => new DpItem(i)).ToList();
+
+        // 3. Initialize best solution trackers
+        var bestProfit = 0.0f;
+        var bestCounts = phaseOrder.ToDictionary(t => t, t => 0);
+        int finalUsedBudget = 0;
+        int phase = 0;
+        bool initialCoverageComplete = false;
+
+        // 4. Phased expansion loop
+        while (true)
         {
-            Console.WriteLine($"Stopping: Budget {budget} < cheapest item price {minPrice}");
+            bool madeProgress = false;
+
+            // Phase 1: Cover each interest type once in order
+            if (phase < phaseOrder.Count)
+            {
+                var type = phaseOrder[phase];
+                int maxForType = GetMaxConstraint(constraints, type);
+                if (bestCounts[type] >= maxForType)
+                {
+                    phase++;
+                    continue;
+                }
+
+                // Force adding one item of the current type
+                var phaseLimits = phaseOrder.ToDictionary(
+                    t => t,
+                    t => t == type ? Math.Min(bestCounts[t] + 1, maxForType) : bestCounts[t]
+                );
+
+                var (dp, decision, _) = _dpCalculator.Calculate(
+                    budget,
+                    dpItems,
+                    phaseLimits.GetValueOrDefault(ItemType.Restaurant),
+                    phaseLimits.GetValueOrDefault(ItemType.Accommodation),
+                    phaseLimits.GetValueOrDefault(ItemType.Entertainment),
+                    phaseLimits.GetValueOrDefault(ItemType.TourismArea)
+                );
+
+                var (phaseProfit, usedBudget, r, a, e, t) = _profitFinder.FindMaxProfit(
+                    dp,
+                    budget,
+                    new UserDefinedKnapsackConstraints(
+                        phaseLimits.GetValueOrDefault(ItemType.Restaurant),
+                        phaseLimits.GetValueOrDefault(ItemType.Accommodation),
+                        phaseLimits.GetValueOrDefault(ItemType.Entertainment),
+                        phaseLimits.GetValueOrDefault(ItemType.TourismArea)
+                    ),
+                    requireExact: false
+                );
+
+                if (phaseProfit > bestProfit)
+                {
+                    bestProfit = phaseProfit;
+                    bestCounts[ItemType.Restaurant] = r;
+                    bestCounts[ItemType.Accommodation] = a;
+                    bestCounts[ItemType.Entertainment] = e;
+                    bestCounts[ItemType.TourismArea] = t;
+                    finalUsedBudget = usedBudget;
+                    madeProgress = true;
+                    Console.WriteLine($"Phase {phase}: Added {type}, Profit={bestProfit}, Counts={string.Join(",", bestCounts)}, UsedBudget={finalUsedBudget}");
+                }
+
+                phase++;
+                if (phase == phaseOrder.Count)
+                    initialCoverageComplete = true;
+            }
+            // Phase 2: Expand freely within constraints
+            else if (initialCoverageComplete)
+            {
+                int unchangedRounds = 0;
+                while (unchangedRounds < 1)
+                {
+                    bool phaseProgress = false;
+
+                    foreach (var type in phaseOrder)
+                    {
+                        int maxForType = GetMaxConstraint(constraints, type);
+                        if (bestCounts[type] >= maxForType)
+                            continue;
+
+                        var phaseLimits = phaseOrder.ToDictionary(
+                            t => t,
+                            t => Math.Min(
+                                t == type ? bestCounts[t] + 1 : bestCounts[t],
+                                maxForType)
+                        );
+
+                        var (dp, decision, _) = _dpCalculator.Calculate(
+                            budget,
+                            dpItems,
+                            phaseLimits.GetValueOrDefault(ItemType.Restaurant),
+                            phaseLimits.GetValueOrDefault(ItemType.Accommodation),
+                            phaseLimits.GetValueOrDefault(ItemType.Entertainment),
+                            phaseLimits.GetValueOrDefault(ItemType.TourismArea)
+                        );
+
+                        var (phaseProfit, usedBudget, r, a, e, t) = _profitFinder.FindMaxProfit(
+                            dp,
+                            budget,
+                            new UserDefinedKnapsackConstraints(
+                                phaseLimits.GetValueOrDefault(ItemType.Restaurant),
+                                phaseLimits.GetValueOrDefault(ItemType.Accommodation),
+                                phaseLimits.GetValueOrDefault(ItemType.Entertainment),
+                                phaseLimits.GetValueOrDefault(ItemType.TourismArea)
+                            ),
+                            requireExact: false
+                        );
+
+                        if (phaseProfit > bestProfit)
+                        {
+                            bestProfit = phaseProfit;
+                            bestCounts[ItemType.Restaurant] = r;
+                            bestCounts[ItemType.Accommodation] = a;
+                            bestCounts[ItemType.Entertainment] = e;
+                            bestCounts[ItemType.TourismArea] = t;
+                            finalUsedBudget = usedBudget;
+                            phaseProgress = true;
+                            Console.WriteLine($"Free Phase: Added {type}, Profit={bestProfit}, Counts={string.Join(",", bestCounts)}, UsedBudget={finalUsedBudget}");
+                        }
+                    }
+
+                    if (!phaseProgress)
+                        unchangedRounds++;
+                    else
+                        unchangedRounds = 0;
+                }
+                break; // Exit after free expansion
+            }
+        }
+
+        // 5. Final backtracking using used budget
+        var finalLimits = phaseOrder.ToDictionary(t => t, t => bestCounts.GetValueOrDefault(t));
+        var (finalDp, finalDecision, _) = _dpCalculator.Calculate(
+            budget,
+            dpItems,
+            finalLimits.GetValueOrDefault(ItemType.Restaurant),
+            finalLimits.GetValueOrDefault(ItemType.Accommodation),
+            finalLimits.GetValueOrDefault(ItemType.Entertainment),
+            finalLimits.GetValueOrDefault(ItemType.TourismArea)
+        );
+
+        var (finalProfit, fusedBudget, fr, fa, fe, ft) = _profitFinder.FindMaxProfit(
+            finalDp,
+            budget,
+            new UserDefinedKnapsackConstraints(
+                finalLimits.GetValueOrDefault(ItemType.Restaurant),
+                finalLimits.GetValueOrDefault(ItemType.Accommodation),
+                finalLimits.GetValueOrDefault(ItemType.Entertainment),
+                finalLimits.GetValueOrDefault(ItemType.TourismArea)
+            ),
+            requireExact: true
+        );
+
+        Console.WriteLine($"Backtracking from: Budget={fusedBudget}, R={fr}, A={fa}, E={fe}, T={ft}");
+
+        if (finalDp[fusedBudget, fr, fa, fe, ft] == float.MinValue)
+        {
+            Console.WriteLine("❌ Attempting to backtrack from invalid DP state!");
             return new List<Item>();
         }
 
-        var phaseOrder = orderedInterests.Select(GetItemType).Distinct().ToList();
-        var maxPerType = new Dictionary<ItemType, int>
+        var finalState = new KnapsackState
         {
-            [ItemType.Restaurant] = constraints.MaxRestaurants,
-            [ItemType.Accommodation] = constraints.MaxAccommodations,
-            [ItemType.Entertainment] = constraints.MaxEntertainments,
-            [ItemType.TourismArea] = constraints.MaxTourismAreas
+            TotalProfit = finalProfit,
+            RemainingBudget = finalUsedBudget,
+            CategoryCounts = new Dictionary<ItemType, int>
+            {
+                [ItemType.Restaurant] = fr,
+                [ItemType.Accommodation] = fa,
+                [ItemType.Entertainment] = fe,
+                [ItemType.TourismArea] = ft
+            },
+            Priorities = priorities
         };
-        var dpItems = items.Select(i => new DpItem(i)).ToList();
 
-        // Calculate priority weights
-        var priorityWeights = new Dictionary<ItemType, double>();
-        for (int i = 0; i < phaseOrder.Count; i++)
-        {
-            priorityWeights[phaseOrder[i]] = 1.0 + (phaseOrder.Count - i) * 0.5; // e.g., 2.5, 2.0, 1.5, 1.0
-        }
-
-        var bestSolution = new KnapsackState { RemainingBudget = budget };
-        int phase = 0;
-        int unchangedPhases = 0;
-        var currentCounts = new Dictionary<ItemType, int>(); // Tracks items selected per type
-
-        while (unchangedPhases < phaseOrder.Count && bestSolution.RemainingBudget >= minPrice)
-        {
-            var currentType = phaseOrder[phase % phaseOrder.Count];
-            if (currentCounts.GetValueOrDefault(currentType, 0) >= maxPerType[currentType])
-            {
-                unchangedPhases++;
-                phase++;
-                continue;
-            }
-
-            // Define item count constraints for this phase
-            var phaseConstraints = new Dictionary<ItemType, int>();
-            for (int i = 0; i <= phase % phaseOrder.Count; i++)
-            {
-                var type = phaseOrder[i];
-                int count = (i == phase % phaseOrder.Count) ? currentCounts.GetValueOrDefault(type, 0) + 1 : currentCounts.GetValueOrDefault(type, 0);
-                phaseConstraints[type] = Math.Min(count, maxPerType[type]);
-            }
-
-            // Run knapsack with full budget and phase constraints
-            var newSolution = RunKnapsack(dpItems, budget, phaseConstraints, priorityWeights);
-            if (newSolution != null && newSolution.TotalProfit > bestSolution.TotalProfit)
-            {
-                bestSolution = newSolution;
-                currentCounts = newSolution.CategoryCounts;
-                unchangedPhases = 0;
-                Console.WriteLine($"Phase {phase + 1}: Added item for {currentType}, Profit={bestSolution.TotalProfit}, Budget Used={budget - bestSolution.RemainingBudget}");
-            }
-            else
-            {
-                unchangedPhases++;
-                maxPerType[currentType] = currentCounts.GetValueOrDefault(currentType, 0);
-                Console.WriteLine($"Phase {phase + 1}: Failed to add for {currentType}, Fixed Max={maxPerType[currentType]}");
-            }
-
-            phase++;
-        }
-
-        var selectedItems = bestSolution.SelectedItems.Select(i => items.First(x => x.GlobalId == i.GlobalId && x.PlaceType == i.PlaceType)).ToList();
-        Console.WriteLine($"Optimization Complete: Selected {selectedItems.Count} items, Total Profit={bestSolution.TotalProfit}, Total Cost={budget - bestSolution.RemainingBudget}");
-        return selectedItems;
+        var selectedDp = _backtracker.BacktrackSingleSolution(finalState, dpItems, finalDecision);
+        return selectedDp.Select(d => d.Original).ToList();
     }
 
+    private int GetMaxConstraint(UserDefinedKnapsackConstraints c, ItemType t) => t switch
+    {
+        ItemType.Restaurant => c.MaxRestaurants,
+        ItemType.Accommodation => c.MaxAccommodations,
+        ItemType.Entertainment => c.MaxEntertainments,
+        ItemType.TourismArea => c.MaxTourismAreas,
+        _ => 0
+    };
+
+    private ItemType GetItemType(string interest) => interest?.Trim().ToLowerInvariant() switch
+    {
+        "accommodation" => ItemType.Accommodation,
+        "restaurants" or "food" => ItemType.Restaurant,
+        "entertainments" or "entertainment" => ItemType.Entertainment,
+        "tourismareas" or "tourism" => ItemType.TourismArea,
+        _ => throw new ArgumentException($"Unknown interest: {interest}")
+    };
+    
+    
     private KnapsackState RunKnapsack(
         List<DpItem> items,
         int budget,
@@ -130,15 +282,4 @@ public class StagedTripPlanOptimizer : IStagedTripPlanOptimizer
         return bestState.SelectedItems.Any() ? bestState : null;
     }
 
-    private ItemType GetItemType(string interest)
-    {
-        return interest?.Trim().ToLowerInvariant() switch
-        {
-            "accommodation" => ItemType.Accommodation,
-            "restaurants" or "food" => ItemType.Restaurant,
-            "entertainments" or "entertainment" => ItemType.Entertainment,
-            "tourismareas" or "tourism" => ItemType.TourismArea,
-            _ => throw new ArgumentException($"Unknown interest: {interest}")
-        };
-    }
 }

@@ -31,14 +31,14 @@ public static class CalculateScoreBehavior
         };
 
         // 2. Priority Weight: Linear scaling to emphasize priority without harsh decay
-        float priorityWeight = 1.0f + (priority - 1) * 0.5f; // e.g., 2.5, 2.0, 1.5, 1.0 for priorities 4,3,2,1
+        float priorityWeight = 1.0f + (priority - 1) * 2.0f; // e.g., 1.0, 3.0, 5.0, 7.0 for priorities 4,3,2,1
 
         // 3. Price Normalization: Logarithmic scaling to reduce penalty for high prices
-        // float scale = (float)Math.Max(dailyBudgetPerAdult, 1.0);
-        // float priceRatio = (float)(averagePricePerAdult / scale);
-        // float priceFactor = 1.0f / (1.0f + (float)Math.Log(1.0 + priceRatio)); // Logarithmic to soften high-price penalty
+        float scale = (float)Math.Max(dailyBudgetPerAdult, 1.0);
+        float priceRatio = (float)(averagePricePerAdult / scale);
+        float priceFactor = 1.0f / (1.0f + (float)Math.Log(1.0 + priceRatio)); // Logarithmic to soften high-price penalty
 
         // Final score: Product of components
-        return classWeight * priorityWeight;// * priceFactor;
+        return classWeight * priorityWeight * priceFactor;
     }
 }
