@@ -1,10 +1,6 @@
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 using Moq;
 using TripMinder.Core.Behaviors.Knapsack;
 using TripMinder.Core.Behaviors.Shared;
-using Xunit;
 
 namespace TripMinder.Core.Tests.Behaviors.Knapsack;
 
