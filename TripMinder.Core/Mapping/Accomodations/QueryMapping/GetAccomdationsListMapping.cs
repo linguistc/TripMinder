@@ -1,6 +1,7 @@
 ﻿
 using AutoMapper;
 using TripMinder.Core.Features.Accomodataions.Queries.Responses;
+using TripMinder.Data.AppMetaData;
 using TripMinder.Data.Entities;
 
 namespace TripMinder.Core.Mapping.Accomodations
@@ -10,6 +11,8 @@ namespace TripMinder.Core.Mapping.Accomodations
         void GetAccomdationsListMapping()
         {
             CreateMap<Accomodation, GetAccomodationsListResponse>()
+                .ForMember(dest => dest.ImageSource,
+                    options => options.MapFrom(src => Router.AccomodationRouting.GetImage))
                 .ForMember(dest => dest.Id,
                     options => options.MapFrom(src => src.Id))
                 .ForMember(dest => dest.Name, 
@@ -22,6 +25,8 @@ namespace TripMinder.Core.Mapping.Accomodations
                     options => options.MapFrom(src => src.Zone.Name ))
                 .ForMember(dest => dest.Governorate, 
                     options => options.MapFrom(src => src.Zone.Governorate.Name))
+                .ForMember(dest => dest.GovernorateId, 
+                    options => options.MapFrom(src => src.Zone.Governorate.Id))
                 .ForMember(dest => dest.Rating,
                     options => options.MapFrom(src => src.Rating))
                 .ForMember(dest => dest.Score,
@@ -40,8 +45,6 @@ namespace TripMinder.Core.Mapping.Accomodations
                     options => options.MapFrom(src => src.MapLink))
                 .ForMember(dest => dest.ContactLink, 
                     options => options.MapFrom(src => src.ContactLink))
-                .ForMember(dest => dest.ImageSource, 
-                    options => options.MapFrom(src => src.ImageSource))
                 .ForMember(dest => dest.NumOfBeds,
                     options => options.MapFrom(src => src.NumOfBeds))
                 .ForMember(dest => dest.NumOfPersons,

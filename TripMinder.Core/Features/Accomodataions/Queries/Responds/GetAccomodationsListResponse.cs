@@ -10,7 +10,9 @@ namespace TripMinder.Core.Features.Accomodataions.Queries.Responses
         public string AccomodationType { get; set; }
         public string ClassType { get; set; }
         public string Zone { get; set; }
+        public int ZoneId { get; set; }
         public string Governorate { get; set; }
+        public int GovernorateId { get; set; }
         public double Rating { get; set; }
         public string PlaceType { get; set; }
         public double AveragePricePerAdult { get; set; }

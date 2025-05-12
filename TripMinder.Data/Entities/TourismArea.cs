@@ -49,7 +49,7 @@ namespace TripMinder.Data.Entities
         
         public string? ContactLink { get; set; } 
         
-        public string? ImageSource { get; set; }
+        public  byte[]? ImgData  { get; set; }
         public float Score { get; set; }
 
 

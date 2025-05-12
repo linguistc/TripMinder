@@ -2,12 +2,17 @@
 using TripMinder.API.Bases;
 using TripMinder.Core.Features.Accomodataions.Queries.Models;
 using TripMinder.Data.AppMetaData;
+using TripMinder.Infrastructure.Data;
 
 namespace TripMinder.API.Controllers
 {
     [ApiController]
     public class AccommodationController : AppControllerBase
     {
+        private readonly AppDBContext _ctx;
+        
+        public AccommodationController(AppDBContext ctx) => _ctx = ctx;
+        
         [HttpGet(Router.AccomodationRouting.List)]
         public async Task<IActionResult> GetAccommodationListAsync()
         {
@@ -20,6 +25,18 @@ namespace TripMinder.API.Controllers
         {
             var response = await this.Mediator.Send(new GetAccomodationByIdQuery(id));
             return NewResult(response);
+        }
+
+        [HttpGet(Router.AccomodationRouting.GetImage)]
+        public IActionResult GetAccommodationImage(int id)
+        {
+            var img = _ctx.Accomodations
+                .Where(r => r.Id == id)
+                .Select(r => r.ImgData)
+                .FirstOrDefault();
+            if (img == null) return NotFound();
+            // حدِّد الـ content-type بناءً على امتداد الصورة
+            return File(img, "image/jpeg");
         }
 
         #region Filtering Endpoints

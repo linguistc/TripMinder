@@ -8,7 +8,6 @@ namespace TripMinder.Data.Entities
         public User()
         {
             this.SocialMediaProfiles = new HashSet<UserSocialProfile>();
-            this.Images = new HashSet<UserImage>();
             this.History = new HashSet<UserHistory>();
             this.Bookmarks = new HashSet<UserBookMark>();
             this.Ratings = new HashSet<UserRating>();
@@ -34,7 +33,7 @@ namespace TripMinder.Data.Entities
         public string PhoneNumber { get; set; }
 
         public ICollection<UserSocialProfile> SocialMediaProfiles { get; set; }
-        public ICollection<UserImage> Images { get; set; }
+        public  byte[]? ImgData { get; set; }
         public ICollection<UserHistory> History { get; set; }
         public ICollection<UserBookMark> Bookmarks { get; set; }
         public ICollection<UserRating> Ratings { get; set; }

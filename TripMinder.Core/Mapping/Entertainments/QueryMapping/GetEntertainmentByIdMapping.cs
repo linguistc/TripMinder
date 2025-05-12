@@ -1,45 +1,48 @@
 using TripMinder.Core.Features.Entertainments.Queries.Responses;
+using TripMinder.Data.AppMetaData;
 using TripMinder.Data.Entities;
 
 namespace TripMinder.Core.Mapping.Entertainments
 {
     public partial class EntertainmentProfile
     {
-        public void GetEntertainmentByIdMapping() 
+        public void GetEntertainmentByIdMapping()
         {
             CreateMap<Entertainment, GetEntertainmentByIdResponse>()
+                .ForMember(dest => dest.ImageSource,
+                    options => options.MapFrom(src => Router.EntertainmentRouting.GetImage))
                 .ForMember(dest => dest.Id,
                     options => options.MapFrom(src => src.Id))
-                .ForMember(dest => dest.Name, 
+                .ForMember(dest => dest.Name,
                     options => options.MapFrom(src => src.Name))
-                .ForMember(dest => dest.EntertainmentType, 
+                .ForMember(dest => dest.EntertainmentType,
                     options => options.MapFrom(src => src.EntertainmentType.Type))
-                .ForMember(dest => dest.ClassType, 
+                .ForMember(dest => dest.ClassType,
                     options => options.MapFrom(src => src.Class.Type))
-                .ForMember(dest => dest.Zone, 
-                    options => options.MapFrom(src => src.Zone.Name ))
-                .ForMember(dest => dest.Governorate, 
+                .ForMember(dest => dest.Zone,
+                    options => options.MapFrom(src => src.Zone.Name))
+                .ForMember(dest => dest.Governorate,
                     options => options.MapFrom(src => src.Zone.Governorate.Name))
+                .ForMember(dest => dest.GovernorateId,
+                    options => options.MapFrom(src => src.Zone.Governorate.Id))
                 .ForMember(dest => dest.Rating,
                     options => options.MapFrom(src => src.Rating))
                 .ForMember(dest => dest.Score,
                     options => options.MapFrom(src => src.Score))
-                .ForMember(dest => dest.PlaceType, 
+                .ForMember(dest => dest.PlaceType,
                     options => options.MapFrom(src => src.PlaceType.Type))
-                .ForMember(dest => dest.AveragePricePerAdult, 
+                .ForMember(dest => dest.AveragePricePerAdult,
                     options => options.MapFrom(src => src.AveragePricePerAdult))
-                .ForMember(dest => dest.HasKidsArea, 
+                .ForMember(dest => dest.HasKidsArea,
                     options => options.MapFrom(src => src.HasKidsArea))
-                .ForMember(dest => dest.Description, 
+                .ForMember(dest => dest.Description,
                     options => options.MapFrom(src => src.Description))
-                .ForMember(dest => dest.Address, 
+                .ForMember(dest => dest.Address,
                     options => options.MapFrom(src => src.Address))
-                .ForMember(dest => dest.MapLink, 
+                .ForMember(dest => dest.MapLink,
                     options => options.MapFrom(src => src.MapLink))
-                .ForMember(dest => dest.ContactLink, 
-                    options => options.MapFrom(src => src.ContactLink))
-                .ForMember(dest => dest.ImageSource, 
-                    options => options.MapFrom(src => src.ImageSource));
+                .ForMember(dest => dest.ContactLink,
+                    options => options.MapFrom(src => src.ContactLink));
         }
     }
 }
