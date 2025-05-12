@@ -27,7 +27,7 @@ namespace TripMinder.Core.Features.Accomodataions.Queries.Responses
         
         public string? ContactLink { get; set; } 
         
-        public string? ImageSource { get; set; }
+        public string? ImageUrl { get; set; }
         public int NumOfBeds { get; set; }
         public string? BedStatus { get; set; }
         public int NumOfPersons { get; set; }

@@ -9,21 +9,21 @@ namespace TripMinder.API.Controllers;
 [ApiController]
 public class TourismAreaController : AppControllerBase
 {
-    private readonly AppDBContext _ctx;
-        
-    public TourismAreaController(AppDBContext ctx) => _ctx = ctx;
-    
-    [HttpGet(Router.AccomodationRouting.GetImage)]
-    public IActionResult GetAccommodationImage(int id)
-    {
-        var img = _ctx.TourismAreas
-            .Where(r => r.Id == id)
-            .Select(r => r.ImgData)
-            .FirstOrDefault();
-        if (img == null) return NotFound();
-        // حدِّد الـ content-type بناءً على امتداد الصورة
-        return File(img, "image/jpeg");
-    }
+    // private readonly AppDBContext _ctx;
+    //     
+    // public TourismAreaController(AppDBContext ctx) => _ctx = ctx;
+    //
+    // [HttpGet(Router.TourismAreaRouting.GetImage)]
+    // public IActionResult GetTourismAreaImage(int id)
+    // {
+    //     var img = _ctx.TourismAreas
+    //         .Where(r => r.Id == id)
+    //         .Select(r => r.ImgData)
+    //         .FirstOrDefault();
+    //     if (img == null) return NotFound();
+    //     // حدِّد الـ content-type بناءً على امتداد الصورة
+    //     return File(img, "image/jpeg");
+    // }
         
     [HttpGet(Router.TourismAreaRouting.List)]
     public async Task<IActionResult> GetTourismAreaListAsync()

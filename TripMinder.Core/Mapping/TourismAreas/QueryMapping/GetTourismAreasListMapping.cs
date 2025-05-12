@@ -11,8 +11,8 @@ namespace TripMinder.Core.Mapping.TourismAreas
         void GetTourismAreasListMapping()
         {
             CreateMap<TourismArea, GetTourismAreasListResponse>()
-                .ForMember(dest => dest.ImageSource,
-                    options => options.MapFrom(src => Router.TourismAreaRouting.GetImage))
+                .ForMember(dest => dest.ImageUrl,
+                    options => options.MapFrom(src => src.ImageUrl))
                 .ForMember(dest => dest.Id,
                     options => options.MapFrom(src => src.Id))
                 .ForMember(dest => dest.Name,

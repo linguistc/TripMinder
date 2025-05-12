@@ -10,8 +10,8 @@ namespace TripMinder.Core.Mapping.Entertainments
         void GetEntertainmentsListMapping()
         {
             CreateMap<Entertainment, GetEntertainmentsListResponse>()
-                .ForMember(dest => dest.ImageSource,
-                    options => options.MapFrom(src => Router.EntertainmentRouting.GetImage))
+                .ForMember(dest => dest.ImageUrl,
+                    options => options.MapFrom(src => src.ImageUrl))
                 .ForMember(dest => dest.Id,
                     options => options.MapFrom(src => src.Id))
                 .ForMember(dest => dest.Name,

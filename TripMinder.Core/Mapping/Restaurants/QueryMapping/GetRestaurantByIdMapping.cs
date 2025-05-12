@@ -10,8 +10,8 @@ namespace TripMinder.Core.Mapping.Restaurants
         {
 
             CreateMap<Restaurant, GetRestaurantByIdResponse>()
-                .ForMember(dest => dest.ImageSource,
-                    options => options.MapFrom(src => Router.RestaurantRouting.GetImage))
+                .ForMember(dest => dest.ImageUrl,
+                    options => options.MapFrom(src => src.ImageUrl))
                 .ForMember(dest => dest.Id,
                     options => options.MapFrom(src => src.Id))
                 .ForMember(dest => dest.Name,

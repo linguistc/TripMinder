@@ -22,7 +22,7 @@ namespace TripMinder.Core.Features.Entertainments.Queries.Responses
         
         public string? ContactLink { get; set; } 
         
-        public string? ImageSource { get; set; }
+        public string? ImageUrl { get; set; }
         public string PlaceType { get; set; }
 
         public float Score { get; set; }

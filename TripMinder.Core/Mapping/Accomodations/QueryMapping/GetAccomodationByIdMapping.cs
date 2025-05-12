@@ -10,8 +10,8 @@ namespace TripMinder.Core.Mapping.Accomodations
         void GetAccomodationByIdMapping()
         {
             CreateMap<Accomodation, GetAccomodationByIdResponse>()
-                .ForMember(dest => dest.ImageSource,
-                    options => options.MapFrom(src => Router.AccomodationRouting.GetImage))
+                .ForMember(dest => dest.ImageUrl,
+                    options => options.MapFrom(src => src.ImageUrl))
                 .ForMember(dest => dest.Id,
                     options => options.MapFrom(src => src.Id))
                 .ForMember(dest => dest.Name, 

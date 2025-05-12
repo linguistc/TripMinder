@@ -94,7 +94,7 @@ public class ItemFetcher : IItemFetcher
                     Score = CalculateScoreBehavior.CalculateScore(a.ClassType ?? "C", priorities.a, a.AveragePricePerAdult, dailyBudgetPerAdult),
                     PlaceType = ItemType.Accommodation,
                     Rating = a.Rating,
-                    ImageSource = a.ImageSource
+                    ImageSource = a.ImageUrl
                 };
                 Console.WriteLine($"Item: {item.Name}, GlobalId: {item.GlobalId}, Type: {item.PlaceType}, Price: {item.AveragePricePerAdult}, Score: {item.Score}");
                 return item;
@@ -123,7 +123,7 @@ public class ItemFetcher : IItemFetcher
                     Score = CalculateScoreBehavior.CalculateScore(r.ClassType ?? "C", priorities.f, r.AveragePricePerAdult, dailyBudgetPerAdult),
                     PlaceType = ItemType.Restaurant,
                     Rating = r.Rating,
-                    ImageSource = r.ImageSource
+                    ImageSource = r.ImageUrl
                 };
                 Console.WriteLine($"Item: {item.Name}, GlobalId: {item.GlobalId}, Type: {item.PlaceType}, Price: {item.AveragePricePerAdult}, Score: {item.Score}");
                 return item;
@@ -154,7 +154,7 @@ public class ItemFetcher : IItemFetcher
                     Score = CalculateScoreBehavior.CalculateScore(e.ClassType ?? "C", priorities.e, e.AveragePricePerAdult, dailyBudgetPerAdult),
                     PlaceType = ItemType.Entertainment,
                     Rating = e.Rating,
-                    ImageSource = e.ImageSource
+                    ImageSource = e.ImageUrl
                 };
                 Console.WriteLine($"Item: {item.Name}, GlobalId: {item.GlobalId}, Type: {item.PlaceType}, Price: {item.AveragePricePerAdult}, Score: {item.Score}");
                 return item;
@@ -183,7 +183,7 @@ public class ItemFetcher : IItemFetcher
                     Score = CalculateScoreBehavior.CalculateScore(t.ClassType ?? "C", priorities.t, t.AveragePricePerAdult, dailyBudgetPerAdult),
                     PlaceType = ItemType.TourismArea,
                     Rating = t.Rating,
-                    ImageSource = t.ImageSource
+                    ImageSource = t.ImageUrl
                 };
                 Console.WriteLine($"Item: {item.Name}, GlobalId: {item.GlobalId}, Type: {item.PlaceType}, Price: {item.AveragePricePerAdult}, Score: {item.Score}");
                 return item;
@@ -215,7 +215,7 @@ public class ItemFetcher : IItemFetcher
                     Score = CalculateScoreBehavior.CalculateScore(a.ClassType ?? "C", priorities.a, a.AveragePricePerAdult, dailyBudgetPerAdult),
                     PlaceType = ItemType.Accommodation,
                     Rating = a.Rating,
-                    ImageSource = a.ImageSource
+                    ImageSource = a.ImageUrl
                 };
                 Console.WriteLine($"Item: {item.Name}, GlobalId: {item.GlobalId}, Type: {item.PlaceType}, Price: {item.AveragePricePerAdult}, Score: {item.Score}");
                 return item;
@@ -244,7 +244,7 @@ public class ItemFetcher : IItemFetcher
                     Score = CalculateScoreBehavior.CalculateScore(r.ClassType ?? "C", priorities.f, r.AveragePricePerAdult, dailyBudgetPerAdult),
                     PlaceType = ItemType.Restaurant,
                     Rating = r.Rating,
-                    ImageSource = r.ImageSource
+                    ImageSource = r.ImageUrl
                 };
                 Console.WriteLine($"Item: {item.Name}, GlobalId: {item.GlobalId}, Type: {item.PlaceType}, Price: {item.AveragePricePerAdult}, Score: {item.Score}");
                 return item;
@@ -275,7 +275,7 @@ public class ItemFetcher : IItemFetcher
                     Score = CalculateScoreBehavior.CalculateScore(e.ClassType ?? "C", priorities.e, e.AveragePricePerAdult, dailyBudgetPerAdult),
                     PlaceType = ItemType.Entertainment,
                     Rating = e.Rating,
-                    ImageSource = e.ImageSource
+                    ImageSource = e.ImageUrl
                 };
                 Console.WriteLine($"Item: {item.Name}, GlobalId: {item.GlobalId}, Type: {item.PlaceType}, Price: {item.AveragePricePerAdult}, Score: {item.Score}");
                 return item;
@@ -304,7 +304,7 @@ public class ItemFetcher : IItemFetcher
                     Score = CalculateScoreBehavior.CalculateScore(t.ClassType ?? "C", priorities.t, t.AveragePricePerAdult, dailyBudgetPerAdult),
                     PlaceType = ItemType.TourismArea,
                     Rating = t.Rating,
-                    ImageSource = t.ImageSource
+                    ImageSource = t.ImageUrl
                 };
                 Console.WriteLine($"Item: {item.Name}, GlobalId: {item.GlobalId}, Type: {item.PlaceType}, Price: {item.AveragePricePerAdult}, Score: {item.Score}");
                 return item;

@@ -71,23 +71,23 @@ namespace TripMinder.Infrastructure.Data
 
 
             #region SQL BLOB
-            modelBuilder.Entity<Accomodation>()
-                .Property(a => a.ImgData)
-                .HasColumnType("varbinary(max)");
-            modelBuilder.Entity<Entertainment>()
-                .Property(e => e.ImgData)
-                .HasColumnType("varbinary(max)");
-            modelBuilder.Entity<Restaurant>()
-                .Property(r => r.ImgData)
-                .HasColumnType("varbinary(max)");
-
-            modelBuilder.Entity<TourismArea>()
-                .Property(t => t.ImgData)
-                .HasColumnType("varbinary(max)");
-            
-            modelBuilder.Entity<User>()
-                .Property(u => u.ImgData)
-                .HasColumnType("varbinary(max)");
+            // modelBuilder.Entity<Accomodation>()
+            //     .Property(a => a.ImgData)
+            //     .HasColumnType("varbinary(max)");
+            // modelBuilder.Entity<Entertainment>()
+            //     .Property(e => e.ImgData)
+            //     .HasColumnType("varbinary(max)");
+            // modelBuilder.Entity<Restaurant>()
+            //     .Property(r => r.ImgData)
+            //     .HasColumnType("varbinary(max)");
+            //
+            // modelBuilder.Entity<TourismArea>()
+            //     .Property(t => t.ImgData)
+            //     .HasColumnType("varbinary(max)");
+            //
+            // modelBuilder.Entity<User>()
+            //     .Property(u => u.ImgData)
+            //     .HasColumnType("varbinary(max)");
             #endregion
 
             modelBuilder.Entity<UserBookMark>()

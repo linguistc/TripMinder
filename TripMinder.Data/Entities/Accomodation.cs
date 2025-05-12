@@ -57,8 +57,7 @@ namespace TripMinder.Data.Entities
         
         public string? ContactLink { get; set; } 
         
-        public byte[]? ImgData { get; set; }
-        
+        public string? ImageUrl { get; set; }
         public int NumOfBeds { get; set; } = 1;
         
         public string? BedStatus { get; set; }
