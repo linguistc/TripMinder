@@ -119,6 +119,17 @@
             public const string Delete = Prefix + SingleRouter;
             public const string Paginate = Prefix + "paginate/";
         }
+        
+        public static class GovernorateRouting
+        {
+            public const string Prefix = Rule + "governorate/";
+            public const string List = Prefix + "list/";
+            public const string GetById = Prefix + SingleRouter;
+            public const string Create = Prefix + "create/";
+            public const string Update = Prefix + "Update/";
+            public const string Delete = Prefix + SingleRouter;
+            public const string Paginate = Prefix + "paginate/";
+        }
 
         public static class AccomodationClassRouting
         {

@@ -5,56 +5,54 @@ using TripMinder.Service.Contracts;
 
 namespace TripMinder.Service.Implementations;
 
-public class ZoneService : IZoneService
+public class GovernorateService : IGovernorateService
 {
     #region Fields
-    private readonly IZoneRepository zoneRepository;
+    private readonly IGovernorateRepository governorateRepository;
     #endregion
     
     #region Constructors
-    public ZoneService(IZoneRepository zoneRepository)
+    public GovernorateService(IGovernorateRepository governorateRepository)
     {
-        this.zoneRepository = zoneRepository;
+        this.governorateRepository = governorateRepository;
     }
     #endregion
-
-    #region Methods
-
-    public async Task<List<Zone>> GetZonesListAsync()
-    {
-        return await this.zoneRepository.GetTableNoTracking().Include(z => z.Governorate).ToListAsync();
-    }
-
-    public async Task<Zone> GetZoneByIdAsync(int id)
-    {
-        var zone = await this.zoneRepository.GetByIdAsync(id);
-        return zone;
-    }
-
-    public async Task<bool> IsZoneIdExist(int id)
-    {
-        return await this.zoneRepository.GetTableNoTracking().AnyAsync(z => z.Id == id);
-    }
     
-    public async Task<string> CreateAsync(Zone zone)
+    #region Methods
+    public async Task<List<Governorate>> GetGovernoratesListAsync()
     {
-        await this.zoneRepository.CreateAsync(zone);
+        return await this.governorateRepository.GetTableNoTracking().ToListAsync();
+    }
+
+    public async Task<Governorate> GetGovernorateByIdAsync(int id)
+    {
+        return await this.governorateRepository.GetByIdAsync(id);
+    }
+
+    public async Task<bool> IsGovernorateIdExist(int id)
+    {
+        throw new NotImplementedException();
+    }
+
+    public async Task<string> CreateAsync(Governorate governorate)
+    {
+        await this.governorateRepository.CreateAsync(governorate);
         return "Created";
     }
-
-    public async Task<string> UpdateAsync(Zone zone)
+    
+    public async Task<string> UpdateAsync(Governorate governorate)
     {
-        await this.zoneRepository.UpdateAsync(zone);
+        await this.governorateRepository.UpdateAsync(governorate);
         return "Updated";
     }
-
-    public async Task<string> DeleteAsync(Zone zone)
+    
+    public async Task<string> DeleteAsync(Governorate governorate)
     {
-        var trans = this.zoneRepository.BeginTransaction();
+        var trans = this.governorateRepository.BeginTransaction();
 
         try
         {
-            await this.zoneRepository.DeleteAsync(zone);
+            await this.governorateRepository.DeleteAsync(governorate);
             await trans.CommitAsync();
             return "Deleted";
         }
@@ -84,6 +82,6 @@ public class ZoneService : IZoneService
     {
         throw new NotImplementedException();
     }
-    
+
     #endregion
 }

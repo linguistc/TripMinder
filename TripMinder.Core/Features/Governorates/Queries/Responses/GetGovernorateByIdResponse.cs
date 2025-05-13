@@ -1,12 +1,10 @@
-using System.ComponentModel.DataAnnotations;
+namespace TripMinder.Core.Features.Governorates.Queries.Responses;
 
-namespace TripMinder.Data.Entities;
-
-public class Governorate
+public class GetGovernorateByIdResponse
 {
-    [Key]
     public int Id { get; set; }
     public string Name { get; set; }
     
     public string? ImageUrl { get; set; }
+
 }
