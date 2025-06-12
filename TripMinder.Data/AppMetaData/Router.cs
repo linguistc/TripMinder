@@ -122,7 +122,7 @@
         
         public static class GovernorateRouting
         {
-            public const string Prefix = Rule + "governorate/";
+            public const string Prefix = Rule + "city/";
             public const string List = Prefix + "list/";
             public const string GetById = Prefix + SingleRouter;
             public const string Create = Prefix + "create/";

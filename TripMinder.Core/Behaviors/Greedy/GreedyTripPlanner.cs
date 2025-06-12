@@ -68,7 +68,7 @@ public class GreedyTripPlanner
                 item.ClassType,
                 typeToPriority[item.PlaceType],
                 item.AveragePricePerAdult,
-                request.BudgetPerAdult
+                request.BudgetPerAdult, 1
             );
         }
 

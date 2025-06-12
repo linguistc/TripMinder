@@ -91,7 +91,7 @@ public class ItemFetcher : IItemFetcher
                     AveragePricePerAdult = a.AveragePricePerAdult <= 0
                         ? GetRandomPrice(ItemType.Accommodation)
                         : (float)a.AveragePricePerAdult,
-                    Score = CalculateScoreBehavior.CalculateScore(a.ClassType ?? "C", priorities.a, a.AveragePricePerAdult, dailyBudgetPerAdult),
+                    Score = CalculateScoreBehavior.CalculateScore(a.ClassType ?? "C", priorities.a, a.AveragePricePerAdult, dailyBudgetPerAdult, a.Rating),
                     PlaceType = ItemType.Accommodation,
                     Rating = a.Rating,
                     ImageSource = a.ImageUrl
@@ -120,7 +120,7 @@ public class ItemFetcher : IItemFetcher
                     AveragePricePerAdult = r.AveragePricePerAdult <= 0
                         ? GetRandomPrice(ItemType.Restaurant)
                         : (float)r.AveragePricePerAdult,
-                    Score = CalculateScoreBehavior.CalculateScore(r.ClassType ?? "C", priorities.f, r.AveragePricePerAdult, dailyBudgetPerAdult),
+                    Score = CalculateScoreBehavior.CalculateScore(r.ClassType ?? "C", priorities.f, r.AveragePricePerAdult, dailyBudgetPerAdult, r.Rating),
                     PlaceType = ItemType.Restaurant,
                     Rating = r.Rating,
                     ImageSource = r.ImageUrl
@@ -151,7 +151,7 @@ public class ItemFetcher : IItemFetcher
                     AveragePricePerAdult = e.AveragePricePerAdult <= 0
                         ? GetRandomPrice(ItemType.Entertainment)
                         : (float)e.AveragePricePerAdult,
-                    Score = CalculateScoreBehavior.CalculateScore(e.ClassType ?? "C", priorities.e, e.AveragePricePerAdult, dailyBudgetPerAdult),
+                    Score = CalculateScoreBehavior.CalculateScore(e.ClassType ?? "C", priorities.e, e.AveragePricePerAdult, dailyBudgetPerAdult, e.Rating),
                     PlaceType = ItemType.Entertainment,
                     Rating = e.Rating,
                     ImageSource = e.ImageUrl
@@ -180,7 +180,7 @@ public class ItemFetcher : IItemFetcher
                     AveragePricePerAdult = t.AveragePricePerAdult <= 0
                         ? GetRandomPrice(ItemType.TourismArea)
                         : (float)t.AveragePricePerAdult,
-                    Score = CalculateScoreBehavior.CalculateScore(t.ClassType ?? "C", priorities.t, t.AveragePricePerAdult, dailyBudgetPerAdult),
+                    Score = CalculateScoreBehavior.CalculateScore(t.ClassType ?? "C", priorities.t, t.AveragePricePerAdult, dailyBudgetPerAdult, t.Rating),
                     PlaceType = ItemType.TourismArea,
                     Rating = t.Rating,
                     ImageSource = t.ImageUrl
@@ -212,7 +212,7 @@ public class ItemFetcher : IItemFetcher
                     AveragePricePerAdult = a.AveragePricePerAdult <= 0
                         ? GetRandomPrice(ItemType.Accommodation)
                         : (float)a.AveragePricePerAdult,
-                    Score = CalculateScoreBehavior.CalculateScore(a.ClassType ?? "C", priorities.a, a.AveragePricePerAdult, dailyBudgetPerAdult),
+                    Score = CalculateScoreBehavior.CalculateScore(a.ClassType ?? "C", priorities.a, a.AveragePricePerAdult, dailyBudgetPerAdult, a.Rating),
                     PlaceType = ItemType.Accommodation,
                     Rating = a.Rating,
                     ImageSource = a.ImageUrl
@@ -241,7 +241,7 @@ public class ItemFetcher : IItemFetcher
                     AveragePricePerAdult = r.AveragePricePerAdult <= 0
                         ? GetRandomPrice(ItemType.Restaurant)
                         : (float)r.AveragePricePerAdult,
-                    Score = CalculateScoreBehavior.CalculateScore(r.ClassType ?? "C", priorities.f, r.AveragePricePerAdult, dailyBudgetPerAdult),
+                    Score = CalculateScoreBehavior.CalculateScore(r.ClassType ?? "C", priorities.f, r.AveragePricePerAdult, dailyBudgetPerAdult, r.Rating),
                     PlaceType = ItemType.Restaurant,
                     Rating = r.Rating,
                     ImageSource = r.ImageUrl
@@ -272,7 +272,7 @@ public class ItemFetcher : IItemFetcher
                     AveragePricePerAdult = e.AveragePricePerAdult <= 0
                         ? GetRandomPrice(ItemType.Entertainment)
                         : (float)e.AveragePricePerAdult,
-                    Score = CalculateScoreBehavior.CalculateScore(e.ClassType ?? "C", priorities.e, e.AveragePricePerAdult, dailyBudgetPerAdult),
+                    Score = CalculateScoreBehavior.CalculateScore(e.ClassType ?? "C", priorities.e, e.AveragePricePerAdult, dailyBudgetPerAdult, e.Rating),
                     PlaceType = ItemType.Entertainment,
                     Rating = e.Rating,
                     ImageSource = e.ImageUrl
@@ -301,7 +301,7 @@ public class ItemFetcher : IItemFetcher
                     AveragePricePerAdult = t.AveragePricePerAdult <= 0
                         ? GetRandomPrice(ItemType.TourismArea)
                         : (float)t.AveragePricePerAdult,
-                    Score = CalculateScoreBehavior.CalculateScore(t.ClassType ?? "C", priorities.t, t.AveragePricePerAdult, dailyBudgetPerAdult),
+                    Score = CalculateScoreBehavior.CalculateScore(t.ClassType ?? "C", priorities.t, t.AveragePricePerAdult, dailyBudgetPerAdult, t.Rating),
                     PlaceType = ItemType.TourismArea,
                     Rating = t.Rating,
                     ImageSource = t.ImageUrl

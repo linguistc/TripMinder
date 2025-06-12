@@ -18,7 +18,7 @@ public static class CalculateScoreBehavior
         string classType,
         int priority,
         double averagePricePerAdult,
-        double dailyBudgetPerAdult)
+        double dailyBudgetPerAdult, double placeRating = 1.0)
     {
         // 1. Class Weight: Exponential weights for higher classes
         float classWeight = classType switch
@@ -39,6 +39,6 @@ public static class CalculateScoreBehavior
         float priceFactor = 1.0f / (1.0f + (float)Math.Log(1.0 + priceRatio)); // Logarithmic to soften high-price penalty
 
         // Final score: Product of components
-        return classWeight * priorityWeight * priceFactor;
+        return classWeight * priorityWeight * priceFactor * (float)placeRating;
     }
 }

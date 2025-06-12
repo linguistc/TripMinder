@@ -1,242 +1,76 @@
-﻿using Microsoft.EntityFrameworkCore;
-using TripMinder.Infrastructure.Data;
+﻿using System;
+using System.IO;
+using System.Linq;
+using Microsoft.EntityFrameworkCore;
+using TripMinder.Infrastructure.Data; // Assuming AppDBContext is defined here
 
-namespace SeedingImgs;
-
-class Program
+namespace SeedingImgs
 {
-    static void Main(string[] args)
+    class Program
     {
-        var options = new DbContextOptionsBuilder<AppDBContext>()
-            .UseSqlServer("Data Source=.;Initial Catalog=TripDbDemo;Integrated Security=True;Encrypt=False;Trust Server Certificate=True")
-            .Options;
-
-        // using (var ctx = new AppDBContext(options))
-        // {
-        //     var map = ctx.Accomodations
-        //         .Select(r => new {r.Name, r.Id})
-        //         .ToDictionary(r => r.Name, x => x.Id);
-        //     
-        //     var folder = @"E:\college\g-data\Cairo Image\Cairo Image\cairo Accommodation";
-        //     var files = Directory.GetFiles(folder);
-        //
-        //     foreach (var file in files)
-        //     {
-        //         string fileName = Path.GetFileNameWithoutExtension(file);
-        //         string ext = Path.GetExtension(file);
-        //
-        //         if (map.TryGetValue(fileName, out int id))
-        //         {
-        //             string newPath = Path.Combine(folder, $"{id}{ext}");
-        //             
-        //             if(!File.Exists(newPath))
-        //                 File.Move(file, newPath);
-        //             else
-        //                 Console.WriteLine($"File for ID {id} already exists, skipping.");
-        //         }
-        //         else 
-        //             Console.WriteLine($"No DB record found for name '{fileName}'.");
-        //     }
-        // }
-        
-        using (var ctx = new AppDBContext(options))
+        static void Main(string[] args)
         {
-            var map = ctx.Entertainments
-                .Select(r => new {r.Name, r.Id})
-                .ToDictionary(r => r.Name, x => x.Id);
-            
-            var folder = @"E:\college\g-data\Cairo Image\Cairo Image\cairo Entertainment";
-            var files = Directory.GetFiles(folder);
+            // Declare and initialize ctxOptions in Main
+            var ctxOptions = new DbContextOptionsBuilder<AppDBContext>()
+                .UseSqlServer("Data Source=.;Initial Catalog=TripDbDemo;Integrated Security=True;Encrypt=False;Trust Server Certificate=True")
+                .Options;
 
+            // Pass ctxOptions to RenameFiles
+            RenameFiles(ctx => ctx.Accomodations, @"E:\college\g-data\acco", ctxOptions);
+            RenameFiles(ctx => ctx.Entertainments, @"E:\college\g-data\entertain", ctxOptions);
+            RenameFiles(ctx => ctx.Restaurants, @"E:\college\g-data\rest", ctxOptions);
+            RenameFiles(ctx => ctx.TourismAreas, @"E:\college\g-data\tour", ctxOptions);
+
+            Console.WriteLine("All done. Press any key to exit…");
+            Console.ReadKey();
+        }
+
+        /// <summary>
+        /// Renames files in a folder based on a Name-to-Id mapping from the database.
+        /// </summary>
+        static void RenameFiles<TEntity>(
+            Func<AppDBContext, IQueryable<TEntity>> tableSelector,
+            string folder,
+            DbContextOptions<AppDBContext> ctxOptions) // Accept ctxOptions as a parameter
+            where TEntity : class
+        {
+            // Use ctxOptions to create the DbContext
+            using var ctx = new AppDBContext(ctxOptions);
+
+            // Build a dictionary of Name → Id from the database
+            var map = tableSelector(ctx)
+                .AsEnumerable()
+                .GroupBy(e => (string)e.GetType().GetProperty("Name").GetValue(e))
+                .Select(g => g.First())
+                .ToDictionary(
+                    e => (string)e.GetType().GetProperty("Name").GetValue(e),
+                    e => (int)e.GetType().GetProperty("Id").GetValue(e));
+
+            Console.WriteLine($"Renaming in '{folder}' — {map.Count} unique names found.");
+
+            // Rename files based on the dictionary
+            var files = Directory.GetFiles(folder);
             foreach (var file in files)
             {
-                string fileName = Path.GetFileNameWithoutExtension(file);
-                string ext = Path.GetExtension(file);
+                var fileName = Path.GetFileNameWithoutExtension(file);
+                var ext = Path.GetExtension(file);
 
-                if (map.TryGetValue(fileName, out int id))
+                if (!map.TryGetValue(fileName, out var id))
                 {
-                    string newPath = Path.Combine(folder, $"{id}{ext}");
-                    
-                    if(!File.Exists(newPath))
-                        File.Move(file, newPath);
-                    else
-                        Console.WriteLine($"File for ID {id} already exists, skipping.");
+                    Console.WriteLine($"[SKIP] No DB record for '{fileName}'.");
+                    continue;
                 }
-                else 
-                    Console.WriteLine($"No DB record found for name '{fileName}'.");
+
+                var newPath = Path.Combine(folder, $"{id}{ext}");
+                if (File.Exists(newPath))
+                {
+                    Console.WriteLine($"[SKIP] '{newPath}' already exists.");
+                    continue;
+                }
+
+                File.Move(file, newPath);
+                Console.WriteLine($"[RENAMED] {fileName}{ext} → {id}{ext}");
             }
         }
-        
-        using (var ctx = new AppDBContext(options))
-        {
-            var map = ctx.Restaurants
-                .Select(r => new {r.Name, r.Id})
-                .ToDictionary(r => r.Name, x => x.Id);
-            
-            var folder = @"E:\college\g-data\Cairo Image\Cairo Image\cairo Restaurants";
-            var files = Directory.GetFiles(folder);
-
-            foreach (var file in files)
-            {
-                string fileName = Path.GetFileNameWithoutExtension(file);
-                string ext = Path.GetExtension(file);
-
-                if (map.TryGetValue(fileName, out int id))
-                {
-                    string newPath = Path.Combine(folder, $"{id}{ext}");
-                    
-                    if(!File.Exists(newPath))
-                        File.Move(file, newPath);
-                    else
-                        Console.WriteLine($"File for ID {id} already exists, skipping.");
-                }
-                else 
-                    Console.WriteLine($"No DB record found for name '{fileName}'.");
-            }
-        }
-        
-        using (var ctx = new AppDBContext(options))
-        {
-            var map = ctx.TourismAreas
-                .Select(r => new {r.Name, r.Id})
-                .ToDictionary(r => r.Name, x => x.Id);
-            
-            var folder = @"E:\college\g-data\Cairo Image\Cairo Image\cairo tourism";
-            var files = Directory.GetFiles(folder);
-
-            foreach (var file in files)
-            {
-                string fileName = Path.GetFileNameWithoutExtension(file);
-                string ext = Path.GetExtension(file);
-
-                if (map.TryGetValue(fileName, out int id))
-                {
-                    string newPath = Path.Combine(folder, $"{id}{ext}");
-                    
-                    if(!File.Exists(newPath))
-                        File.Move(file, newPath);
-                    else
-                        Console.WriteLine($"File for ID {id} already exists, skipping.");
-                }
-                else 
-                    Console.WriteLine($"No DB record found for name '{fileName}'.");
-            }
-        }
-        
-        // using (var ctx = new AppDBContext(options))
-        // {
-        //     var folder = @"E:\college\g-data\Cairo Image\Cairo Image\cairo Accommodation";
-        //     var files = Directory.GetFiles(folder);
-        //
-        //     short counter = 0;
-        //     foreach (var file in files)
-        //     {
-        //         var fileName = Path.GetFileNameWithoutExtension(file);
-        //         
-        //         var AcommodationItem = ctx.Accomodations
-        //             .FirstOrDefault(i => i.Name == fileName);
-        //
-        //         if (AcommodationItem != null)
-        //         {
-        //             AcommodationItem.ImgData = File.ReadAllBytes(file);
-        //         }
-        //         
-        //         if (++counter >= 20)
-        //         {
-        //             ctx.SaveChanges();
-        //             counter = 0;
-        //         }
-        //     }
-        //     
-        //     ctx.SaveChanges();
-        // }
-        //
-        // using (var ctx = new AppDBContext(options))
-        // {
-        //     var folder = @"E:\college\g-data\Cairo Image\Cairo Image\Cairo Entertainment";
-        //     var files = Directory.GetFiles(folder);
-        //
-        //     short counter = 0;
-        //     foreach (var file in files)
-        //     {
-        //         
-        //         var fileName = Path.GetFileNameWithoutExtension(file);
-        //         
-        //         var EntertainmentItem = ctx.Entertainments
-        //             .FirstOrDefault(i => i.Name == fileName);
-        //
-        //         if (EntertainmentItem != null)
-        //         {
-        //             EntertainmentItem.ImgData = File.ReadAllBytes(file);
-        //         }
-        //
-        //         if (++counter >= 20)
-        //         {
-        //             ctx.SaveChanges();
-        //             counter = 0;
-        //         }
-        //     }
-        //     
-        //     ctx.SaveChanges();
-        // }
-        //
-        // using (var ctx = new AppDBContext(options))
-        // {
-        //     var folder = @"E:\college\g-data\Cairo Image\Cairo Image\cairo restaurants";
-        //     var files = Directory.GetFiles(folder);
-        //
-        //     short counter = 0;
-        //     foreach (var file in files)
-        //     {
-        //         var fileName = Path.GetFileNameWithoutExtension(file);
-        //         
-        //         var RestItem = ctx.Restaurants
-        //             .FirstOrDefault(i => i.Name == fileName);
-        //
-        //         if (RestItem != null)
-        //         {
-        //             RestItem.ImgData = File.ReadAllBytes(file);
-        //         }
-        //         
-        //         if (++counter >= 20)
-        //         {
-        //             ctx.SaveChanges();
-        //             counter = 0;
-        //         }
-        //     }
-        //     
-        //     ctx.SaveChanges();
-        // }
-        //
-        // using (var ctx = new AppDBContext(options))
-        // {
-        //     var folder = @"E:\college\g-data\Cairo Image\Cairo Image\Cairo Tourism";
-        //     var files = Directory.GetFiles(folder);
-        //
-        //     short counter = 0;
-        //     foreach (var file in files)
-        //     {
-        //         var fileName = Path.GetFileNameWithoutExtension(file);
-        //         
-        //         var TourItem = ctx.TourismAreas
-        //             .FirstOrDefault(i => i.Name == fileName);
-        //
-        //         if (TourItem != null)
-        //         {
-        //             TourItem.ImgData = File.ReadAllBytes(file);
-        //         }
-        //         
-        //         if (++counter >= 20)
-        //         {
-        //             ctx.SaveChanges();
-        //             counter = 0;
-        //         }
-        //     }
-        //     
-        //     ctx.SaveChanges();
-        // }
-        //
     }
-    
-    
 }
