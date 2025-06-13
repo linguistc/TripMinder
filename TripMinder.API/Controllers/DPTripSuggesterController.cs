@@ -10,9 +10,9 @@ namespace TripMinder.API.Controllers;
 public class DPTripSuggesterController : AppControllerBase
 {
     private readonly TripPlanOptimizer _optimizer;
-    private readonly ILogger<TripSuggesterController> _logger;
+    private readonly ILogger<GreedyTripSuggesterController> _logger;
 
-    public DPTripSuggesterController(TripPlanOptimizer optimizer, ILogger<TripSuggesterController> logger)
+    public DPTripSuggesterController(TripPlanOptimizer optimizer, ILogger<GreedyTripSuggesterController> logger)
     {
         this._optimizer = optimizer;
         this._logger = logger;

@@ -17,7 +17,11 @@ public class GreedySolutionOptimizer
 
     public void TryAddSolution(List<Item> solution)
     {
-        if (!solution.Any()) return;
+        if (!solution.Any())
+        {
+            Console.WriteLine("Empty solution, skipping.");
+            return;
+        }
 
         double score = solution.Sum(item => item.Score);
         double cost = solution.Sum(item => item.AveragePricePerAdult);
@@ -30,6 +34,7 @@ public class GreedySolutionOptimizer
             if (intersection > solution.Count / 2)
             {
                 isUnique = false;
+                Console.WriteLine($"Solution too similar to existing, skipping. Score={score}, Cost={cost}");
                 break;
             }
         }
@@ -43,6 +48,7 @@ public class GreedySolutionOptimizer
             if (_topSolutions.Count > _maxSolutions)
             {
                 var minIndex = _topSolutions.IndexOf(_topSolutions.OrderBy(s => s.Score).First());
+                Console.WriteLine($"Removing weakest solution at index {minIndex}, Score={_topSolutions[minIndex].Score}");
                 _topSolutions.RemoveAt(minIndex);
                 _usedItemsPerSolution.RemoveAt(minIndex);
             }
@@ -53,9 +59,11 @@ public class GreedySolutionOptimizer
 
     public List<List<Item>> GetTopSolutions()
     {
-        return _topSolutions
+        var solutions = _topSolutions
             .OrderByDescending(s => s.Score)
             .Select(s => s.Solution)
             .ToList();
+        Console.WriteLine($"Returning {solutions.Count} top solutions.");
+        return solutions;
     }
 }

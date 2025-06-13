@@ -234,11 +234,11 @@
 
         #region TripSuggestionner Routing
         
-        public class TripSuggesterRouting
+        public class GreedyTripSuggesterRouting
         {
             public const string Prefix = Rule + "tripsuggester/";
-            public const string OptimizeTrip = Prefix + "optimize/";
-            public const string TestOptimizeTrip = Prefix + "testoptimize/";
+            public const string GreedyOptimizeTrip = Prefix + "greedyOptimize/";
+            public const string GreedyTestOptimizeTrip = Prefix + "greedyTestoptimize/";
         }
         
         public class DPTripSuggesterRouting

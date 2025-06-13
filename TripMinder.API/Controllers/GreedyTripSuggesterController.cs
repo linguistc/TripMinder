@@ -44,19 +44,19 @@ public record TripPlanRequestDto(
     int MaxTourismAreas);
 
 [ApiController]
-public class TripSuggesterController : AppControllerBase
+public class GreedyTripSuggesterController : AppControllerBase
 {
     private readonly GreedyTripPlanner _planner;
-    private readonly ILogger<TripSuggesterController> _logger;
+    private readonly ILogger<GreedyTripSuggesterController> _logger;
     
-    public TripSuggesterController(GreedyTripPlanner planner,
-        ILogger<TripSuggesterController> logger)
+    public GreedyTripSuggesterController(GreedyTripPlanner planner,
+        ILogger<GreedyTripSuggesterController> logger)
     {
         _planner = planner;
         _logger = logger;
     }
     
-    [HttpPost(Router.TripSuggesterRouting.OptimizeTrip)]
+    [HttpPost(Router.GreedyTripSuggesterRouting.GreedyOptimizeTrip)]
     public async Task<IActionResult> OptimizeTrip([FromBody] TripPlanRequestDto requestDto)
     {
         _logger.LogInformation("Received trip optimization request: GovernorateId={GovernorateId}, ZoneId={ZoneId}, BudgetPerAdult={BudgetPerAdult}, NumberOfTravelers={NumberOfTravelers}, MaxRestaurants={MaxRestaurants}, Interests={Interests}",
@@ -66,6 +66,13 @@ public class TripSuggesterController : AppControllerBase
         {
             _logger.LogWarning("Invalid model state: {@ModelState}", ModelState);
             return BadRequest(ModelState);
+        }
+        
+        var validInterests = new[] { "accommodation", "restaurants", "food", "entertainments", "entertainment", "tourismareas", "tourism" };
+        if (requestDto.Interests.Any(i => !validInterests.Contains(i.Trim().ToLowerInvariant())))
+        {
+            _logger.LogWarning("Invalid interests provided: {Interests}", string.Join(", ", requestDto.Interests));
+            return BadRequest(new { Message = "Invalid interests provided", Errors = new List<string> { "Interests must be one of: accommodation, restaurants, food, entertainments, entertainment, tourismareas, tourism" } });
         }
         
         var totalBudget = (int)(requestDto.BudgetPerAdult * requestDto.NumberOfTravelers);
@@ -97,8 +104,7 @@ public class TripSuggesterController : AppControllerBase
                 return Ok(new Respond<TripPlanResponse>
                 {
                     Succeeded = false,
-                    Message = "No items selected within constraints",
-                    Errors = new List<string> { "Empty trip plan generated" }
+                    Message = "No items selected within constraints. Consider increasing the budget or adjusting interests.",                    Errors = new List<string> { "Empty trip plan generated" }
                 });
             }
             _logger.LogInformation("Optimization succeeded: Restaurants={RestaurantsCount}, TotalCost={TotalCost}",

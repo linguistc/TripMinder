@@ -1,104 +1,74 @@
-using TripMinder.Core.Behaviors.Shared;
+using System;
+   using System.Collections.Generic;
+   using System.Linq;
+   using System.Threading.Tasks;
+   using TripMinder.Core.Behaviors.Shared;
 
-namespace TripMinder.Core.Behaviors.Knapsack;
+   namespace TripMinder.Core.Behaviors.Knapsack;
 
-public class GreedyTripSolver : IGreedyTripSolver
-{
-    private readonly GreedySolutionCollector _collector;
+   public class GreedyTripSolver : IGreedyTripSolver
+   {
+       private readonly GreedySolutionOptimizer _optimizer;
+       private readonly IGreedyStagedTripPlanOptimizer _phaseOptimizer;
 
-    public GreedyTripSolver(GreedySolutionCollector collector)
-    {
-        _collector = collector;
-    }
+       public GreedyTripSolver(GreedySolutionOptimizer optimizer, IGreedyStagedTripPlanOptimizer phaseOptimizer)
+       {
+           _optimizer = optimizer;
+           _phaseOptimizer = phaseOptimizer;
+       }
 
-    public (float maxProfit, List<Item> selectedItems) GetBestPlan(
-        int budget,
-        List<Item> items,
-        IKnapsackConstraints constraints,
-        (int a, int f, int e, int t)? priorities = null)
-    {
-        var selectedItems = RunGreedy(budget, items, constraints, priorities);
-        float maxProfit = selectedItems.Sum(i => i.Score);
-        Console.WriteLine($"Greedy Single Plan: Profit={maxProfit}, Items={selectedItems.Count}, Cost={selectedItems.Sum(i => i.AveragePricePerAdult)}");
-        return (maxProfit, selectedItems);
-    }
+       public (float maxProfit, List<Item> selectedItems) GetBestPlan(
+           int budget,
+           List<Item> items,
+           IKnapsackConstraints constraints,
+           (int a, int f, int e, int t)? priorities = null)
+       {
+           var selectedItems = RunGreedy(budget, items, constraints, priorities).Result;
+           float maxProfit = selectedItems.Sum(i => i.Score);
+           Console.WriteLine($"Greedy Single Plan: Profit={maxProfit}, Items={selectedItems.Count}, Cost={selectedItems.Sum(i => i.AveragePricePerAdult)}");
+           return (maxProfit, selectedItems);
+       }
 
-    public (float maxProfit, List<List<Item>> allPlans) GetMultiplePlans(
-        int budget,
-        List<Item> items,
-        IKnapsackConstraints constraints,
-        (int a, int f, int e, int t)? priorities = null)
-    {
-        var basePlan = RunGreedy(budget, items, constraints, priorities);
-        _collector.TryAddPlan(basePlan);
+       public (float maxProfit, List<List<Item>> allPlans) GetMultiplePlans(
+           int budget,
+           List<Item> items,
+           IKnapsackConstraints constraints,
+           (int a, int f, int e, int t)? priorities = null)
+       {
+           var basePlan = RunGreedy(budget, items, constraints, priorities).Result;
+           _optimizer.TryAddSolution(basePlan);
 
-        if (priorities.HasValue)
-        {
-            for (int i = 0; i < 5; i++)
-            {
-                var rand = new Random(i);
-                var perturbedPriorities = (
-                    a: priorities.Value.a + (float)(rand.NextDouble() * 0.2 - 0.1),
-                    f: priorities.Value.f + (float)(rand.NextDouble() * 0.2 - 0.1),
-                    e: priorities.Value.e + (float)(rand.NextDouble() * 0.2 - 0.1),
-                    t: priorities.Value.t + (float)(rand.NextDouble() * 0.2 - 0.1)
-                );
-                var variantPlan = RunGreedy(budget, items, constraints, perturbedPriorities);
-                _collector.TryAddPlan(variantPlan);
-            }
-        }
+           var allPlans = _optimizer.GetTopSolutions();
+           float maxProfit = allPlans.Any() ? allPlans.Max(s => s.Sum(i => i.Score)) : 0f;
+           Console.WriteLine($"Greedy Multiple Plans: Count={allPlans.Count}, Max Profit={maxProfit}");
+           return (maxProfit, allPlans);
+       }
 
-        var allPlans = _collector.GetTopPlans();
-        float maxProfit = allPlans.Any() ? allPlans.Max(s => s.Sum(i => i.Score)) : 0f;
-        Console.WriteLine($"Greedy Multiple Plans: Count={allPlans.Count}, Max Profit={maxProfit}");
-        return (maxProfit, allPlans);
-    }
+       private async Task<List<Item>> RunGreedy(
+           int budget,
+           List<Item> items,
+           IKnapsackConstraints constraints,
+           (int a, int f, int e, int t)? priorities)
+       {
+           var userConstraints = new UserDefinedKnapsackConstraints(
+               constraints.MaxRestaurants,
+               constraints.MaxAccommodations,
+               constraints.MaxEntertainments,
+               constraints.MaxTourismAreas);
 
-    private List<Item> RunGreedy(
-        int budget,
-        List<Item> items,
-        IKnapsackConstraints constraints,
-        (float a, float f, float e, float t)? priorities)
-    {
-        var tracker = new CountTracker();
-        var priorityWeights = new Dictionary<ItemType, float>
-        {
-            [ItemType.Accommodation] = priorities?.a ?? 0.1f,
-            [ItemType.Restaurant] = priorities?.f ?? 0.1f,
-            [ItemType.Entertainment] = priorities?.e ?? 0.1f,
-            [ItemType.TourismArea] = priorities?.t ?? 0.1f
-        };
+           var orderedInterests = priorities.HasValue
+               ? new List<(ItemType, int)>
+                 {
+                     (ItemType.Accommodation, priorities.Value.a),
+                     (ItemType.Restaurant, priorities.Value.f),
+                     (ItemType.Entertainment, priorities.Value.e),
+                     (ItemType.TourismArea, priorities.Value.t)
+                 }
+                 .OrderByDescending(x => x.Item2)
+                 .Select(x => x.Item1.ToString().ToLower())
+                 .ToList()
+               : new List<string> { "accommodation", "restaurants", "entertainments", "tourismareas" };
 
-        var itemScores = items
-            .Select(item => new
-            {
-                Item = item,
-                AdjustedRatio = item.AveragePricePerAdult > 0
-                    ? (item.Score * priorityWeights.GetValueOrDefault(item.PlaceType, 0.1f)) / item.AveragePricePerAdult
-                    : 0.0
-            })
-            .OrderByDescending(x => x.AdjustedRatio)
-            .ToList();
-
-        var selectedItems = new List<Item>();
-        int remainingBudget = budget;
-
-        while (remainingBudget > 0)
-        {
-            var candidate = itemScores
-                .FirstOrDefault(x =>
-                    !selectedItems.Contains(x.Item) &&
-                    x.Item.AveragePricePerAdult <= remainingBudget &&
-                    !tracker.Exceeded(x.Item.PlaceType, constraints));
-
-            if (candidate == null) break;
-
-            selectedItems.Add(candidate.Item);
-            remainingBudget -= (int)candidate.Item.AveragePricePerAdult;
-            tracker.Increment(candidate.Item.PlaceType);
-            Console.WriteLine($"Selected: {candidate.Item.Name}, Type={candidate.Item.PlaceType}, Score={candidate.Item.Score}, Cost={candidate.Item.AveragePricePerAdult}");
-        }
-
-        return selectedItems;
-    }
-}
+           return await _phaseOptimizer.OptimizeStagedAsync(items, orderedInterests, budget, userConstraints, priorities);
+       }
+   }
