@@ -6,7 +6,7 @@ My graduation project, a RESTful Web API for generating personalized travel itin
 
 ## Features
 - **Backend**: Built with C#, .NET Core, RESTful APIs, and Entity Framework.
-- **Algorithm**: Innovative 5D dynamic programming, implemented following established design principles for efficient itinerary planning.
+- **Algorithm**: Developed 5D dynamic programming, implemented following established design principles for efficient itinerary planning.
 - **Database**: Normalized SQL database with relational integrity.
 - **Architecture**: CQRS pattern for scalability, maintainability, and performance.
 - **Testing**: Unit tests to ensure reliability.
@@ -14,7 +14,7 @@ My graduation project, a RESTful Web API for generating personalized travel itin
 ## Project Timeline
 
 - **Start Date**: February 2025
-- **Expected Completion**: June 2025
+- **Completion Date**: June 2025
 
 ## GitHub
 [https://github.com/linguistc/TripMinder](https://github.com/linguistc/TripMinder)
