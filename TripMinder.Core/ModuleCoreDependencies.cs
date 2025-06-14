@@ -37,8 +37,7 @@ namespace TripMinder.Core
             services.AddScoped<GreedySolutionOptimizer>();
             
             // Greedy Dependencies
-            // services.AddScoped<IGreedyPhaseOptimizer, GreedyPhasedTripPlanOptimizer>();
-            services.AddScoped<IGreedyStagedTripPlanOptimizer, GreedyTripPlanOptimizer>();
+            services.AddScoped<IGreedyStagedTripPlanOptimizer, GreedyPhasedTripPlanOptimizer>();
             services.AddScoped<IGreedyTripSolver, GreedyTripSolver>();
             services.AddScoped<GreedyTripPlanner>();
             services.AddScoped<GreedySolutionOptimizer>();

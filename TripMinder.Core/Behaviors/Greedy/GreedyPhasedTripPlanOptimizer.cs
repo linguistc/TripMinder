@@ -1,7 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using TripMinder.Core.Behaviors.Shared;
 
 namespace TripMinder.Core.Behaviors.Knapsack;
@@ -12,11 +8,6 @@ namespace TripMinder.Core.Behaviors.Knapsack;
 /// </summary>
 public class GreedyPhasedTripPlanOptimizer : IGreedyStagedTripPlanOptimizer
 {
-    public GreedyPhasedTripPlanOptimizer()
-    {
-        // No dependencies needed
-    }
-
     public async Task<List<Item>> OptimizeStagedAsync(
         List<Item> items,
         List<string> orderedInterests,
@@ -54,68 +45,52 @@ public class GreedyPhasedTripPlanOptimizer : IGreedyStagedTripPlanOptimizer
         var selected = new List<Item>();
         var tracker = new CountTracker();
         int remainingBudget = budget;
-        bool initialCoverageComplete = false;
         int phase = 0;
 
         // 4. Phased expansion loop
-        while (true)
+        // Phase 1: Try to cover each interest type once
+        while (phase < phaseOrder.Count)
+        {
+            var type = phaseOrder[phase];
+            if (tracker.Exceeded(type, constraints))
+            {
+                Console.WriteLine($"Phase {phase}: Skipping {type} (max reached: {GetMax(constraints, type)})");
+                phase++;
+                continue;
+            }
+
+            if (TryTakeNext(type, greedyLists, tracker, ref remainingBudget, constraints, selected))
+            {
+                Console.WriteLine($"Phase {phase}: Added {type}, Count={tracker.GetCount(type)}, Budget={remainingBudget}, Item={selected.Last().Name}");
+            }
+            else
+            {
+                Console.WriteLine($"Phase {phase}: No suitable {type} item found for budget {remainingBudget}");
+            }
+
+            phase++;
+        }
+
+        // Phase 2: Expand freely until no more items can be added or budget is exhausted
+        while (remainingBudget > minPrice && greedyLists.Any(kvp => kvp.Value.Any() && !tracker.Exceeded(kvp.Key, constraints)))
         {
             bool madeProgress = false;
 
-            // Phase 1: Cover each interest type once
-            if (phase < phaseOrder.Count)
+            foreach (var type in phaseOrder)
             {
-                var type = phaseOrder[phase];
-                if (tracker.Exceeded(type, constraints))
-                {
-                    Console.WriteLine($"Phase {phase}: Skipping {type} (max reached: {GetMax(constraints, type)})");
-                    phase++;
+                if (tracker.Exceeded(type, constraints) || !greedyLists[type].Any())
                     continue;
-                }
 
                 if (TryTakeNext(type, greedyLists, tracker, ref remainingBudget, constraints, selected))
                 {
                     madeProgress = true;
-                    Console.WriteLine($"Phase {phase}: Added {type}, Count={tracker.GetCount(type)}, Budget={remainingBudget}, Item={selected.Last().Name}");
-                }
-                else
-                {
-                    Console.WriteLine($"Phase {phase}: No suitable {type} item found for budget {remainingBudget}");
-                }
-
-                phase++;
-                if (phase == phaseOrder.Count)
-                {
-                    initialCoverageComplete = true;
-                    Console.WriteLine("Initial coverage complete. Entering free expansion phase.");
+                    Console.WriteLine($"Free Phase: Added {type}, Count={tracker.GetCount(type)}, Budget={remainingBudget}, Item={selected.Last().Name}");
                 }
             }
-            // Phase 2: Expand freely within constraints
-            else if (initialCoverageComplete)
+
+            if (!madeProgress)
             {
-                int unchangedRounds = 0;
-                while (unchangedRounds < phaseOrder.Count)
-                {
-                    bool phaseProgress = false;
-
-                    foreach (var type in phaseOrder)
-                    {
-                        if (tracker.Exceeded(type, constraints))
-                            continue;
-
-                        if (TryTakeNext(type, greedyLists, tracker, ref remainingBudget, constraints, selected))
-                        {
-                            phaseProgress = true;
-                            Console.WriteLine($"Free Phase: Added {type}, Count={tracker.GetCount(type)}, Budget={remainingBudget}, Item={selected.Last().Name}");
-                        }
-                    }
-
-                    if (!phaseProgress)
-                        unchangedRounds++;
-                    else
-                        unchangedRounds = 0;
-                }
-                Console.WriteLine("Free expansion complete. No further items can be added.");
+                Console.WriteLine("Free Phase: No more items can be added.");
                 break;
             }
         }
