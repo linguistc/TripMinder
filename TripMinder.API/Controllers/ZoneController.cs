@@ -23,24 +23,24 @@ public class ZoneController : AppControllerBase
         return NewResult(response);
     }
     
-    [HttpPost(Router.ZoneRouting.Create)]
-    public async Task<IActionResult> Create(CreateZoneCommand command)
-    {
-        var response = await Mediator.Send(command);
-        return NewResult(response);
-    }
-    
-    [HttpPut(Router.ZoneRouting.Update)]
-    public async Task<IActionResult> Update(UpdateZoneCommand command)
-    {
-        var response = await Mediator.Send(command);
-        return NewResult(response);
-    }
-    
-    [HttpDelete(Router.ZoneRouting.Delete)]
-    public async Task<IActionResult> Delete(int id)
-    {
-        var response = await Mediator.Send(new DeleteZoneCommand(id));
-        return NewResult(response);
-    }
+    // [HttpPost(Router.ZoneRouting.Create)]
+    // public async Task<IActionResult> Create(CreateZoneCommand command)
+    // {
+    //     var response = await Mediator.Send(command);
+    //     return NewResult(response);
+    // }
+    //
+    // [HttpPut(Router.ZoneRouting.Update)]
+    // public async Task<IActionResult> Update(UpdateZoneCommand command)
+    // {
+    //     var response = await Mediator.Send(command);
+    //     return NewResult(response);
+    // }
+    //
+    // [HttpDelete(Router.ZoneRouting.Delete)]
+    // public async Task<IActionResult> Delete(int id)
+    // {
+    //     var response = await Mediator.Send(new DeleteZoneCommand(id));
+    //     return NewResult(response);
+    // }
 }

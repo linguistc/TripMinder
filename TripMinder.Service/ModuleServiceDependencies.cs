@@ -24,6 +24,7 @@ namespace TripMinder.Service
             services.AddTransient<ITourismAreaClassService, TourismAreaClassService>();
             services.AddTransient<ITourismTypeService, TourismTypeService>();
             services.AddTransient<IZoneService, ZoneService>();
+            services.AddTransient<IGovernorateService, GovernorateService>();
 
             return services;
         }

@@ -3,6 +3,7 @@ using TripMinder.API.Bases;
 using TripMinder.Core.Behaviors.Knapsack;
 using TripMinder.Data.AppMetaData;
 using TripMinder.Core.Bases;
+using TripMinder.Core.Behaviors.Shared;
 
 namespace TripMinder.API.Controllers;
 
@@ -36,7 +37,7 @@ public class TripSuggesterMultipleController : AppControllerBase
             });
         }
 
-        var interestsQueue = new Queue<string>(requestDto.Interests);
+        var interestsQueue = new Queue<string>(requestDto.Interests ?? new List<string>());
         var request = new TripPlanRequest(
             requestDto.GovernorateId,
             requestDto.ZoneId,
@@ -51,19 +52,48 @@ public class TripSuggesterMultipleController : AppControllerBase
 
         var response = await _optimizer.OptimizePlanMultiple(request);
 
-        if (response.Succeeded)
+        if (response.Succeeded && response.Data != null)
         {
+            // Retry with relaxed constraints if fewer than 3 solutions
+            if (response.Data.Count < 3)
+            {
+                _logger.LogWarning("Only {Count} solutions found, retrying with relaxed constraints", response.Data.Count);
+                response = await _optimizer.OptimizePlanMultiple(request); // Could pass modified constraints
+            }
+
             _logger.LogInformation("Optimization succeeded with {Count} solutions", response.Data.Count);
             return Ok(response);
+        }
+
+        // Fallback to single solution if multiple solutions fail
+        _logger.LogWarning("Multiple solutions failed, attempting single solution");
+        var singleResponse = await _optimizer.OptimizePlanPhasedAsync(request);
+        if (singleResponse.Succeeded && singleResponse.Data != null)
+        {
+            _logger.LogInformation("Single solution succeeded, returning as fallback");
+            return Ok(new Respond<List<TripPlanResponse>>
+            {
+                Succeeded = true,
+                Message = "Fallback to single trip plan due to no multiple solutions found",
+                Data = new List<TripPlanResponse> { singleResponse.Data },
+                Meta = new
+                {
+                    TotalItems = singleResponse.Data.Restaurants.Count +
+                                 singleResponse.Data.Entertainments.Count +
+                                 singleResponse.Data.TourismAreas.Count +
+                                 (singleResponse.Data.Accommodation != null ? 1 : 0),
+                    TotalSolutions = 1
+                }
+            });
         }
 
         _logger.LogError("Optimization failed: {Message}, Errors: {@Errors}", response.Message, response.Errors);
         return BadRequest(new Respond<List<TripPlanResponse>>
         {
             Succeeded = false,
-            Message = response.Message,
-            Errors = response.Errors,
-            ErrorsBag = new Dictionary<string, List<string>> { { "General", response.Errors.ToList() } }
+            Message = response.Message ?? "No valid trip plans could be generated",
+            Errors = response.Errors ?? new List<string> { "No items matched the provided criteria" },
+            ErrorsBag = new Dictionary<string, List<string>> { { "General", response.Errors?.ToList() ?? new List<string> { "No items matched the provided criteria" } } }
         });
     }
 }

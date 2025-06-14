@@ -22,7 +22,7 @@ public class ZoneService : IZoneService
 
     public async Task<List<Zone>> GetZonesListAsync()
     {
-        return await this.zoneRepository.GetTableNoTracking().ToListAsync();
+        return await this.zoneRepository.GetTableNoTracking().Include(z => z.Governorate).ToListAsync();
     }
 
     public async Task<Zone> GetZoneByIdAsync(int id)

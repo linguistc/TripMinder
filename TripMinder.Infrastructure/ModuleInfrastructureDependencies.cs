@@ -31,6 +31,7 @@ namespace TripMinder.Infrastructure
             services.AddTransient<ITourismTypeRepository, TourismTypeRepository>();
             services.AddTransient<IZoneRepository, ZoneRepository>();
 
+            services.AddTransient<IGovernorateRepository, GovernorateRepository>();
             // Add DataSeeder to DI
             services.AddScoped<DataSeeder>();
             

@@ -15,7 +15,18 @@
             public const string Prefix = Rule + "restaurant/";
             public const string List = Prefix + "list/";
             public const string GetById = Prefix + SingleRouter;
+            public const string GetImage = Prefix + SingleRouter + "image/";
 
+            #region Filtering
+            public const string ListByZoneId = Prefix + "zone/{zoneId}/";
+            public const string ListByGovernorateId = Prefix + "governorate/{governorateId}/";
+            public const string ListByClassId = Prefix + "class/{classId}/";
+            public const string ListByFoodTypeId = Prefix + "foodtype/{foodtypeId}/";
+            public const string ListByRating = Prefix + "rating/{rating}/";
+            public const string ListLessThanPrice = Prefix + "lessThanprice/{price}/";
+            public const string ListMoreThanPrice = Prefix + "moreThanprice/{price}/";
+            #endregion
+            
             public const string Create = Prefix + "create/";
             public const string Update = Prefix + "Update/";
             public const string Delete = Prefix + SingleRouter;
@@ -28,7 +39,20 @@
             public const string Prefix = Rule + "accommodation/";
             public const string List = Prefix + "list/";
             public const string GetById = Prefix + SingleRouter;
+            public const string GetImage = Prefix + SingleRouter + "image/";
+
+            
+            #region Filtering
             public const string ListByZoneId = Prefix + "zone/{zoneId}/";
+            public const string ListByGovernorateId = Prefix + "governorate/{governorateId}/";
+            public const string ListByClassId = Prefix + "class/{classId}/";
+            public const string ListByTypeId = Prefix + "type/{typeId}/";
+            public const string ListByRating = Prefix + "rating/{rating}/";
+            public const string ListLessThanPrice = Prefix + "lessThanprice/{price}/";
+            public const string ListMoreThanPrice = Prefix + "moreThanprice/{price}/";
+            public const string ListByNumOfBeds = Prefix + "numOfBeds/{numOfBeds}/";
+            public const string ListByNumOfAdults = Prefix + "numOfAdults/{numOfAdults}/";
+            #endregion
             public const string Create = Prefix + "create/";
             public const string Update = Prefix + "Update/";
             public const string Delete = Prefix + SingleRouter;
@@ -40,6 +64,19 @@
             public const string Prefix = Rule + "entertainment/";
             public const string List = Prefix + "list/";
             public const string GetById = Prefix + SingleRouter;
+            public const string GetImage = Prefix + SingleRouter + "image/";
+
+            
+            #region Filtering
+            public const string ListByZoneId = Prefix + "zone/{zoneId}/";
+            public const string ListByGovernorateId = Prefix + "governorate/{governorateId}/";
+            public const string ListByClassId = Prefix + "class/{classId}/";
+            public const string ListByTypeId = Prefix + "type/{typeId}/";
+            public const string ListByRating = Prefix + "rating/{rating}/";
+            public const string ListLessThanPrice = Prefix + "lessThanprice/{price}/";
+            public const string ListMoreThanPrice = Prefix + "moreThanprice/{price}/";
+            #endregion
+            
             public const string Create = Prefix + "create/";
             public const string Update = Prefix + "Update/";
             public const string Delete = Prefix + SingleRouter;
@@ -51,6 +88,19 @@
             public const string Prefix = Rule + "tourismarea/";
             public const string List = Prefix + "list/";
             public const string GetById = Prefix + SingleRouter;
+            public const string GetImage = Prefix + SingleRouter + "image/";
+
+            
+            #region Filtering
+            public const string ListByZoneId = Prefix + "zone/{zoneId}/";
+            public const string ListByGovernorateId = Prefix + "governorate/{governorateId}/";
+            public const string ListByClassId = Prefix + "class/{classId}/";
+            public const string ListByTypeId = Prefix + "type/{typeId}/";
+            public const string ListByRating = Prefix + "rating/{rating}/";
+            public const string ListLessThanPrice = Prefix + "lessThanprice/{price}/";
+            public const string ListMoreThanPrice = Prefix + "moreThanprice/{price}/";
+            #endregion
+            
             public const string Create = Prefix + "create/";
             public const string Update = Prefix + "Update/";
             public const string Delete = Prefix + SingleRouter;
@@ -62,6 +112,17 @@
         public static class ZoneRouting
         {
             public const string Prefix = Rule + "zone/";
+            public const string List = Prefix + "list/";
+            public const string GetById = Prefix + SingleRouter;
+            public const string Create = Prefix + "create/";
+            public const string Update = Prefix + "Update/";
+            public const string Delete = Prefix + SingleRouter;
+            public const string Paginate = Prefix + "paginate/";
+        }
+        
+        public static class GovernorateRouting
+        {
+            public const string Prefix = Rule + "city/";
             public const string List = Prefix + "list/";
             public const string GetById = Prefix + SingleRouter;
             public const string Create = Prefix + "create/";
@@ -173,10 +234,17 @@
 
         #region TripSuggestionner Routing
         
-        public class TripSuggesterRouting
+        public class GreedyTripSuggesterRouting
         {
             public const string Prefix = Rule + "tripsuggester/";
-            public const string OptimizeTrip = Prefix + "optimize/";
+            public const string GreedyOptimizeTrip = Prefix + "greedyOptimize/";
+            public const string GreedyTestOptimizeTrip = Prefix + "greedyTestoptimize/";
+        }
+        
+        public class DPTripSuggesterRouting
+        {
+            public const string Prefix = Rule + "dptripsuggester/";
+            public const string DPOptimizeTrip = Prefix + "dpoptimize/";
         }
         
         public class TripSuggesterMultipleRouting

@@ -15,6 +15,11 @@ namespace TripMinder.Core.Features.Restaurants.Queries.Handlers
                                         , IRequestHandler<GetRestaurantsListByZoneIdQuery, Respond<List<GetRestaurantsListResponse>>>
                                         , IRequestHandler<GetRestaurantsListByGovernorateIdQuery, Respond<List<GetRestaurantsListResponse>>>
                                         , IRequestHandler<GetRestaurantByIdQuery, Respond<GetRestaurantByIdResponse>>
+                                        , IRequestHandler<GetRestaurantsListByClassIdQuery, Respond<List<GetRestaurantsListResponse>>>
+                                        , IRequestHandler<GetRestaurantsListByFoodTypeIdQuery, Respond<List<GetRestaurantsListResponse>>>
+                                        , IRequestHandler<GetRestaurantsListByRatingQuery, Respond<List<GetRestaurantsListResponse>>>
+                                        , IRequestHandler<GetRestaurantsListLessThanPriceQuery, Respond<List<GetRestaurantsListResponse>>>
+                                        , IRequestHandler<GetRestaurantsListMoreThanPriceQuery, Respond<List<GetRestaurantsListResponse>>>
     {
 
         #region Fields
@@ -65,9 +70,7 @@ namespace TripMinder.Core.Features.Restaurants.Queries.Handlers
         public async Task<Respond<List<GetRestaurantsListResponse>>> Handle(GetRestaurantsListByZoneIdQuery request, CancellationToken cancellationToken)
         {
             var restaurantsList = await this.restaurantService.GetRestaurantsListByZoneIdAsync(request.ZoneId, cancellationToken);
-
-            restaurantsList.ForEach(a => a.Score = CalculateScoreBehavior.CalculateScore(a.Class.Type, request.Priority, a.AveragePricePerAdult));
-
+            
             var restaurantMapper = this.mapper.Map<List<GetRestaurantsListResponse>>(restaurantsList);
 
             var result = Success(restaurantMapper);
@@ -80,8 +83,73 @@ namespace TripMinder.Core.Features.Restaurants.Queries.Handlers
         public async Task<Respond<List<GetRestaurantsListResponse>>> Handle(GetRestaurantsListByGovernorateIdQuery request, CancellationToken cancellationToken)
         {
             var restaurantsList = await this.restaurantService.GetRestaurantsListByGovernorateIdAsync(request.GovernorateId, cancellationToken);
+            
+            var restaurantMapper = this.mapper.Map<List<GetRestaurantsListResponse>>(restaurantsList);
 
-            restaurantsList.ForEach(a => a.Score = CalculateScoreBehavior.CalculateScore(a.Class.Type, request.Priority, a.AveragePricePerAdult));
+            var result = Success(restaurantMapper);
+
+            result.Meta = new { Count = restaurantMapper.Count };
+
+            return result;
+        }
+
+        public async Task<Respond<List<GetRestaurantsListResponse>>> Handle(GetRestaurantsListByClassIdQuery request, CancellationToken cancellationToken)
+        {
+            var restaurantsList = await this.restaurantService.GetRestaurantsListByClassIdAsync(request.ClassId, cancellationToken);
+            
+            var restaurantMapper = this.mapper.Map<List<GetRestaurantsListResponse>>(restaurantsList);
+
+            var result = Success(restaurantMapper);
+
+            result.Meta = new { Count = restaurantMapper.Count };
+
+            return result;
+        }
+
+        public async Task<Respond<List<GetRestaurantsListResponse>>> Handle(GetRestaurantsListByFoodTypeIdQuery request, CancellationToken cancellationToken)
+        {
+            var restaurantsList = await this.restaurantService.GetRestaurantsListByFoodTypeIdAsync(request.FoodTypeId, cancellationToken);
+            
+            var restaurantMapper = this.mapper.Map<List<GetRestaurantsListResponse>>(restaurantsList);
+
+            var result = Success(restaurantMapper);
+
+            result.Meta = new { Count = restaurantMapper.Count };
+
+            return result;
+        }
+
+        public async Task<Respond<List<GetRestaurantsListResponse>>> Handle(GetRestaurantsListByRatingQuery request, CancellationToken cancellationToken)
+        {
+            var restaurantsList = await this.restaurantService.GetRestaurantsListByRatingAsync(request.Rating, cancellationToken);           
+            
+            var restaurantMapper = this.mapper.Map<List<GetRestaurantsListResponse>>(restaurantsList);
+
+            var result = Success(restaurantMapper);
+
+            result.Meta = new { Count = restaurantMapper.Count };
+
+            return result;
+        }
+
+        public async Task<Respond<List<GetRestaurantsListResponse>>> Handle(GetRestaurantsListLessThanPriceQuery request, CancellationToken cancellationToken)
+        {
+            var restaurantsList = await this.restaurantService.GetRestaurantsListLessThanPriceAsync((double)request.Price, cancellationToken);
+
+
+            var restaurantMapper = this.mapper.Map<List<GetRestaurantsListResponse>>(restaurantsList);
+
+            var result = Success(restaurantMapper);
+
+            result.Meta = new { Count = restaurantMapper.Count };
+
+            return result;
+        }
+
+        public async Task<Respond<List<GetRestaurantsListResponse>>> Handle(GetRestaurantsListMoreThanPriceQuery request, CancellationToken cancellationToken)
+        {
+            var restaurantsList = await this.restaurantService.GetRestaurantsListMoreThanPriceAsync((double)request.Price, cancellationToken);
+
 
             var restaurantMapper = this.mapper.Map<List<GetRestaurantsListResponse>>(restaurantsList);
 
@@ -92,6 +160,5 @@ namespace TripMinder.Core.Features.Restaurants.Queries.Handlers
             return result;
         }
         #endregion
-
     }
 }

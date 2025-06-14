@@ -26,6 +26,9 @@ namespace TripMinder.Infrastructure.Bases
         #endregion
         
         #region Actions
+        
+        public AppDBContext GetDbContext() => dbContext;
+        
         public virtual async Task<T> GetByIdAsync(int id)
         {
 

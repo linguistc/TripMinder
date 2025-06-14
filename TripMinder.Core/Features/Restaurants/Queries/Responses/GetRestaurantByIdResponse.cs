@@ -7,7 +7,9 @@
         public string FoodCategory { get; set; }
         public string ClassType { get; set; }
         public string Zone { get; set; }
+        public int ZoneId { get; set; }
         public string Governorate { get; set; }
+        public int GovernorateId { get; set; }
         public double Rating { get; set; }
         public string PlaceType { get; set; }
         public double AveragePricePerAdult { get; set; }
@@ -22,7 +24,7 @@
         
         public string? ContactLink { get; set; } 
         
-        public string? ImageSource { get; set; }
+        public string? ImageUrl { get; set; }
         
         public float Score { get; set; }
 

@@ -4,6 +4,8 @@ using FluentValidation;
 using MediatR;
 using TripMinder.Core.Behaviors;
 using TripMinder.Core.Behaviors.Knapsack;
+using TripMinder.Core.Behaviors.Shared;
+
 
 namespace TripMinder.Core
 {
@@ -22,14 +24,23 @@ namespace TripMinder.Core
             services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>));
             
             // Optimizer Dependencies
-            services.AddScoped<IKnapsackSolver, KnapsackSolver>();
+            services.AddScoped<IKnapsackSolver, KnapsackSolver>(); 
             services.AddScoped<IKnapsackDP ,KnapsackDP>();
             services.AddScoped<IKnapsackBacktracker, KnapsackBacktracker>();
             services.AddScoped<IProfitFinder, ProfitFinder>();
             services.AddScoped<IDynamicProgrammingCalculator, DynamicProgrammingCalculator>();
+            services.AddScoped<IStagedTripPlanOptimizer, StagedTripPlanOptimizer>();
             services.AddScoped<IItemFetcher, ItemFetcher>();
             services.AddScoped<IKnapsackConstraints>(sp => new UserDefinedKnapsackConstraints(3, 1, 3, 3));
+            // services.AddScoped<IKnapsackConstraints, UserDefinedKnapsackConstraints>();
             services.AddScoped<TripPlanOptimizer>();
+            services.AddScoped<GreedySolutionOptimizer>();
+            
+            // Greedy Dependencies
+            services.AddScoped<IGreedyStagedTripPlanOptimizer, GreedyPhasedTripPlanOptimizer>();
+            services.AddScoped<IGreedyTripSolver, GreedyTripSolver>();
+            services.AddScoped<GreedyTripPlanner>();
+            services.AddScoped<GreedySolutionOptimizer>();
             
             //
             

@@ -20,8 +20,6 @@ public partial class EntertainmentProfile
                 options => options.MapFrom(src => src.PlaceTypeId))
             .ForMember(dest => dest.Address,
                 options => options.MapFrom(src => src.Address))
-            .ForMember(dest => dest.ImageSource,
-                options => options.MapFrom(src => src.ImageSource))
             .ForMember(dest => dest.HasKidsArea,
                 options => options.MapFrom(src => src.HasKidsArea))
             .ForMember(dest => dest.AveragePricePerAdult,

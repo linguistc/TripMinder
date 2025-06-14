@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using TripMinder.Data.Entities;
 using TripMinder.Infrastructure.Contracts;
+using TripMinder.Infrastructure.Extentions;
 using TripMinder.Service.Contracts;
 
 namespace TripMinder.Service.Implementations
@@ -9,14 +10,18 @@ namespace TripMinder.Service.Implementations
     {
 
         #region Fields
-        private readonly IRestaurantRepository repository;
+        private readonly IRestaurantRepository _repository;
 
         #endregion
 
         #region Constructors
+        public async Task<double?> GetMinimumPriceAsync(CancellationToken cancellationToken = default)
+        {
+            return await this._repository.GetMinimumPriceAsync(cancellationToken);
+        }
         public RestaurantService(IRestaurantRepository repository)
         {
-            this.repository = repository;
+            this._repository = repository;
         }
 
         
@@ -26,33 +31,60 @@ namespace TripMinder.Service.Implementations
         #region Functions
         public async Task<List<Restaurant>> GetRestaurantsListAsync()
         {
-            return await repository.GetRestaurantsListAsync();
+            return await _repository.GetRestaurantsListAsync();
         }
 
         public async Task<List<Restaurant>> GetRestaurantsListByZoneIdAsync(int zoneId, CancellationToken cancellationToken = default)
         {
-            return await repository.GetRestaurantsListByZoneIdAsync(zoneId, cancellationToken);
+            return await _repository.GetRestaurantsListByZoneIdAsync(zoneId, cancellationToken);
         }
 
         public async Task<List<Restaurant>> GetRestaurantsListByGovernorateIdAsync(int governorateId, CancellationToken cancellationToken = default)
         {
-            return await repository.GetRestaurantsListByGovernorateIdAsync(governorateId, cancellationToken);
+            return await _repository.GetRestaurantsListByGovernorateIdAsync(governorateId, cancellationToken);
         }
 
         public async Task<Restaurant> GetRestaurantByIdWithIncludeAsync(int id)
         {
-            var restaurant = this.repository.GetTableNoTracking()
+            var restaurant = this._repository.GetTableNoTracking()
                 .Include(r => r.FoodCategory)
                 .Include(r => r.PlaceType)
                 .Include(r => r.Class)
                 .Include(r => r.Zone)
+                .Include(r => r.Zone.Governorate)
                 .FirstOrDefault(r => r.Id == id);
 
             return restaurant;
         }
+
+        public async Task<List<Restaurant>> GetRestaurantsListByClassIdAsync(int classId, CancellationToken cancellationToken = default)
+        {
+            return await _repository.GetRestaurantsListByClassIdAsync(classId, cancellationToken);
+        }
+
+        public async Task<List<Restaurant>> GetRestaurantsListByFoodTypeIdAsync(int foodTypeId, CancellationToken cancellationToken = default)
+        {
+            return await _repository.GetRestaurantsListByFoodTypeIdAsync(foodTypeId, cancellationToken);
+        }
+
+        public async Task<List<Restaurant>> GetRestaurantsListByRatingAsync(double rating, CancellationToken cancellationToken = default)
+        {
+            return await _repository.GetRestaurantsListByRatingAsync(rating, cancellationToken);
+        }
+
+        public async Task<List<Restaurant>> GetRestaurantsListMoreThanPriceAsync(double price, CancellationToken cancellationToken = default)
+        {
+            return await _repository.GetRestaurantsListMoreThanPriceAsync(price, cancellationToken);
+        }
+
+        public async Task<List<Restaurant>> GetRestaurantsListLessThanPriceAsync(double price, CancellationToken cancellationToken = default)
+        {
+            return await _repository.GetRestaurantsListLessThanPriceAsync(price, cancellationToken);
+        }
+
         public async Task<Restaurant> GetRestaurantByIdAsync(int id)
         {
-            var restaurant = await this.repository.GetByIdAsync(id);
+            var restaurant = await this._repository.GetByIdAsync(id);
 
             return restaurant;
         }
@@ -79,24 +111,24 @@ namespace TripMinder.Service.Implementations
 
         public async Task<string> UpdateAsync(Restaurant restaurant)
         {
-            await this.repository.UpdateAsync(restaurant);
+            await this._repository.UpdateAsync(restaurant);
             return "Updated";
 
         }
         
         public async Task<string> CreateAsync(Restaurant newRestaurant)
         {
-            await this.repository.CreateAsync(newRestaurant);
+            await this._repository.CreateAsync(newRestaurant);
             return "Created";
         }
 
         public async Task<string> DeleteAsync(Restaurant restaurant)
         {
-            var trans = this.repository.BeginTransaction();
+            var trans = this._repository.BeginTransaction();
 
             try
             {
-                await this.repository.DeleteAsync(restaurant);
+                await this._repository.DeleteAsync(restaurant);
                 await trans.CommitAsync();
                 return "Deleted";
             }

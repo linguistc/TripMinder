@@ -1,3 +1,4 @@
+using TripMinder.Core.Behaviors.Shared;
 namespace TripMinder.Core.Behaviors.Knapsack;
 
 public class Solution

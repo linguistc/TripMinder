@@ -27,38 +27,106 @@ namespace TripMinder.Infrastructure.Repositories
         {
 
             var result = await this.tourismAreas.Include(r => r.TourismType)
-                                         .Include(r => r.Zone)
-                                         .Include(r => r.Class)
-                                         .Include(r => r.PlaceType)
+                                         .Include(t => t.Zone).AsNoTracking()
+                                         .Include(t => t.Zone.Governorate).AsNoTracking()
+                                         .Include(t => t.Class)
+                                         .Include(t => t.PlaceType)
                                          .ToListAsync();
 
             return result;
         }
 
-        public async Task<List<TourismArea>> GetTourismAreasByZoneIdAsync(int zoneId,
+        public async Task<List<TourismArea>> GetTourismAreasListByZoneIdAsync(int zoneId,
             CancellationToken cancellationToken = default)
         {
             return await this.tourismAreas
-                .Include(r => r.TourismType)
-                .Include(r => r.Zone)
-                .Include(r => r.Class)
-                .Include(r => r.PlaceType)
-                .Where(r => r.ZoneId == zoneId)
+                .Include(t => t.TourismType)
+                .Include(t => t.Zone).AsNoTracking()
+                .Include(t => t.Zone.Governorate).AsNoTracking()
+                .Include(t => t.Class)
+                .Include(t => t.PlaceType)
+                .Where(t => t.ZoneId == zoneId)
                 .ToListAsync(cancellationToken);
         }
 
-        public async Task<List<TourismArea>> GetTourismAreasByGovernorateIdAsync(int governorateId,
+        public async Task<List<TourismArea>> GetTourismAreasListByGovernorateIdAsync(int governorateId,
             CancellationToken cancellationToken = default)
         {
             return await this.tourismAreas
-                .Include(r => r.TourismType)
-                .Include(r => r.Zone)
-                .Include(r => r.Class)
-                .Include(r => r.PlaceType)
-                .Where(r => r.Zone.GovernorateId == governorateId)
+                .Include(t => t.TourismType)
+                .Include(t => t.Zone).AsNoTracking()
+                .Include(t => t.Zone.Governorate).AsNoTracking()
+                .Include(t => t.Class)
+                .Include(t => t.PlaceType)
+                .Where(t => t.Zone.GovernorateId == governorateId)
                 .ToListAsync(cancellationToken);
         }
 
+        
+        
+        
+        public async Task<List<TourismArea>> GetTourismAreasListByClassIdAsync(int classId,
+            CancellationToken cancellationToken = default)
+        {
+            return await this.tourismAreas
+                .Include(t => t.TourismType)
+                .Include(t => t.Zone).AsNoTracking()
+                .Include(t => t.Zone.Governorate).AsNoTracking()
+                .Include(t => t.Class)
+                .Include(t => t.PlaceType)
+                .Where(t => t.ClassId == classId)
+                .ToListAsync(cancellationToken);
+        }
+        
+        public async Task<List<TourismArea>> GetTourismAreasListByTypeIdAsync(int TypeId,
+            CancellationToken cancellationToken = default)
+        {
+            return await this.tourismAreas
+                .Include(t => t.TourismType)
+                .Include(t => t.Zone).AsNoTracking()
+                .Include(t => t.Zone.Governorate).AsNoTracking()
+                .Include(t => t.Class)
+                .Include(t => t.PlaceType)
+                .Where(t => t.TourismTypeId == TypeId)
+                .ToListAsync(cancellationToken);
+        }
+        
+        public async Task<List<TourismArea>> GetTourismAreasListByRatingAsync(double rating, CancellationToken cancellationToken = default)
+        {
+            return await this.tourismAreas
+                .Include(t => t.TourismType)
+                .Include(t => t.Zone).AsNoTracking()
+                .Include(t => t.Zone.Governorate).AsNoTracking()
+                .Include(t => t.Class)
+                .Include(t => t.PlaceType)
+                .Where(t => t.Rating >= rating)
+                .ToListAsync(cancellationToken);
+        }
+        
+        public async Task<List<TourismArea>> GetTourismAreasListMoreThanPriceAsync(double price, CancellationToken cancellationToken = default)
+        {
+            return await this.tourismAreas
+                .Include(t => t.TourismType)
+                .Include(t => t.Zone).AsNoTracking()
+                .Include(t => t.Zone.Governorate).AsNoTracking()
+                .Include(t => t.Class)
+                .Include(t => t.PlaceType)
+                .Where(t => t.AveragePricePerAdult > price)
+                .ToListAsync(cancellationToken);
+        }
+        
+        public async Task<List<TourismArea>> GetTourismAreasListLessThanPriceAsync(double price, CancellationToken cancellationToken = default)
+        {
+            return await this.tourismAreas
+                .Include(t => t.TourismType)
+                .Include(t => t.Zone).AsNoTracking()
+                .Include(t => t.Zone.Governorate).AsNoTracking()
+                .Include(t => t.Class)
+                .Include(t => t.PlaceType)
+                .Where(t => t.AveragePricePerAdult < price)
+                .ToListAsync(cancellationToken);
+        }
+        
         #endregion
 
 

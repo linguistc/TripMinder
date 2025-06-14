@@ -17,6 +17,11 @@ namespace TripMinder.Core.Features.TourismAreas.Queries.Handlers
                                         , IRequestHandler<GetTourismAreasListByZoneIdQuery, Respond<List<GetTourismAreasListResponse>>>
                                         , IRequestHandler<GetTourismAreasListByGovernorateIdQuery, Respond<List<GetTourismAreasListResponse>>>
                                         , IRequestHandler<GetTourismAreaByIdQuery, Respond<GetTourismAreaByIdResponse>>
+                                        , IRequestHandler<GetTourismAreasListByClassIdQuery, Respond<List<GetTourismAreasListResponse>>>
+                                        , IRequestHandler<GetTourismAreasListByTypeIdQuery, Respond<List<GetTourismAreasListResponse>>>
+                                        , IRequestHandler<GetTourismAreasListByRatingQuery, Respond<List<GetTourismAreasListResponse>>>
+                                        , IRequestHandler<GetTourismAreasListLessThanPriceQuery, Respond<List<GetTourismAreasListResponse>>>
+                                        , IRequestHandler<GetTourismAreasListMoreThanPriceQuery, Respond<List<GetTourismAreasListResponse>>>
     {
         #region Fields
         private readonly IMapper mapper;
@@ -64,7 +69,6 @@ namespace TripMinder.Core.Features.TourismAreas.Queries.Handlers
         {
             var tourismAreasList = await this.service.GetTourismAreasListByZoneIdAsync(request.ZoneId, cancellationToken);
 
-            tourismAreasList.ForEach(t => t.Score = CalculateScoreBehavior.CalculateScore(t.Class.Type, request.Priority, t.AveragePricePerAdult));
             var tourismAreaMapper = this.mapper.Map<List<GetTourismAreasListResponse>>(tourismAreasList);
 
             var result = Success(tourismAreaMapper);
@@ -77,7 +81,69 @@ namespace TripMinder.Core.Features.TourismAreas.Queries.Handlers
         {
             var tourismAreasList = await this.service.GetTourismAreasListByGovernorateIdAsync(request.GovernorateId, cancellationToken);
 
-            tourismAreasList.ForEach(t => t.Score = CalculateScoreBehavior.CalculateScore(t.Class.Type, request.Priority, t.AveragePricePerAdult));
+            var tourismAreaMapper = this.mapper.Map<List<GetTourismAreasListResponse>>(tourismAreasList);
+
+            var result = Success(tourismAreaMapper);
+
+            result.Meta = new { Count = tourismAreaMapper.Count };
+            return result;
+        }
+
+        public async Task<Respond<List<GetTourismAreasListResponse>>> Handle(GetTourismAreasListByClassIdQuery request, CancellationToken cancellationToken)
+        {
+            var tourismAreasList = await this.service.GetTourismAreasListByClassIdAsync(request.ClassId, cancellationToken);
+
+            var tourismAreaMapper = this.mapper.Map<List<GetTourismAreasListResponse>>(tourismAreasList);
+
+            var result = Success(tourismAreaMapper);
+
+            result.Meta = new { Count = tourismAreaMapper.Count };
+            return result;
+        }
+
+        public async Task<Respond<List<GetTourismAreasListResponse>>> Handle(GetTourismAreasListByTypeIdQuery request, CancellationToken cancellationToken)
+        {
+            var tourismAreasList = await this.service.GetTourismAreasByTypeIdAsync(request.TypeId, cancellationToken);
+
+            var tourismAreaMapper = this.mapper.Map<List<GetTourismAreasListResponse>>(tourismAreasList);            
+
+            var result = Success(tourismAreaMapper);
+
+            result.Meta = new { Count = tourismAreaMapper.Count };
+            return result;
+        }
+
+        public async Task<Respond<List<GetTourismAreasListResponse>>> Handle(GetTourismAreasListByRatingQuery request, CancellationToken cancellationToken)
+        {
+            
+            var tourismAreasList = await this.service.GetTourismAreasByRatingAsync(request.Rating, cancellationToken);
+
+            var tourismAreaMapper = this.mapper.Map<List<GetTourismAreasListResponse>>(tourismAreasList);
+
+            var result = Success(tourismAreaMapper);
+
+            result.Meta = new { Count = tourismAreaMapper.Count };
+            
+            return result;
+            
+        }
+
+        public async Task<Respond<List<GetTourismAreasListResponse>>> Handle(GetTourismAreasListLessThanPriceQuery request, CancellationToken cancellationToken)
+        {
+            var tourismAreasList = await this.service.GetTourismAreasLessThanPriceAsync((double)request.Price, cancellationToken);
+
+            var tourismAreaMapper = this.mapper.Map<List<GetTourismAreasListResponse>>(tourismAreasList);
+
+            var result = Success(tourismAreaMapper);
+
+            result.Meta = new { Count = tourismAreaMapper.Count };
+            return result;
+        }
+
+        public async Task<Respond<List<GetTourismAreasListResponse>>> Handle(GetTourismAreasListMoreThanPriceQuery request, CancellationToken cancellationToken)
+        {
+            var tourismAreasList = await this.service.GetTourismAreasMoreThanPriceAsync((double)request.Price, cancellationToken);
+
             var tourismAreaMapper = this.mapper.Map<List<GetTourismAreasListResponse>>(tourismAreasList);
 
             var result = Success(tourismAreaMapper);
@@ -86,6 +152,5 @@ namespace TripMinder.Core.Features.TourismAreas.Queries.Handlers
             return result;
         }
         #endregion
-
     }
 }

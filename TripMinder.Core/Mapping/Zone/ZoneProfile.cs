@@ -38,8 +38,9 @@ public partial class ZoneProfile : Profile
             .ForMember(dest => dest.Id,
                 options => options.MapFrom(src => src.Id))
             .ForMember(dest => dest.Name,
-                options => options.MapFrom(src => src.Name));
-
+                options => options.MapFrom(src => src.Name))            
+            .ForMember(dest => dest.GovernorateId, options => options.MapFrom(src => src.Governorate.Id))
+            .ForMember(dest => dest.GovernorateName, options => options.MapFrom(src => src.Governorate.Name));
     }
 
     private void GetZoneByIdMapping()
@@ -48,6 +49,8 @@ public partial class ZoneProfile : Profile
             .ForMember(dest => dest.Id,
                 options => options.MapFrom(src => src.Id))
             .ForMember(dest => dest.Name,
-                options => options.MapFrom(src => src.Name));
+                options => options.MapFrom(src => src.Name))
+            .ForMember(dest => dest.GovernorateId, options => options.MapFrom(src => src.Governorate.Id))
+            .ForMember(dest => dest.GovernorateName, options => options.MapFrom(src => src.Governorate.Name));;
     }
 }

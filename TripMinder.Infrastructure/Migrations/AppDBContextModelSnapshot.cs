@@ -52,13 +52,10 @@ namespace TripMinder.Infrastructure.Migrations
                     b.Property<string>("Description")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("GovernorateId")
-                        .HasColumnType("int");
-
                     b.Property<bool>("HasKidsArea")
                         .HasColumnType("bit");
 
-                    b.Property<string>("ImageSource")
+                    b.Property<string>("ImageUrl")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("MapLink")
@@ -94,8 +91,6 @@ namespace TripMinder.Infrastructure.Migrations
                     b.HasIndex("AccomodationTypeId");
 
                     b.HasIndex("ClassId");
-
-                    b.HasIndex("GovernorateId");
 
                     b.HasIndex("PlaceTypeId");
 
@@ -280,13 +275,10 @@ namespace TripMinder.Infrastructure.Migrations
                     b.Property<int>("EntertainmentTypeId")
                         .HasColumnType("int");
 
-                    b.Property<int>("GovernorateId")
-                        .HasColumnType("int");
-
                     b.Property<bool>("HasKidsArea")
                         .HasColumnType("bit");
 
-                    b.Property<string>("ImageSource")
+                    b.Property<string>("ImageUrl")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("MapLink")
@@ -316,8 +308,6 @@ namespace TripMinder.Infrastructure.Migrations
                     b.HasIndex("ClassId");
 
                     b.HasIndex("EntertainmentTypeId");
-
-                    b.HasIndex("GovernorateId");
 
                     b.HasIndex("PlaceTypeId");
 
@@ -410,6 +400,9 @@ namespace TripMinder.Infrastructure.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<string>("ImageUrl")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -463,13 +456,10 @@ namespace TripMinder.Infrastructure.Migrations
                     b.Property<int>("FoodCategoryId")
                         .HasColumnType("int");
 
-                    b.Property<int>("GovernorateId")
-                        .HasColumnType("int");
-
                     b.Property<bool>("HasKidsArea")
                         .HasColumnType("bit");
 
-                    b.Property<string>("ImageSource")
+                    b.Property<string>("ImageUrl")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("MapLink")
@@ -499,8 +489,6 @@ namespace TripMinder.Infrastructure.Migrations
                     b.HasIndex("ClassId");
 
                     b.HasIndex("FoodCategoryId");
-
-                    b.HasIndex("GovernorateId");
 
                     b.HasIndex("PlaceTypeId");
 
@@ -575,13 +563,10 @@ namespace TripMinder.Infrastructure.Migrations
                     b.Property<string>("Description")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("GovernorateId")
-                        .HasColumnType("int");
-
                     b.Property<bool>("HasKidsArea")
                         .HasColumnType("bit");
 
-                    b.Property<string>("ImageSource")
+                    b.Property<string>("ImageUrl")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("MapLink")
@@ -612,8 +597,6 @@ namespace TripMinder.Infrastructure.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("ClassId");
-
-                    b.HasIndex("GovernorateId");
 
                     b.HasIndex("PlaceTypeId");
 
@@ -710,6 +693,9 @@ namespace TripMinder.Infrastructure.Migrations
                     b.Property<string>("Email")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<byte[]>("ImgData")
+                        .HasColumnType("varbinary(max)");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -891,12 +877,6 @@ namespace TripMinder.Infrastructure.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("TripMinder.Data.Entities.Governorate", "Governorate")
-                        .WithMany()
-                        .HasForeignKey("GovernorateId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.HasOne("TripMinder.Data.Entities.PlaceType", "PlaceType")
                         .WithMany()
                         .HasForeignKey("PlaceTypeId")
@@ -916,8 +896,6 @@ namespace TripMinder.Infrastructure.Migrations
                     b.Navigation("AccomodationType");
 
                     b.Navigation("Class");
-
-                    b.Navigation("Governorate");
 
                     b.Navigation("PlaceType");
 
@@ -1052,12 +1030,6 @@ namespace TripMinder.Infrastructure.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("TripMinder.Data.Entities.Governorate", "Governorate")
-                        .WithMany()
-                        .HasForeignKey("GovernorateId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.HasOne("TripMinder.Data.Entities.PlaceType", "PlaceType")
                         .WithMany()
                         .HasForeignKey("PlaceTypeId")
@@ -1077,8 +1049,6 @@ namespace TripMinder.Infrastructure.Migrations
                     b.Navigation("Class");
 
                     b.Navigation("EntertainmentType");
-
-                    b.Navigation("Governorate");
 
                     b.Navigation("PlaceType");
 
@@ -1118,12 +1088,6 @@ namespace TripMinder.Infrastructure.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("TripMinder.Data.Entities.Governorate", "Governorate")
-                        .WithMany()
-                        .HasForeignKey("GovernorateId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.HasOne("TripMinder.Data.Entities.PlaceType", "PlaceType")
                         .WithMany()
                         .HasForeignKey("PlaceTypeId")
@@ -1143,8 +1107,6 @@ namespace TripMinder.Infrastructure.Migrations
                     b.Navigation("Class");
 
                     b.Navigation("FoodCategory");
-
-                    b.Navigation("Governorate");
 
                     b.Navigation("PlaceType");
 
@@ -1178,12 +1140,6 @@ namespace TripMinder.Infrastructure.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("TripMinder.Data.Entities.Governorate", "Governorate")
-                        .WithMany()
-                        .HasForeignKey("GovernorateId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.HasOne("TripMinder.Data.Entities.PlaceType", "PlaceType")
                         .WithMany()
                         .HasForeignKey("PlaceTypeId")
@@ -1207,8 +1163,6 @@ namespace TripMinder.Infrastructure.Migrations
                         .IsRequired();
 
                     b.Navigation("Class");
-
-                    b.Navigation("Governorate");
 
                     b.Navigation("PlaceType");
 
@@ -1261,7 +1215,7 @@ namespace TripMinder.Infrastructure.Migrations
             modelBuilder.Entity("TripMinder.Data.Entities.UserImage", b =>
                 {
                     b.HasOne("TripMinder.Data.Entities.User", "User")
-                        .WithMany("Images")
+                        .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -1318,8 +1272,6 @@ namespace TripMinder.Infrastructure.Migrations
                     b.Navigation("Bookmarks");
 
                     b.Navigation("History");
-
-                    b.Navigation("Images");
 
                     b.Navigation("Ratings");
 

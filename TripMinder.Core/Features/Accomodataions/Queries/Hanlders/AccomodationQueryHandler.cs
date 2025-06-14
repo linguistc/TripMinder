@@ -15,6 +15,13 @@ namespace TripMinder.Core.Features.Accomodataions.Queries.Hanlders
                                          , IRequestHandler<GetAccomodationsListQuery, Respond<List<GetAccomodationsListResponse>>>
                                          , IRequestHandler<GetAccomodationsListByGovernorateIdQuery, Respond<List<GetAccomodationsListResponse>>>
                                          , IRequestHandler<GetAccomodationsListByZoneIdQuery, Respond<List<GetAccomodationsListResponse>>>
+                                         , IRequestHandler<GetAccomodationsListByClassIdQuery, Respond<List<GetAccomodationsListResponse>>>
+                                         , IRequestHandler<GetAccomodationsListByTypeIdQuery, Respond<List<GetAccomodationsListResponse>>>
+                                         , IRequestHandler<GetAccomodationsListByRatingQuery, Respond<List<GetAccomodationsListResponse>>>
+                                         , IRequestHandler<GetAccomodationsListByNumberOfBedsQuery, Respond<List<GetAccomodationsListResponse>>>
+                                         , IRequestHandler<GetAccomodationsListByNumberOfAdultsQuery, Respond<List<GetAccomodationsListResponse>>>
+                                         , IRequestHandler<GetAccomodationsListLessThanPriceQuery, Respond<List<GetAccomodationsListResponse>>>
+                                         , IRequestHandler<GetAccomodationsListMoreThanPriceQuery, Respond<List<GetAccomodationsListResponse>>>
     {
         #region Fields
         private readonly IAccomodationService service;
@@ -62,8 +69,6 @@ namespace TripMinder.Core.Features.Accomodataions.Queries.Hanlders
         {
             var accomodationList = await this.service.GetAccomodationsListByZoneIdAsync(request.ZoneId, cancellationToken);
             
-            accomodationList.ForEach(a => a.Score = CalculateScoreBehavior.CalculateScore(a.Class.Type, request.Priority, a.AveragePricePerAdult));
-
             var accomodationMapper = this.mapper.Map<List<GetAccomodationsListResponse>>(accomodationList);
 
             var result = Success(accomodationMapper);
@@ -76,8 +81,6 @@ namespace TripMinder.Core.Features.Accomodataions.Queries.Hanlders
         {
             var accomodationList = await this.service.GetAccomodationsListByGovernorateIdAsync(request.GovernorateId, cancellationToken);
             
-            accomodationList.ForEach(a => a.Score = CalculateScoreBehavior.CalculateScore(a.Class.Type, request.Priority, a.AveragePricePerAdult));
-            
             var accomodationMapper = this.mapper.Map<List<GetAccomodationsListResponse>>(accomodationList);
 
             var result = Success(accomodationMapper);
@@ -88,6 +91,98 @@ namespace TripMinder.Core.Features.Accomodataions.Queries.Hanlders
         }
 
         #endregion
-        
+
+        public async Task<Respond<List<GetAccomodationsListResponse>>> Handle(GetAccomodationsListByClassIdQuery request, CancellationToken cancellationToken)
+        {
+            var accomodationList = await this.service.GetAccomodationsListByClassIdAsync(request.ClassId, cancellationToken);
+            
+            var accomodationMapper = this.mapper.Map<List<GetAccomodationsListResponse>>(accomodationList);
+
+            var result = Success(accomodationMapper);
+
+            result.Meta = new { Count = accomodationMapper.Count };
+
+            return result;
+        }
+
+        public async Task<Respond<List<GetAccomodationsListResponse>>> Handle(GetAccomodationsListByTypeIdQuery request, CancellationToken cancellationToken)
+        {
+            var accomodationList = await this.service.GetAccomodationsListByTypeIdAsync(request.TypeId, cancellationToken);
+            
+            var accomodationMapper = this.mapper.Map<List<GetAccomodationsListResponse>>(accomodationList);
+
+            var result = Success(accomodationMapper);
+
+            result.Meta = new { Count = accomodationMapper.Count };
+
+            return result;        
+        }
+
+        public async Task<Respond<List<GetAccomodationsListResponse>>> Handle(GetAccomodationsListByRatingQuery request, CancellationToken cancellationToken)
+        {
+            var accomodationList = await this.service.GetAccomodationsListByRatingAsync(request.Rating, cancellationToken);
+            
+            var accomodationMapper = this.mapper.Map<List<GetAccomodationsListResponse>>(accomodationList);
+
+            var result = Success(accomodationMapper);
+
+            result.Meta = new { Count = accomodationMapper.Count };
+
+            return result;
+        }
+
+        public async Task<Respond<List<GetAccomodationsListResponse>>> Handle(GetAccomodationsListByNumberOfBedsQuery request, CancellationToken cancellationToken)
+        {
+            var accomodationList = await this.service.GetAccomodationsListByNumberOfBedsAsync(request.NumOfBeds, cancellationToken);
+            
+            var accomodationMapper = this.mapper.Map<List<GetAccomodationsListResponse>>(accomodationList);
+
+            var result = Success(accomodationMapper);
+
+            result.Meta = new { Count = accomodationMapper.Count };
+
+            return result;
+        }
+
+        public async Task<Respond<List<GetAccomodationsListResponse>>> Handle(GetAccomodationsListByNumberOfAdultsQuery request, CancellationToken cancellationToken)
+        {
+            var accomodationList = await this.service.GetAccomodationsListByNumberOfAdultsAsync(request.NumOfAdults, cancellationToken);
+            
+            var accomodationMapper = this.mapper.Map<List<GetAccomodationsListResponse>>(accomodationList);
+
+            var result = Success(accomodationMapper);            
+
+            result.Meta = new { Count = accomodationMapper.Count };
+
+            return result;
+        }
+
+        public async Task<Respond<List<GetAccomodationsListResponse>>> Handle(GetAccomodationsListLessThanPriceQuery request, CancellationToken cancellationToken)
+        {
+            
+            var accomodationList = await this.service.GetAccomodationsListLessThanPriceAsync((double)request.Price, cancellationToken);
+            
+            var accomodationMapper = this.mapper.Map<List<GetAccomodationsListResponse>>(accomodationList);
+
+            var result = Success(accomodationMapper);
+
+            result.Meta = new { Count = accomodationMapper.Count };
+
+            return result;
+            
+        }
+
+        public async Task<Respond<List<GetAccomodationsListResponse>>> Handle(GetAccomodationsListMoreThanPriceQuery request, CancellationToken cancellationToken)
+        {
+            var accomodationList = await this.service.GetAccomodationsListMoreThanPriceAsync((double)request.Price, cancellationToken);
+            
+            var accomodationMapper = this.mapper.Map<List<GetAccomodationsListResponse>>(accomodationList);
+
+            var result = Success(accomodationMapper);
+
+            result.Meta = new { Count = accomodationMapper.Count };
+
+            return result;
+        }
     }
 }
